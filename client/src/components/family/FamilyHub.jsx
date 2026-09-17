@@ -395,7 +395,7 @@ export default function FamilyHub({
                   No Prescriptions Saved Yet
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Prescriptions generated from Voice AI Triage or uploaded via the OCR Scanner will be stored under <strong>{activeMember.name}</strong>.
+                  Prescriptions generated from Symptom Checklist Triage or uploaded via the OCR Scanner will be stored under <strong>{activeMember.name}</strong>.
                 </p>
               </div>
               <button
@@ -428,7 +428,7 @@ export default function FamilyHub({
                         </span>
 
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white uppercase">
-                          {presc.createdBy === 'ocr_scan' ? 'Prescription OCR' : 'Voice AI Triage'}
+                          {presc.createdBy === 'ocr_scan' ? 'Prescription OCR' : presc.createdBy === 'symptom_checklist' ? 'Symptom Checklist' : 'Checklist Triage'}
                         </span>
 
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
@@ -439,6 +439,12 @@ export default function FamilyHub({
                         }`}>
                           {presc.riskLevel || 'LOW'} Risk
                         </span>
+
+                        {presc.durationDays && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-caution-amber/20 text-caution-amber border border-caution-amber/30">
+                            {presc.durationDays} Days Protocol
+                          </span>
+                        )}
 
                         {/* Verification Status Badge */}
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
@@ -507,6 +513,22 @@ export default function FamilyHub({
                                 </div>
                               )}
                             </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Safe Home Remedies */}
+                    {presc.homeRemedies && presc.homeRemedies.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[11px] uppercase tracking-wider font-bold text-health-green">
+                          Safe Home Remedies / घरगुती सुरक्षित उपाय
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {presc.homeRemedies.map((rem, rIdx) => (
+                            <span key={rIdx} className="text-xs px-2.5 py-1 rounded-lg bg-health-green/10 text-health-green border border-health-green/20">
+                              ✓ {rem}
+                            </span>
                           ))}
                         </div>
                       </div>

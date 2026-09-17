@@ -26,8 +26,10 @@ export async function savePrescription(req, res) {
       familyMemberId,
       userId,
       patientDetails,
-      createdBy = 'ai_triage',
+      createdBy = 'symptom_checklist',
       medicines = [],
+      homeRemedies = [],
+      durationDays = 2,
       diagnosisSummary = 'Clinical Health Assessment',
       riskLevel = 'LOW',
       verificationStatus = 'unverified'
@@ -54,6 +56,8 @@ export async function savePrescription(req, res) {
         patientDetails: patientDetails || {},
         createdBy,
         medicines: formattedMedicines,
+        homeRemedies,
+        durationDays: Number(durationDays) || 2,
         diagnosisSummary,
         riskLevel,
         verificationStatus,
@@ -72,6 +76,8 @@ export async function savePrescription(req, res) {
         patientDetails: patientDetails || { name: 'Family Member', abhaId: '14-2026-9812-4456' },
         createdBy,
         medicines: formattedMedicines,
+        homeRemedies,
+        durationDays: Number(durationDays) || 2,
         diagnosisSummary,
         riskLevel,
         verificationStatus,
@@ -204,71 +210,125 @@ export async function generatePrescriptionPdf(req, res) {
     doc.font('Helvetica').text(String(presc._id || presc.id), 150, 208);
 
     doc.font('Helvetica-Bold').text('SOURCE CHANNEL:', 320, 208);
-    doc.font('Helvetica').text(presc.createdBy === 'ocr_scan' ? 'Prescription OCR Scan' : 'Voice AI Clinical Triage', 440, 208);
+    const sourceLabel = presc.createdBy === 'ocr_scan' 
+      ? 'Prescription OCR Scan' 
+      : presc.createdBy === 'symptom_checklist' 
+        ? 'Symptom Checklist Triage (2-Day Rx)' 
+        : 'Clinical Triage';
+    doc.font('Helvetica').text(sourceLabel, 440, 208);
 
     // Clinical Diagnosis Summary & Risk
-    doc.rect(40, 240, 515, 45).fill('#E9ECEF');
-    doc.fillColor('#212529').fontSize(10).font('Helvetica-Bold')
-      .text('Clinical Assessment / Diagnosis Summary:', 55, 248);
-    doc.fontSize(10).font('Helvetica')
-      .text(`${presc.diagnosisSummary || 'General Assessment'}  |  Risk Level: ${presc.riskLevel || 'LOW'}`, 55, 263);
+    const isCritical = presc.riskLevel === 'CRITICAL';
+    const assessmentBg = isCritical ? '#FEE2E2' : '#E9ECEF';
+    const assessmentBorder = isCritical ? '#EF4444' : '#CED4DA';
 
-    // Medicines Table
-    doc.rect(40, 295, 515, 22).fill('#2A6F97');
-    doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold');
-    doc.text('MEDICINE / OTC CATEGORY', 50, 302, { width: 160 });
-    doc.text('PHARMACOLOGICAL CLASS', 215, 302, { width: 110 });
-    doc.text('INSTRUCTIONS / GUIDANCE', 330, 302, { width: 130 });
-    doc.text('TIMING', 465, 302, { width: 85 });
+    doc.rect(40, 238, 515, 45).fill(assessmentBg);
+    doc.rect(40, 238, 515, 45).stroke(assessmentBorder);
+    doc.fillColor(isCritical ? '#991B1B' : '#212529').fontSize(10).font('Helvetica-Bold')
+      .text(isCritical ? 'CRITICAL EMERGENCY NOTICE / तातडीची वैद्यकीय आणीबाणी:' : 'Clinical Assessment / Diagnosis Summary:', 55, 246);
+    doc.fontSize(9.5).font('Helvetica')
+      .text(`${presc.diagnosisSummary || 'General Health Assessment'}  |  Risk Level: ${presc.riskLevel || 'LOW'}`, 55, 262, { width: 485 });
 
-    let currentY = 320;
-    const meds = presc.medicines && presc.medicines.length > 0
-      ? presc.medicines
-      : [{ name: 'Paracetamol OTC Category', category: 'Antipyretic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Post-meals' }];
+    let currentY = 292;
 
-    meds.forEach((med, index) => {
-      const bgColor = index % 2 === 0 ? '#FFFFFF' : '#F8F9FA';
-      doc.rect(40, currentY, 515, 32).fill(bgColor);
-      doc.rect(40, currentY, 515, 32).stroke('#E5E7EB');
+    if (isCritical) {
+      // Emergency Red Alert Banner - Strictly Zero Self-Medication
+      doc.rect(40, currentY, 515, 65).fill('#FEF2F2');
+      doc.rect(40, currentY, 515, 65).stroke('#DC2626');
 
-      doc.fillColor('#1F2937').fontSize(8.5).font('Helvetica-Bold')
-        .text(med.name || 'Medicine', 50, currentY + 6, { width: 160 });
+      doc.fillColor('#DC2626').fontSize(12).font('Helvetica-Bold')
+        .text('EMERGENCY: STRICTLY NO SELF-MEDICATION (कोणतेही औषध स्वतः घेऊ नका)', 55, currentY + 12);
+      doc.fillColor('#7F1D1D').fontSize(9).font('Helvetica')
+        .text('Extreme risk detected. OTC medicine is NOT safe for this condition. Immediately visit the nearest emergency trauma hospital or call 108 for ambulance dispatch.', 55, currentY + 30, { width: 485 });
 
-      doc.font('Helvetica').fillColor('#4B5563')
-        .text(med.category || 'General OTC', 215, currentY + 6, { width: 110 });
+      currentY += 80;
+    } else {
+      // 2-Day Schedule Duration Banner
+      doc.rect(40, currentY, 515, 20).fill('#FEF3C7');
+      doc.rect(40, currentY, 515, 20).stroke('#F59E0B');
+      doc.fillColor('#92400E').fontSize(9).font('Helvetica-Bold')
+        .text('STRICT 2-DAY OTC RELIEF PROTOCOL (कालावधी: फक्त २ दिवस) - Discontinue & consult doctor if unresolved', 55, currentY + 5, { align: 'center', width: 495 });
 
-      doc.text(med.instructions || 'Consult pharmacist', 330, currentY + 6, { width: 130 });
-      doc.text(med.timing || 'As advised', 465, currentY + 6, { width: 85 });
+      currentY += 26;
 
-      currentY += 34;
-    });
+      // Medicines Table Header
+      doc.rect(40, currentY, 515, 22).fill('#2A6F97');
+      doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold');
+      doc.text('MEDICINE / OTC CATEGORY', 50, currentY + 7, { width: 160 });
+      doc.text('PHARMACOLOGICAL CLASS', 215, currentY + 7, { width: 110 });
+      doc.text('INSTRUCTIONS / GUIDANCE', 330, currentY + 7, { width: 130 });
+      doc.text('TIMING (2-DAY)', 465, currentY + 7, { width: 85 });
+
+      currentY += 22;
+      const meds = presc.medicines && presc.medicines.length > 0
+        ? presc.medicines
+        : [{ name: 'Paracetamol OTC Category', category: 'Antipyretic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Post-meals [2 Days]' }];
+
+      meds.forEach((med, index) => {
+        const bgColor = index % 2 === 0 ? '#FFFFFF' : '#F8F9FA';
+        doc.rect(40, currentY, 515, 30).fill(bgColor);
+        doc.rect(40, currentY, 515, 30).stroke('#E5E7EB');
+
+        doc.fillColor('#1F2937').fontSize(8.5).font('Helvetica-Bold')
+          .text(med.name || 'Medicine', 50, currentY + 6, { width: 160 });
+
+        doc.font('Helvetica').fillColor('#4B5563')
+          .text(med.category || 'General OTC', 215, currentY + 6, { width: 110 });
+
+        doc.text(med.instructions || 'Consult pharmacist', 330, currentY + 6, { width: 130 });
+        doc.text(med.timing || 'As advised [2 Days]', 465, currentY + 6, { width: 85 });
+
+        currentY += 32;
+      });
+
+      // Safe Home Remedies Box
+      if (presc.homeRemedies && presc.homeRemedies.length > 0) {
+        currentY += 6;
+        const remediesCount = presc.homeRemedies.length;
+        const boxHeight = Math.min(60, 20 + remediesCount * 14);
+        doc.rect(40, currentY, 515, boxHeight).fill('#F0FDF4');
+        doc.rect(40, currentY, 515, boxHeight).stroke('#86EFAC');
+
+        doc.fillColor('#166534').fontSize(8.5).font('Helvetica-Bold')
+          .text('SAFE HOME REMEDIES / SUPPORTIVE CARE (घरगुती सुरक्षित उपाय):', 50, currentY + 6);
+        
+        let remY = currentY + 18;
+        presc.homeRemedies.slice(0, 3).forEach(rem => {
+          doc.fillColor('#15803D').fontSize(8).font('Helvetica')
+            .text(`* ${rem}`, 55, remY, { width: 480 });
+          remY += 13;
+        });
+
+        currentY += boxHeight + 10;
+      }
+    }
 
     // Verification Section with QR Code Stamp
-    currentY += 15;
-    doc.rect(40, currentY, 515, 115).fill('#F0FDF4');
-    doc.rect(40, currentY, 515, 115).stroke('#86EFAC');
+    currentY = Math.max(currentY + 10, 560);
+    doc.rect(40, currentY, 515, 110).fill('#F0FDF4');
+    doc.rect(40, currentY, 515, 110).stroke('#86EFAC');
 
     // Draw QR Code
-    doc.image(qrBuffer, 55, currentY + 12, { width: 90, height: 90 });
+    doc.image(qrBuffer, 55, currentY + 10, { width: 85, height: 85 });
 
-    doc.fillColor('#166534').fontSize(11).font('Helvetica-Bold')
-      .text('PHARMACIST / DOCTOR VERIFICATION SECTION', 160, currentY + 14);
+    doc.fillColor('#166534').fontSize(10.5).font('Helvetica-Bold')
+      .text('PHARMACIST / DOCTOR VERIFICATION SECTION', 155, currentY + 12);
 
     const isVerified = presc.verificationStatus === 'pharmacist_verified' || presc.verificationStatus === 'doctor_verified';
 
-    doc.fontSize(9).font('Helvetica');
+    doc.fontSize(8.5).font('Helvetica');
     if (isVerified) {
-      doc.fillColor('#15803D').text(`Status: VERIFIED by ${presc.verifiedBy || 'Registered Pharmacist'}`, 160, currentY + 32);
-      doc.text(`Verified On: ${new Date(presc.verifiedAt || Date.now()).toLocaleString('en-IN')}`, 160, currentY + 46);
+      doc.fillColor('#15803D').text(`Status: VERIFIED by ${presc.verifiedBy || 'Registered Pharmacist'}`, 155, currentY + 28);
+      doc.text(`Verified On: ${new Date(presc.verifiedAt || Date.now()).toLocaleString('en-IN')}`, 155, currentY + 41);
     } else {
-      doc.fillColor('#B45309').text('Status: UNVERIFIED (Awaiting local medical store verification)', 160, currentY + 32);
-      doc.fillColor('#4B5563').text('Scan QR code to verify validity and approve dispensing.', 160, currentY + 46);
+      doc.fillColor('#B45309').text('Status: UNVERIFIED (Awaiting local medical store verification)', 155, currentY + 28);
+      doc.fillColor('#4B5563').text('Scan QR code to verify validity and approve dispensing.', 155, currentY + 41);
     }
 
-    doc.fillColor('#374151').fontSize(8.5)
-      .text('Pharmacist Stamp & Registration Sign-off:', 160, currentY + 68);
-    doc.rect(160, currentY + 82, 230, 20).stroke('#9CA3AF');
-    doc.fontSize(7.5).fillColor('#9CA3AF').text('Dispensing Chemist Signature / Reg No.', 170, currentY + 88);
+    doc.fillColor('#374151').fontSize(8)
+      .text('Pharmacist Stamp & Registration Sign-off:', 155, currentY + 60);
+    doc.rect(155, currentY + 72, 230, 20).stroke('#9CA3AF');
+    doc.fontSize(7.5).fillColor('#9CA3AF').text('Dispensing Chemist Signature / Reg No.', 165, currentY + 78);
 
     // Footer Disclaimer
     doc.rect(40, 720, 515, 45).fill('#F3F4F6');

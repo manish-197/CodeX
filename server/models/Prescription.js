@@ -12,9 +12,16 @@ const prescriptionSchema = new mongoose.Schema({
   },
   createdBy: {
     type: String,
-    enum: ['ai_triage', 'ocr_scan'],
-    default: 'ai_triage',
+    enum: ['ai_triage', 'ocr_scan', 'symptom_checklist'],
+    default: 'symptom_checklist',
   },
+  durationDays: {
+    type: Number,
+    default: 2,
+  },
+  homeRemedies: [{
+    type: String,
+  }],
   patientDetails: {
     name: { type: String, default: 'Patient' },
     age: { type: Number, default: 42 },
