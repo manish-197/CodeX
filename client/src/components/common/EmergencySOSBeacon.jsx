@@ -152,7 +152,7 @@ export default function EmergencySOSBeacon({ onNavigateToHospital, activeVitals,
                 <div className="pt-2">
                   <button
                     onClick={abortSOS}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gray-200 dark:bg-dark-base hover:bg-gray-300 text-deep-navy dark:text-clinical-white font-bold text-sm tracking-wider uppercase border border-deep-navy/20 transition-all"
+                    className="w-full py-3.5 px-6 rounded-2xl glass-card hover:bg-deep-navy/10 dark:hover:bg-white/10 text-deep-navy dark:text-clinical-white font-bold text-sm tracking-wider uppercase border border-deep-navy/20 transition-all shadow-md"
                   >
                     Abort / Cancel Dispatch (खोटे कॉल रद्द करा)
                   </button>

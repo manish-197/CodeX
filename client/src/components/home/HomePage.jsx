@@ -262,27 +262,27 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 text-xs">
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-navy/10 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
             <span className="font-bold text-deep-navy dark:text-clinical-white block">Prescription OCR</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Gemini Vision scanner</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-alert-red/20 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-alert-red/20 shadow-sm">
             <span className="font-bold text-alert-red block">1-Tap SOS Beacon</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">3s abort + 108 dispatch</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-navy/10 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
             <span className="font-bold text-deep-navy dark:text-clinical-white block">Offline PWA</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">IndexedDB auto sync</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-navy/10 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
             <span className="font-bold text-deep-navy dark:text-clinical-white block">WhatsApp Bot</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Voice triage for elders</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-navy/10 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
             <span className="font-bold text-deep-navy dark:text-clinical-white block">ABDM Health Card</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Signed JWT QR PDF</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-navy/10 shadow-sm">
+          <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
             <span className="font-bold text-deep-navy dark:text-clinical-white block">Bluetooth BLE</span>
             <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Live GATT vitals pairing</span>
           </div>
