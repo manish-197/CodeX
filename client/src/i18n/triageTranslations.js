@@ -26,6 +26,14 @@ export const triageTranslations = {
     triage_generating: 'Generating 2-Day Prescription...',
     triage_specialist: 'Specialist:',
 
+    // Custom write-in
+    triage_custom_heading: 'Illness Not in the Checklist? Describe Other Symptoms Here',
+    triage_custom_desc: 'Describe symptoms in your own words — AI will instantly analyze and provide a 2-day prescription or emergency doctor guidance.',
+    triage_custom_placeholder: 'e.g., Having acute stomach cramps since last night, feeling dizzy and unable to digest food...',
+    triage_custom_btn: 'Analyze with AI & Get Prescription',
+    triage_custom_analyzing: 'AI Analyzing Symptoms...',
+    triage_custom_hint: '💡 Tip: You can type in any language (Marathi, Hindi, English, etc.).',
+
     // Modal
     rx_modal_critical_badge: 'Immediate Medical Emergency',
     rx_modal_2day_badge: 'Strict 2-Day Temporary Prescription',
@@ -55,10 +63,15 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'Night',
     rx_modal_tbl_inst: 'Instructions / Food Guidance',
     rx_modal_remedies_title: 'Safe Home Remedies & Supportive Care',
+    rx_modal_ayurvedic_title: 'Safe Ayurvedic & Herbal Supportive Care (आयुर्वेदिक सुरक्षित उपाय)',
     rx_modal_disclaimer: 'Medical Notice: This is a 2-day preliminary symptom-relief prescription. If symptoms do not improve within 2 days or worsen, consult a doctor immediately.',
     rx_modal_id: 'Prescription ID:',
     rx_modal_download_pdf: 'Download Doctor-Slip PDF',
     rx_modal_close: 'Close',
+
+    // Hub
+    hub_chemist_slip_badge: 'Show PDF at Medical Store (केमिस्टसाठी स्लिप)',
+    hub_btn_pdf: 'Download PDF',
   },
 
   mr: {
@@ -84,6 +97,14 @@ export const triageTranslations = {
     triage_apply: 'तपासा व २ दिवसांचे प्रिस्क्रिप्शन मिळवा',
     triage_generating: 'प्रिस्क्रिप्शन तयार होत आहे...',
     triage_specialist: 'तज्ज्ञ:',
+
+    // Custom write-in
+    triage_custom_heading: 'चेकलिस्टमध्ये तुमचा आजार नाही? इतर काही त्रास असल्यास येथे सांगा',
+    triage_custom_desc: 'तुमच्या स्वतःच्या भाषेत लक्षणांचे वर्णन करा — AI त्याचे त्वरित विश्लेषण करून सुरक्षित २ दिवसांचे प्रिस्क्रिप्शन किंवा तज्ज्ञ डॉक्टर देईल.',
+    triage_custom_placeholder: 'उदा. काल रात्रीपासून पोटात तीव्र कळ येत आहे, चक्कर येत आहे आणि अन्न पचत नाहीये...',
+    triage_custom_btn: 'AI विश्लेषण करा व प्रिस्क्रिप्शन मिळवा',
+    triage_custom_analyzing: 'AI आजाराचे विश्लेषण करत आहे...',
+    triage_custom_hint: '💡 टीप: कोणत्याही भाषेत टाईप करू शकता (मराठी, हिंदी किंवा इंग्रजी).',
 
     // Modal
     rx_modal_critical_badge: 'तात्काळ वैद्यकीय आणीबाणी (Critical Emergency)',
@@ -114,10 +135,15 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'रात्री',
     rx_modal_tbl_inst: 'सूचना व अन्नाचे मार्गदर्शन',
     rx_modal_remedies_title: 'घरगुती सुरक्षित उपाय (Safe Home Remedies)',
+    rx_modal_ayurvedic_title: 'आयुर्वेदिक व वनौषधी सुरक्षित उपाय (Ayurvedic Supportive Care)',
     rx_modal_disclaimer: 'वैद्यकीय सूचना: हे २ दिवसांचे प्राथमिक लक्षणमुक्ती प्रिस्क्रिप्शन आहे. जर २ दिवसांत आराम न पडल्यास किंवा लक्षणे वाढल्यास तात्काळ वैद्यकीय अधिकाऱ्यांचा सल्ला घ्यावा.',
     rx_modal_id: 'प्रिस्क्रिप्शन आयडी:',
     rx_modal_download_pdf: 'प्रिस्क्रिप्शन PDF डाउनलोड करा',
     rx_modal_close: 'बंद करा',
+
+    // Hub
+    hub_chemist_slip_badge: 'केमिस्टसाठी स्लिप (Show at Medical Store)',
+    hub_btn_pdf: 'डाउनलोड PDF',
   },
 
   hi: {
@@ -143,6 +169,14 @@ export const triageTranslations = {
     triage_apply: 'जांचें और २ दिनों का प्रिस्क्रिप्शन पाएं',
     triage_generating: 'प्रिस्क्रिप्शन तैयार हो रहा है...',
     triage_specialist: 'विशेषज्ञ:',
+
+    // Custom write-in
+    triage_custom_heading: 'चेकलिस्ट में आपकी बीमारी नहीं है? अन्य लक्षण यहाँ बताएं',
+    triage_custom_desc: 'अपनी भाषा में लक्षणों का वर्णन करें — AI तुरंत विश्लेषण करके २ दिनों का नुस्खा या डॉक्टर सुझाएगा।',
+    triage_custom_placeholder: 'उदा. कल रात से पेट में मरोड़, चक्कर और उल्टी जैसा लग रहा है...',
+    triage_custom_btn: 'AI विश्लेषण करें व प्रिस्क्रिप्शन पाएं',
+    triage_custom_analyzing: 'AI विश्लेषण कर रहा है...',
+    triage_custom_hint: '💡 सुझाव: किसी भी भाषा में लिख सकते हैं।',
 
     // Modal
     rx_modal_critical_badge: 'आपातकालीन चिकित्सा (Critical Emergency)',
@@ -173,10 +207,15 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'रात',
     rx_modal_tbl_inst: 'निर्देश व भोजन मार्गदर्शन',
     rx_modal_remedies_title: 'सुरक्षित घरेलू उपचार (Safe Home Remedies)',
+    rx_modal_ayurvedic_title: 'आयुर्वेदिक एवं हर्बल सुरक्षित उपाय (Ayurvedic Care)',
     rx_modal_disclaimer: 'चिकित्सीय सूचना: यह २ दिनों का प्रारंभिक लक्षण-राहत प्रिस्क्रिप्शन है। यदि २ दिनों में आराम न मिले या लक्षण बढ़ें, तो तुरंत डॉक्टर से संपर्क करें।',
     rx_modal_id: 'प्रिस्क्रिप्शन आईडी:',
     rx_modal_download_pdf: 'प्रिस्क्रिप्शन PDF डाउनलोड करें',
     rx_modal_close: 'बंद करें',
+
+    // Hub
+    hub_chemist_slip_badge: 'दवा की दुकान पर दिखाएं (For Chemist)',
+    hub_btn_pdf: 'डाउनलोड PDF',
   },
 
   ta: {
@@ -203,7 +242,13 @@ export const triageTranslations = {
     triage_generating: 'மருந்து சீட்டு தயாராகிறது...',
     triage_specialist: 'நிபுணர்:',
 
-    // Modal
+    triage_custom_heading: 'பட்டியலில் உங்கள் நோய் இல்லையா? பிற அறிகுறிகளை இங்கே எழுதுங்கள்',
+    triage_custom_desc: 'உங்கள் சொந்த மொழியில் அறிகுறிகளை விவரிக்கவும் — AI உடனடியாக பகுப்பாய்வு செய்து தீர்வு வழங்கும்.',
+    triage_custom_placeholder: 'எ.கா., நேற்று இரவில் இருந்து கடுமையான வயிற்று வலி மற்றும் தலைச்சுற்றல் உள்ளது...',
+    triage_custom_btn: 'AI பகுப்பாய்வு செய்து மருந்துச்சீட்டு பெறவும்',
+    triage_custom_analyzing: 'AI பகுப்பாய்வு செய்கிறது...',
+    triage_custom_hint: '💡 குறிப்பு: எந்த மொழியிலும் தட்டச்சு செய்யலாம்.',
+
     rx_modal_critical_badge: 'உடனடி மருத்துவ அவசரநிலை',
     rx_modal_2day_badge: '2 நாள் தற்காலிக மருந்து சீட்டு',
     rx_modal_critical_title: 'உடனடி மருத்துவமனை சேர்க்கை தேவை',
@@ -232,10 +277,14 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'இரவு',
     rx_modal_tbl_inst: 'உணவு வழிகாட்டுதல்',
     rx_modal_remedies_title: 'பாதுகாப்பான வீட்டு வைத்தியம்',
+    rx_modal_ayurvedic_title: 'பாதுகாப்பான ஆயுர்வேத ஆதரவு (Ayurvedic Care)',
     rx_modal_disclaimer: 'மருத்துவ அறிவிப்பு: இது 2 நாள் தற்காலிக நிவாரண மருந்து. அறிகுறிகள் நீடித்தால் மருத்துவரை அணுகவும்.',
     rx_modal_id: 'மருந்து சீட்டு எண்:',
     rx_modal_download_pdf: 'மருந்து PDF பதிவிறக்கவும்',
     rx_modal_close: 'மூடு',
+
+    hub_chemist_slip_badge: 'மருந்தகத்தில் காண்பிக்கவும்',
+    hub_btn_pdf: 'பதிவிறக்கு PDF',
   },
 
   kn: {
@@ -262,7 +311,13 @@ export const triageTranslations = {
     triage_generating: 'ಔಷಧ ಪಟ್ಟಿ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...',
     triage_specialist: 'ತಜ್ಞರು:',
 
-    // Modal
+    triage_custom_heading: 'ಪಟ್ಟಿಯಲ್ಲಿ ನಿಮ್ಮ ಕಾಯಿಲೆ ಇಲ್ಲವೇ? ಇತರ ಲಕ್ಷಣಗಳನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ',
+    triage_custom_desc: 'ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ — AI ತಕ್ಷಣವೇ ವಿಶ್ಲೇಷಿಸಿ ಪರಿಹಾರ ನೀಡುತ್ತದೆ.',
+    triage_custom_placeholder: 'ಉದಾ. ನಿನ್ನೆಯಿಂದ ಹೊಟ್ಟೆ ನೋವು ಮತ್ತು ತಲೆತಿರುಗುವಿಕೆ ಇದೆ...',
+    triage_custom_btn: 'AI ವಿಶ್ಲೇಷಿಸಿ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಪಡೆಯಿರಿ',
+    triage_custom_analyzing: 'AI ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ...',
+    triage_custom_hint: '💡 ಸಲಹೆ: ಯಾವುದೇ ಭಾಷೆಯಲ್ಲಿ ಬರೆಯಬಹುದು.',
+
     rx_modal_critical_badge: 'ತುರ್ತು ವೈದ್ಯಕೀಯ ಪರಿಸ್ಥಿತಿ',
     rx_modal_2day_badge: '2 ದಿನಗಳ ತಾತ್ಕಾಲಿಕ ಔಷಧ ಪಟ್ಟಿ',
     rx_modal_critical_title: 'ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ದಾಖಲಾಗುವುದು ಅಗತ್ಯ',
@@ -291,10 +346,14 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'ರಾತ್ರಿ',
     rx_modal_tbl_inst: 'ಆಹಾರ ಮಾರ್ಗದರ್ಶನ',
     rx_modal_remedies_title: 'ಸುರಕ್ಷಿತ ಮನೆಮದ್ದುಗಳು',
+    rx_modal_ayurvedic_title: 'ಸುರಕ್ಷಿತ ಆಯುರ್ವೇದ ಆರೈಕೆ (Ayurvedic Care)',
     rx_modal_disclaimer: 'ವೈದ್ಯಕೀಯ ಸೂಚನೆ: ಇದು 2 ದಿನಗಳ ತಾತ್ಕಾಲಿಕ ಪರಿಹಾರ. ರೋಗಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.',
     rx_modal_id: 'ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಐಡಿ:',
     rx_modal_download_pdf: 'ಔಷಧ PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
     rx_modal_close: 'ಮುಚ್ಚಿ',
+
+    hub_chemist_slip_badge: 'ಔಷಧಿ ಅಂಗಡಿಯಲ್ಲಿ ತೋರಿಸಿ',
+    hub_btn_pdf: 'ಡೌನ್‌ಲೋಡ್ PDF',
   },
 
   bn: {
@@ -321,7 +380,13 @@ export const triageTranslations = {
     triage_generating: 'প্রেসক্রিপশন তৈরি হচ্ছে...',
     triage_specialist: 'বিশেষজ্ঞ:',
 
-    // Modal
+    triage_custom_heading: 'তালিকায় আপনার অসুস্থতা নেই? অন্যান্য লক্ষণ এখানে লিখুন',
+    triage_custom_desc: 'আপনার নিজস্ব ভাষায় লক্ষণগুলি বর্ণনা করুন — AI অবিলম্বে বিশ্লেষণ করে নির্দেশিকা দেবে।',
+    triage_custom_placeholder: 'যেমন, গত রাত থেকে তীব্র পেটে ব্যথা ও মাথা ঘোরার সমস্যা হচ্ছে...',
+    triage_custom_btn: 'AI বিশ্লেষণ করুন ও প্রেসক্রিপশন পান',
+    triage_custom_analyzing: 'AI বিশ্লেষণ করছে...',
+    triage_custom_hint: '💡 পরামর্শ: যেকোনো ভাষায় লিখতে পারেন।',
+
     rx_modal_critical_badge: 'জরুরি চিকিৎসা প্রয়োজন',
     rx_modal_2day_badge: '২ দিনের অস্থায়ী প্রেসক্রিপশন',
     rx_modal_critical_title: 'অবিলম্বে হাসপাতালে ভর্তি প্রয়োজন',
@@ -350,9 +415,13 @@ export const triageTranslations = {
     rx_modal_tbl_night: 'রাত',
     rx_modal_tbl_inst: 'খাবারের নির্দেশিকা',
     rx_modal_remedies_title: 'নিরাপদ ঘরোয়া প্রতিকার',
+    rx_modal_ayurvedic_title: 'নিরাপদ আয়ুর্বেদিক পরিচর্যা (Ayurvedic Care)',
     rx_modal_disclaimer: 'চিকিৎসা বিজ্ঞপ্তি: এটি একটি প্রাথমিক উপসর্গ উপশম প্রেসক্রিপশন। উপসর্গ না কমলে অবিলম্বে ডাক্তার দেখান।',
     rx_modal_id: 'প্রেসক্রিপশন আইডি:',
     rx_modal_download_pdf: 'প্রেসক্রিপশন PDF ডাউনলোড করুন',
     rx_modal_close: 'বন্ধ করুন',
+
+    hub_chemist_slip_badge: 'ওষুধের দোকানে দেখান',
+    hub_btn_pdf: 'ডাউনলোড PDF',
   }
 };
