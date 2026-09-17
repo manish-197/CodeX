@@ -33,6 +33,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         duration: 0.8,
         stagger: 0.12,
         ease: 'power3.out',
+        clearProps: 'all',
       });
 
       gsap.from('.feature-card', {
@@ -42,6 +43,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         stagger: 0.1,
         ease: 'power2.out',
         delay: 0.25,
+        clearProps: 'all',
       });
     }, heroRef);
 
@@ -189,7 +191,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       </section>
 
       {/* Feature Pillar Grid */}
-      <section ref={cardsRef} className="space-y-6">
+      <section ref={cardsRef} className="space-y-6 pt-10 sm:pt-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-terracotta">
