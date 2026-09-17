@@ -3,6 +3,7 @@ import VitalsCard from './VitalsCard';
 import LogVitalsModal from './LogVitalsModal';
 import AddMemberModal from './AddMemberModal';
 import HealthCardModal from './HealthCardModal';
+import PrescriptionModal from './PrescriptionModal';
 import { 
   UserPlus, 
   CreditCard, 
@@ -16,7 +17,6 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function FamilyHub({ 
   currentUser, 
   onVitalsChange, 
-  onNavigateToPrescription,
   onOpenBleModal,
   onTriggerDoctorDispatch
 }) {
@@ -47,6 +47,7 @@ export default function FamilyHub({
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
 
   const activeMember = members.find(m => m.id === activeMemberId) || members[0];
 
@@ -212,7 +213,7 @@ export default function FamilyHub({
                 </button>
 
                 <button
-                  onClick={() => onNavigateToPrescription && onNavigateToPrescription(activeMember)}
+                  onClick={() => setIsPrescriptionModalOpen(true)}
                   className="w-full btn-glass text-xs py-2.5 px-3 flex items-center justify-center gap-2"
                 >
                   <Upload className="w-3.5 h-3.5 text-terracotta" />
@@ -297,6 +298,13 @@ export default function FamilyHub({
       <HealthCardModal
         isOpen={isCardModalOpen}
         onClose={() => setIsCardModalOpen(false)}
+        member={activeMember}
+      />
+
+      {/* Gemini Vision Prescription OCR & Multilingual Audio Explainer Modal */}
+      <PrescriptionModal
+        isOpen={isPrescriptionModalOpen}
+        onClose={() => setIsPrescriptionModalOpen(false)}
         member={activeMember}
       />
 
