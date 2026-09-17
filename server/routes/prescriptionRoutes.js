@@ -4,6 +4,7 @@ import {
   processPrescriptionOcr, 
   savePrescription, 
   getPrescriptionsByMember, 
+  getAllPrescriptions,
   generatePrescriptionPdf, 
   verifyPrescription, 
   verifyPrescriptionLanding 
@@ -11,6 +12,7 @@ import {
 
 const router = express.Router();
 
+router.get('/', getAllPrescriptions);
 router.post('/save', savePrescription);
 router.get('/member/:familyMemberId', getPrescriptionsByMember);
 router.get('/:id/pdf', generatePrescriptionPdf);

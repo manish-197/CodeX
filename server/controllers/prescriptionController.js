@@ -140,6 +140,32 @@ export async function getPrescriptionsByMember(req, res) {
 }
 
 /**
+ * Get All Prescriptions (For Kiosk Registry / Clinic Ledger)
+ */
+export async function getAllPrescriptions(req, res) {
+  try {
+    let records = [];
+    if (isDbConnected()) {
+      records = await Prescription.find({}).sort({ createdAt: -1 }).limit(100).lean();
+    } else {
+      for (const [, presc] of memoryDb.prescriptions) {
+        records.push(presc);
+      }
+      records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    res.json({
+      success: true,
+      count: records.length,
+      prescriptions: records,
+    });
+  } catch (err) {
+    console.error('[GetAllPrescriptions Error]', err);
+    res.status(500).json({ error: 'Failed to load prescriptions list.' });
+  }
+}
+
+/**
  * Helper sanitizers for PDFKit rendering (Helvetica standard font).
  * Converts or extracts clean English/Latin text so PDF never outputs corrupted byte hashes.
  */
