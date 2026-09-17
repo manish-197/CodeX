@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
 import FamilyHub from './components/family/FamilyHub';
+import VoiceTriage from './components/triage/VoiceTriage';
 import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -13,6 +14,11 @@ function AppContent() {
   
   // Latest recorded heart rate (strictly 0 BPM initial per zero dummy data rule)
   const [latestHeartRate, setLatestHeartRate] = useState(0);
+  const [activeVitals, setActiveVitals] = useState({
+    bp: { sys: 0, dia: 0 },
+    heartRate: 0,
+    spo2: 0,
+  });
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState(null);
@@ -54,8 +60,9 @@ function AppContent() {
     }
   };
 
-  const handleVitalsChange = (bpm) => {
+  const handleVitalsChange = (bpm, fullVitals) => {
     setLatestHeartRate(bpm || 0);
+    if (fullVitals) setActiveVitals(fullVitals);
   };
 
   return (
@@ -88,13 +95,20 @@ function AppContent() {
         />
       )}
 
-      {currentTab !== 'home' && currentTab !== 'hub' && (
+      {currentTab === 'triage' && (
+        <VoiceTriage 
+          onNavigateToHospital={() => setCurrentTab('navigation')}
+          activeVitals={activeVitals}
+        />
+      )}
+
+      {currentTab === 'navigation' && (
         <div className="py-12 neo-glass-card p-8 text-center space-y-3 max-w-xl mx-auto">
           <h2 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist capitalize">
-            {currentTab === 'triage' ? 'Voice AI Clinical Triage' : 'Hospital Navigation'}
+            Hospital Road Navigation
           </h2>
           <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
-            Section ready for incremental activation in upcoming build slice.
+            Section ready for incremental activation in Slice 8 (OSRM + Leaflet).
           </p>
           <button 
             onClick={() => setCurrentTab('home')}
