@@ -5,17 +5,12 @@ import AddMemberModal from './AddMemberModal';
 import { 
   UserPlus, 
   CreditCard, 
-  FileText, 
   Upload, 
   Download, 
-  Heart, 
-  Droplet, 
-  Calendar, 
   AlertCircle,
-  Activity,
   ShieldCheck,
-  UserCheck
 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function FamilyHub({ 
   currentUser, 
@@ -25,6 +20,8 @@ export default function FamilyHub({
   onOpenBleModal,
   onTriggerDoctorDispatch
 }) {
+  const { t } = useLanguage();
+
   // Family members list: initializes with currentUser profile or empty list
   const [members, setMembers] = useState([
     {
@@ -91,13 +88,13 @@ export default function FamilyHub({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-terracotta">
-            Household Health Dashboard
+            {t('hub_badge')}
           </span>
           <h2 className="font-display font-bold text-2xl sm:text-3xl text-deep-teal dark:text-sky-mist">
-            Family Health Hub
+            {t('hub_title')}
           </h2>
           <p className="text-xs sm:text-sm text-deep-teal/70 dark:text-dark-muted mt-1">
-            Dynamic profile switcher seamlessly synchronizes vitals, medical history, and ABHA ID per family member.
+            {t('hub_desc')}
           </p>
         </div>
 
@@ -106,7 +103,7 @@ export default function FamilyHub({
           className="btn-terracotta text-xs py-2.5 px-4 self-start sm:self-auto"
         >
           <UserPlus className="w-4 h-4" />
-          <span>Add Family Member</span>
+          <span>{t('hub_btn_add')}</span>
         </button>
       </div>
 
@@ -158,13 +155,13 @@ export default function FamilyHub({
               <div className="flex items-start justify-between border-b border-deep-teal/10 dark:border-white/10 pb-4">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-leaf-green/15 text-leaf-green">
-                    Active Profile
+                    {t('hub_active_profile')}
                   </span>
                   <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist mt-1">
                     {activeMember.name}
                   </h3>
                   <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
-                    Relation: <strong>{activeMember.relation}</strong>
+                    {t('hub_relation')}: <strong>{activeMember.relation}</strong>
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold text-white flex items-center justify-center font-bold text-lg shadow-sm">
@@ -176,7 +173,7 @@ export default function FamilyHub({
               <div className="p-3 rounded-2xl bg-white/70 dark:bg-dark-base/50 border border-deep-teal/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-deep-teal/70 dark:text-dark-muted">
                   <CreditCard className="w-3.5 h-3.5 text-terracotta" />
-                  <span>Ayushman Bharat Health Account (ABHA)</span>
+                  <span>{t('hub_abha_title')}</span>
                 </div>
                 <div className="font-mono text-xs sm:text-sm font-bold tracking-wider text-deep-teal dark:text-sky-mist">
                   {activeMember.abhaId || 'XX-XXXX-XXXX-XXXX'}
@@ -186,7 +183,7 @@ export default function FamilyHub({
               {/* Medical History */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-deep-teal dark:text-sky-mist">
-                  Documented Medical History
+                  {t('hub_medical_history')}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {activeMember.medicalHistory && activeMember.medicalHistory.length > 0 ? (
@@ -197,7 +194,7 @@ export default function FamilyHub({
                     ))
                   ) : (
                     <span className="text-xs text-deep-teal/50 dark:text-dark-muted">
-                      No prior conditions recorded.
+                      {t('hub_no_conditions')}
                     </span>
                   )}
                 </div>
@@ -210,7 +207,7 @@ export default function FamilyHub({
                   className="w-full btn-teal text-xs py-2.5 px-3 flex items-center justify-center gap-2 dark:bg-sky-mist dark:text-deep-teal"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Download ABDM Health Card PDF</span>
+                  <span>{t('hub_btn_pdf')}</span>
                 </button>
 
                 <button
@@ -218,7 +215,7 @@ export default function FamilyHub({
                   className="w-full btn-glass text-xs py-2.5 px-3 flex items-center justify-center gap-2"
                 >
                   <Upload className="w-3.5 h-3.5 text-terracotta" />
-                  <span>Upload Prescription (AI OCR)</span>
+                  <span>{t('hub_btn_rx')}</span>
                 </button>
               </div>
 
@@ -231,10 +228,10 @@ export default function FamilyHub({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist">
-                  Live Vitals Snapshot
+                  {t('vitals_title')}
                 </h3>
                 <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
-                  Strict zero-default baseline: meters remain at 0 until real physical reading is recorded
+                  {t('vitals_subtitle')}
                 </p>
               </div>
             </div>
@@ -265,16 +262,16 @@ export default function FamilyHub({
         <div className="neo-glass-card p-12 text-center max-w-md mx-auto space-y-3">
           <AlertCircle className="w-8 h-8 text-terracotta mx-auto" />
           <h4 className="font-display font-bold text-lg text-deep-teal dark:text-sky-mist">
-            No Family Members Added
+            {t('hub_empty_title')}
           </h4>
           <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
-            Click Add Family Member to register household profiles under zero-default clinical tracking.
+            {t('hub_empty_desc')}
           </p>
           <button 
             onClick={() => setIsAddModalOpen(true)}
             className="btn-terracotta text-xs"
           >
-            Add First Member
+            {t('hub_btn_add')}
           </button>
         </div>
       )}

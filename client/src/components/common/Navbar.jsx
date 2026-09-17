@@ -12,8 +12,9 @@ import {
   PhoneCall,
   LogOut,
   LogIn,
-  ShieldCheck
+  Check
 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function Navbar({ 
   currentTab, 
@@ -22,12 +23,11 @@ export default function Navbar({
   setUserRole, 
   darkMode, 
   setDarkMode,
-  currentLang = 'en',
-  onSelectLang,
   currentUser,
   onOpenAuth,
   onLogout
 }) {
+  const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
@@ -41,10 +41,10 @@ export default function Navbar({
   ];
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Activity },
-    { id: 'hub', label: 'Family Hub', icon: UserCheck },
-    { id: 'triage', label: 'Voice AI Triage', icon: PhoneCall },
-    { id: 'navigation', label: 'Hospital Route', icon: Navigation },
+    { id: 'home', label: t('nav_home'), icon: Activity },
+    { id: 'hub', label: t('nav_hub'), icon: UserCheck },
+    { id: 'triage', label: t('nav_triage'), icon: PhoneCall },
+    { id: 'navigation', label: t('nav_navigation'), icon: Navigation },
   ];
 
   return (
@@ -69,7 +69,7 @@ export default function Navbar({
               </span>
             </div>
             <p className="text-[11px] text-deep-teal/70 dark:text-dark-muted hidden sm:block font-medium">
-              आरोग्यरक्षक • Rural Healthcare Hub
+              {t('nav_subtitle')}
             </p>
           </div>
         </div>
@@ -107,42 +107,45 @@ export default function Navbar({
           >
             <span className={`w-2 h-2 rounded-full ${userRole === 'kiosk' ? 'bg-sun-gold animate-pulse' : 'bg-leaf-green'}`} />
             <span className="text-deep-teal dark:text-sky-mist">
-              {userRole === 'kiosk' ? 'Gram Panchayat Kiosk' : 'Citizen Mode'}
+              {userRole === 'kiosk' ? t('nav_kiosk_mode') : t('nav_citizen_mode')}
             </span>
           </button>
 
-          {/* Language Selector Dropdown */}
+          {/* Regional Script Language Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setLangMenuOpen(!langMenuOpen)}
-              className="p-2 rounded-full hover:bg-deep-teal/5 dark:hover:bg-white/5 text-deep-teal dark:text-sky-mist transition-colors flex items-center gap-1"
+              className="p-2 rounded-full hover:bg-deep-teal/5 dark:hover:bg-white/5 text-deep-teal dark:text-sky-mist transition-colors flex items-center gap-1.5 border border-deep-teal/10"
               aria-label="Language selector"
             >
-              <Globe className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">{currentLang}</span>
+              <Globe className="w-4 h-4 text-terracotta" />
+              <span className="text-xs font-bold uppercase tracking-wider">{lang}</span>
             </button>
 
             {langMenuOpen && (
               <div 
-                className="absolute right-0 mt-2 w-44 neo-glass-card shadow-xl py-2 z-50 animate-fadeIn"
+                className="absolute right-0 mt-2 w-48 neo-glass-card shadow-2xl py-2 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15"
                 data-lenis-prevent="true"
               >
-                <div className="px-3 py-1 text-[11px] font-bold text-deep-teal/60 dark:text-dark-muted uppercase">
-                  Select Language
+                <div className="px-3 py-1 text-[10px] font-bold text-deep-teal/60 dark:text-dark-muted uppercase tracking-wider">
+                  Select Language / भाषा निवडा
                 </div>
                 {languages.map((l) => (
                   <button
                     key={l.code}
                     onClick={() => {
-                      if (onSelectLang) onSelectLang(l.code);
+                      setLang(l.code);
                       setLangMenuOpen(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-deep-teal/10 dark:hover:bg-white/10 transition-colors ${
-                      currentLang === l.code ? 'font-bold text-terracotta' : 'text-deep-teal dark:text-sky-mist'
+                      lang === l.code ? 'font-bold text-terracotta bg-terracotta/10' : 'text-deep-teal dark:text-sky-mist'
                     }`}
                   >
-                    <span>{l.name}</span>
-                    <span className="text-[10px] opacity-60">{l.label}</span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-xs">{l.name}</span>
+                      <span className="text-[10px] opacity-60">{l.label}</span>
+                    </div>
+                    {lang === l.code && <Check className="w-3.5 h-3.5 text-terracotta" />}
                   </button>
                 ))}
               </div>
@@ -166,9 +169,9 @@ export default function Navbar({
               </span>
               <button
                 onClick={onLogout}
-                title="Log out"
+                title={t('nav_logout')}
                 className="p-2 rounded-full text-alert-crimson hover:bg-alert-crimson/10 transition-colors"
-                aria-label="Log out"
+                aria-label={t('nav_logout')}
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -179,7 +182,7 @@ export default function Navbar({
               className="btn-terracotta text-xs py-1.5 px-3 sm:px-4"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign In</span>
+              <span className="hidden sm:inline">{t('nav_sign_in')}</span>
             </button>
           )}
 
@@ -220,12 +223,12 @@ export default function Navbar({
           })}
 
           <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between">
-            <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Role</span>
+            <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Mode</span>
             <button
               onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
               className="px-3 py-1 rounded-full text-xs font-medium bg-terracotta/10 text-terracotta"
             >
-              {userRole === 'kiosk' ? 'Switch to Citizen' : 'Switch to Kiosk'}
+              {userRole === 'kiosk' ? t('nav_citizen_mode') : t('nav_kiosk_mode')}
             </button>
           </div>
         </div>

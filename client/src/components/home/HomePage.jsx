@@ -5,22 +5,19 @@ import {
   Navigation, 
   ShieldCheck, 
   Users, 
-  FileText, 
-  WifiOff, 
-  Radio, 
   ChevronRight,
-  Sparkles,
   ArrowUpRight
 } from 'lucide-react';
 import gsap from 'gsap';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function HomePage({ onNavigate, heartRate = 0 }) {
+  const { t } = useLanguage();
   const heroRef = useRef(null);
   const cardsRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero elements entrance animation
       gsap.from('.hero-fade-in', {
         y: 24,
         opacity: 0,
@@ -29,7 +26,6 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         ease: 'power3.out',
       });
 
-      // Feature cards stagger reveal
       gsap.from('.feature-card', {
         y: 30,
         opacity: 0,
@@ -45,44 +41,36 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
 
   const features = [
     {
-      title: 'Bilingual Voice AI Triage',
-      titleLocal: 'द्विभाषिक व्हॉइस एआय ट्रायज',
-      description: 'Speak symptoms in Marathi, Hindi, or English. Gemini 2.5 Flash triages urgency and speaks home remedies.',
+      title: t('feat_triage_title'),
+      description: t('feat_triage_desc'),
       icon: PhoneCall,
-      actionText: 'Start Triage',
+      actionText: t('hero_cta_triage'),
       tab: 'triage',
       badge: 'Gemini 2.5 Flash',
-      color: 'from-terracotta/20 to-sun-gold/20'
     },
     {
-      title: 'Real Road-to-Road Navigation',
-      titleLocal: 'खरा रस्ता-नेव्हिगेशन',
-      description: 'Accurate OSRM driving routes to the nearest rural PHC or hospital — street roads, not misleading straight lines.',
+      title: t('feat_nav_title'),
+      description: t('feat_nav_desc'),
       icon: Navigation,
-      actionText: 'Find Hospital',
+      actionText: t('hero_cta_hospital'),
       tab: 'navigation',
       badge: 'OSRM + Leaflet',
-      color: 'from-deep-teal/20 to-sky-mist'
     },
     {
-      title: 'ABDM Health Records Hub',
-      titleLocal: 'कुटुंब आरोग्य केंद्र',
-      description: 'Full family health management with ABHA ID. Download verifiable PDF health cards with encrypted QR tokens.',
+      title: t('feat_hub_title'),
+      description: t('feat_hub_desc'),
       icon: Users,
-      actionText: 'Family Hub',
+      actionText: t('nav_hub'),
       tab: 'hub',
-      badge: 'ABDM Compatible',
-      color: 'from-leaf-green/20 to-deep-teal/10'
+      badge: 'ABDM',
     },
     {
-      title: 'Gram Panchayat Kiosk Terminal',
-      titleLocal: 'ग्रामपंचायत किओस्क',
-      description: 'Dedicated assisted mode for village operators to perform vitals checkups for elderly citizens without smartphones.',
+      title: t('feat_kiosk_title'),
+      description: t('feat_kiosk_desc'),
       icon: ShieldCheck,
-      actionText: 'Kiosk Terminal',
+      actionText: t('nav_kiosk_mode'),
       tab: 'hub',
       badge: 'Senior Care',
-      color: 'from-sun-gold/25 to-terracotta/10'
     },
   ];
 
@@ -97,15 +85,15 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
           
           <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-1.5 rounded-full neo-glass-card text-xs font-semibold text-deep-teal dark:text-sky-mist">
             <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse" />
-            <span>ग्रामीण आरोग्य क्रांती • Rural Healthcare Accessibility</span>
+            <span>{t('hero_badge')}</span>
           </div>
 
           <h1 className="hero-fade-in font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-deep-teal dark:text-sky-mist leading-[1.12] tracking-tight">
-            Healthcare that speaks <span className="text-terracotta italic">Bharat's</span> languages, reaches Bharat's roads.
+            {t('hero_headline')}
           </h1>
 
           <p className="hero-fade-in text-base sm:text-lg text-deep-teal/80 dark:text-sky-mist/80 leading-relaxed font-sans max-w-2xl">
-            Empowering 65%+ of India's population with bilingual voice AI clinical triage, true road-geometry emergency hospital routing, zero-default vitals monitoring, and offline-capable digital records.
+            {t('hero_subheadline')}
           </p>
 
           <div className="hero-fade-in flex flex-wrap items-center gap-4 pt-2">
@@ -114,7 +102,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               className="btn-terracotta text-sm sm:text-base py-3.5 px-7"
             >
               <PhoneCall className="w-5 h-5" />
-              <span>Voice AI Triage</span>
+              <span>{t('hero_cta_triage')}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
 
@@ -123,7 +111,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               className="btn-teal text-sm sm:text-base py-3.5 px-6 dark:bg-sky-mist dark:text-deep-teal"
             >
               <Navigation className="w-5 h-5" />
-              <span>Nearest Hospital Route</span>
+              <span>{t('hero_cta_hospital')}</span>
             </button>
           </div>
 
@@ -131,15 +119,15 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
           <div className="hero-fade-in pt-4 flex flex-wrap items-center gap-6 text-xs text-deep-teal/70 dark:text-dark-muted font-medium border-t border-deep-teal/10 dark:border-white/10">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-leaf-green" />
-              <span>Zero-Default Vitals (0/0 mmHg, 0 BPM)</span>
+              <span>{t('hero_zero_vitals_badge')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-sun-gold" />
-              <span>State-Wise Auto Language Detection</span>
+              <span>{t('hero_state_detect_badge')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-terracotta" />
-              <span>1-Tap 108 Emergency SOS</span>
+              <span>{t('hero_sos_badge')}</span>
             </div>
           </div>
 
@@ -151,10 +139,10 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-widest text-terracotta">
-                  Interactive WebGL Twin
+                  {t('hero_3d_tag')}
                 </span>
                 <h3 className="font-display font-bold text-lg text-deep-teal dark:text-sky-mist">
-                  Anatomical Heart Twin
+                  {t('hero_3d_title')}
                 </h3>
               </div>
               <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
@@ -166,8 +154,8 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
             <HeartDigitalTwin heartRate={heartRate} />
 
             <div className="mt-4 pt-3 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between text-xs text-deep-teal/70 dark:text-dark-muted">
-              <span>Drag to rotate 3D heart</span>
-              <span className="text-terracotta font-semibold">Pulse synced to real BPM</span>
+              <span>{t('hero_3d_sub')}</span>
+              <span className="text-terracotta font-semibold">{heartRate > 0 ? t('hero_3d_pulse_live') : t('hero_3d_idle')}</span>
             </div>
           </div>
         </div>
@@ -185,9 +173,6 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               Engineered for Bharat's Real Healthcare Challenges
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-deep-teal/70 dark:text-dark-muted max-w-md">
-            Solving the doctor shortage, dialect hurdles, and rural navigation gaps with inclusive AI and offline sync.
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -213,9 +198,6 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
                     <h3 className="font-display font-bold text-lg text-deep-teal dark:text-sky-mist group-hover:text-terracotta transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-[11px] font-semibold text-terracotta/90 dark:text-sun-gold">
-                      {item.titleLocal}
-                    </p>
                     <p className="text-xs text-deep-teal/75 dark:text-dark-muted mt-2 leading-relaxed">
                       {item.description}
                     </p>
@@ -229,50 +211,6 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* Six Extra Features Overview Strip */}
-      <section className="neo-glass-card p-6 sm:p-8 space-y-4 border-l-4 border-terracotta">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-terracotta">
-              Complete Rural Ecosystem
-            </span>
-            <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist">
-              Six Specialized Accessibility Features Integrated End-to-End
-            </h3>
-          </div>
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-leaf-green/15 text-leaf-green">
-            All 6 Slices Activated
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 text-xs">
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-deep-teal dark:text-sky-mist block">Prescription OCR</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">Gemini Vision Rx scanner</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-alert-crimson block">1-Tap SOS Beacon</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">3s abort + 108 dispatch</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-deep-teal dark:text-sky-mist block">Offline PWA</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">IndexedDB background sync</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-deep-teal dark:text-sky-mist block">WhatsApp Bot</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">Voice note elder triage</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-deep-teal dark:text-sky-mist block">ABDM Health Card</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">Signed JWT QR PDF</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-white/60 dark:bg-dark-card/60 border border-deep-teal/10">
-            <span className="font-bold text-deep-teal dark:text-sky-mist block">Bluetooth BLE</span>
-            <span className="text-[11px] text-deep-teal/70 dark:text-dark-muted">Live GATT vitals pairing</span>
-          </div>
         </div>
       </section>
 

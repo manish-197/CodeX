@@ -3,12 +3,13 @@ import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
 import FamilyHub from './components/family/FamilyHub';
 import AuthModal from './components/auth/AuthModal';
+import StateLanguageToast from './components/common/StateLanguageToast';
+import { LanguageProvider } from './i18n/LanguageContext';
 
-export default function App() {
+function AppContent() {
   const [currentTab, setCurrentTab] = useState('home');
   const [userRole, setUserRole] = useState('citizen');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentLang, setCurrentLang] = useState('en');
   
   // Latest recorded heart rate (strictly 0 BPM initial per zero dummy data rule)
   const [latestHeartRate, setLatestHeartRate] = useState(0);
@@ -65,8 +66,6 @@ export default function App() {
       setUserRole={setUserRole}
       darkMode={darkMode}
       setDarkMode={setDarkMode}
-      currentLang={currentLang}
-      onSelectLang={setCurrentLang}
       currentUser={currentUser}
       onOpenAuth={() => setAuthModalOpen(true)}
       onLogout={handleLogout}
@@ -113,6 +112,17 @@ export default function App() {
         onAuthSuccess={handleAuthSuccess}
         defaultRole={userRole === 'kiosk' ? 'kiosk_operator' : 'citizen'}
       />
+
+      {/* State-Based Auto Language Notification Toast */}
+      <StateLanguageToast />
     </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
