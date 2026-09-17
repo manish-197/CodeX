@@ -37,6 +37,7 @@ export default function PrescriptionResultModal({
   const isCritical = prescription.riskLevel === 'CRITICAL';
   const medicines = prescription.medicines || [];
   const homeRemedies = prescription.homeRemedies || [];
+  const ayurvedicRemedies = prescription.ayurvedicRemedies || [];
   const prescId = prescription._id || prescription.id || 'rx_' + Date.now();
 
   const handleBookEmergencySlot = (doc) => {
@@ -60,9 +61,13 @@ export default function PrescriptionResultModal({
   const patientRelation = selectedMember?.relation || 'Self';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-deep-navy/75 backdrop-blur-md animate-fadeIn">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-deep-navy/75 backdrop-blur-md animate-fadeIn"
+      data-lenis-prevent="true"
+    >
       <div 
         className="relative w-full max-w-3xl h-[88vh] max-h-[88vh] bg-clinical-white dark:bg-dark-base rounded-3xl shadow-2xl border border-white/40 dark:border-white/10 flex flex-col min-h-0 overflow-hidden"
+        data-lenis-prevent="true"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -95,7 +100,11 @@ export default function PrescriptionResultModal({
         </div>
 
         {/* Scrollable Body - Strictly Constrained with min-h-0 and overscroll-contain */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-7 space-y-6 text-deep-navy dark:text-clinical-white">
+        <div 
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-7 space-y-6 text-deep-navy dark:text-clinical-white"
+          data-lenis-prevent="true"
+          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+        >
 
           {/* CRITICAL RISK SECTION */}
           {isCritical ? (
@@ -294,7 +303,7 @@ export default function PrescriptionResultModal({
 
               {/* Safe Home Remedies Grid */}
               {homeRemedies.length > 0 && (
-                <div className="p-5 rounded-2xl bg-health-green/10 border border-health-green/20 space-y-3">
+                <div className="p-5 rounded-2xl bg-health-green/10 border border-health-green/20 space-y-3 text-left">
                   <div className="flex items-center gap-2 text-health-green font-bold text-sm">
                     <CheckCircle className="w-4 h-4" />
                     <span>{t('rx_modal_remedies_title')}</span>
@@ -303,6 +312,24 @@ export default function PrescriptionResultModal({
                     {homeRemedies.map((remedy, rIdx) => (
                       <li key={rIdx} className="flex items-start gap-2 bg-white/60 dark:bg-dark-base/50 p-2.5 rounded-xl border border-health-green/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-health-green mt-1.5 shrink-0" />
+                        <span>{remedy}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Safe Ayurvedic & Herbal Supportive Care */}
+              {ayurvedicRemedies.length > 0 && (
+                <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-3 text-left">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
+                    <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>{t('rx_modal_ayurvedic_title') || 'Ayurvedic & Herbal Supportive Care (आयुर्वेदिक सुरक्षित उपाय)'}</span>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-deep-navy dark:text-clinical-white">
+                    {ayurvedicRemedies.map((remedy, aIdx) => (
+                      <li key={aIdx} className="flex items-start gap-2 bg-white/60 dark:bg-dark-base/50 p-2.5 rounded-xl border border-amber-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                         <span>{remedy}</span>
                       </li>
                     ))}

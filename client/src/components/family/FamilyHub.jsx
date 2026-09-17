@@ -129,32 +129,6 @@ export default function FamilyHub({
     }
   }, [activeMember?.id, hubTab]);
 
-  const handleVerifyPrescription = async (id) => {
-    setVerifyingId(id);
-    try {
-      const res = await fetch(`http://localhost:5000/api/prescriptions/${id}/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          verifierName: 'Koregaon Rural Medical Store (Reg #MH-PH-8891)',
-          status: 'pharmacist_verified'
-        })
-      });
-      if (!res.ok) throw new Error('Verification failed');
-      const data = await res.json();
-      setPrescriptions(prev => prev.map(p => (p._id === id || p.id === id) ? { 
-        ...p, 
-        verificationStatus: 'pharmacist_verified', 
-        verifiedBy: 'Koregaon Rural Medical Store (Reg #MH-PH-8891)',
-        verifiedAt: new Date()
-      } : p));
-    } catch (err) {
-      console.error('Verify error:', err);
-    } finally {
-      setVerifyingId(null);
-    }
-  };
-
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -446,13 +420,13 @@ export default function FamilyHub({
                           </span>
                         )}
 
-                        {/* Verification Status Badge */}
+                        {/* Dispensing / Verification Status Badge */}
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                           isVerified 
                             ? 'bg-health-green/20 text-health-green border-health-green/30'
-                            : 'bg-caution-amber/25 text-deep-navy dark:text-caution-amber border-caution-amber/40'
+                            : 'bg-medical-blue/15 text-medical-blue border-medical-blue/30'
                         }`}>
-                          {isVerified ? '✓ Pharmacist Verified' : 'Awaiting Pharmacist Check'}
+                          {isVerified ? '✓ Pharmacist Verified' : (t('hub_chemist_slip_badge') || 'Show PDF at Medical Store (केमिस्टसाठी स्लिप)')}
                         </span>
                       </div>
 
@@ -461,23 +435,11 @@ export default function FamilyHub({
                           href={`http://localhost:5000/api/prescriptions/${presc._id || presc.id}/pdf`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn-medical-blue text-xs py-1.5 px-3.5 flex items-center gap-1.5 whitespace-nowrap"
+                          className="btn-medical-blue text-xs py-1.5 px-3.5 flex items-center gap-1.5 whitespace-nowrap shadow-sm"
                         >
                           <Download className="w-3.5 h-3.5" />
-                          <span>Download PDF</span>
+                          <span>{t('hub_btn_pdf') || 'Download PDF'}</span>
                         </a>
-
-                        {!isVerified && (
-                          <button
-                            onClick={() => handleVerifyPrescription(presc._id || presc.id)}
-                            disabled={verifyingId === (presc._id || presc.id)}
-                            className="btn-glass text-[11px] py-1.5 px-3 text-health-green hover:bg-health-green/10 flex items-center gap-1"
-                            title="Simulate Pharmacist Verification check"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>{verifyingId === (presc._id || presc.id) ? 'Verifying...' : 'Verify Slip'}</span>
-                          </button>
-                        )}
                       </div>
                     </div>
 

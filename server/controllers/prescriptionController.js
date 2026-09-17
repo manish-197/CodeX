@@ -29,6 +29,7 @@ export async function savePrescription(req, res) {
       createdBy = 'symptom_checklist',
       medicines = [],
       homeRemedies = [],
+      ayurvedicRemedies = [],
       durationDays = 2,
       diagnosisSummary = 'Clinical Health Assessment',
       riskLevel = 'LOW',
@@ -57,6 +58,7 @@ export async function savePrescription(req, res) {
         createdBy,
         medicines: formattedMedicines,
         homeRemedies,
+        ayurvedicRemedies,
         durationDays: Number(durationDays) || 2,
         diagnosisSummary,
         riskLevel,
@@ -77,6 +79,7 @@ export async function savePrescription(req, res) {
         createdBy,
         medicines: formattedMedicines,
         homeRemedies,
+        ayurvedicRemedies,
         durationDays: Number(durationDays) || 2,
         diagnosisSummary,
         riskLevel,
@@ -213,6 +216,12 @@ function sanitizeRemedy(rem) {
   const paren = extractEnglishParentheses(rem);
   if (paren && paren.length > 10) return paren;
   const r = String(rem || '').toLowerCase();
+  if (r.includes('हळद') && (r.includes('दूध') || r.includes('golden milk') || r.includes('turmeric'))) return 'Drink warm turmeric milk (Golden Milk) at bedtime for restorative immunity.';
+  if (r.includes('काढा') || r.includes('आले') || r.includes('तुळस') || r.includes('decoction')) return 'Drink warm ginger, holy basil (tulsi), and black pepper herbal decoction (kadha).';
+  if (r.includes('ओवा') || r.includes('जिरे') || r.includes('ajwain') || r.includes('cumin')) return 'Drink warm ajwain and cumin infused water for digestion and colic relief.';
+  if (r.includes('त्रिफळा') || r.includes('triphala') || r.includes('बद्धकोष्ठता')) return 'Take mild Triphala or warm water at night for gentle bowel regularity.';
+  if (r.includes('लवंग') || r.includes('clove') || r.includes('दात')) return 'Apply a drop of clove oil on cotton or do warm saline rinses for dental soothe.';
+  if (r.includes('मध') || r.includes('honey') || r.includes('lemon')) return 'Sip warm water with a spoonful of honey and fresh lemon for throat soothing.';
   if (r.includes('गुळण्या') || r.includes('मीठ') || r.includes('हळद') || r.includes('salt')) return 'Gargle with warm salt water 3 times daily and stay hydrated.';
   if (r.includes('विश्रांती') || r.includes('शांत') || r.includes('झोप') || r.includes('rest')) return 'Take rest in a quiet, dark room and ensure at least 8 hours of sleep.';
   if (r.includes('वाफ') || r.includes('तुलसी') || r.includes('steam')) return 'Inhale plain water steam twice daily; drink warm ginger/tulsi herbal tea.';
@@ -388,17 +397,21 @@ export async function generatePrescriptionPdf(req, res) {
         currentY += 32;
       });
 
-      // Safe Home Remedies Box
-      if (presc.homeRemedies && presc.homeRemedies.length > 0) {
+      // Safe Home & Ayurvedic Supportive Care Box
+      const allSupportive = [
+        ...(presc.homeRemedies || []),
+        ...(presc.ayurvedicRemedies || []).map(a => `[Ayurvedic] ${a}`)
+      ];
+      if (allSupportive.length > 0) {
         currentY += 6;
-        const cleanRemedies = presc.homeRemedies.map(r => sanitizeRemedy(r)).filter(Boolean);
+        const cleanRemedies = allSupportive.map(r => sanitizeRemedy(r)).filter(Boolean);
         const remediesCount = Math.min(cleanRemedies.length, 3);
         const boxHeight = Math.min(65, 22 + remediesCount * 14);
         doc.rect(40, currentY, 515, boxHeight).fill('#F0FDF4');
         doc.rect(40, currentY, 515, boxHeight).stroke('#86EFAC');
 
         doc.fillColor('#166534').fontSize(8.5).font('Helvetica-Bold')
-          .text('SAFE HOME REMEDIES / SUPPORTIVE CARE (NON-PHARMACOLOGICAL):', 50, currentY + 6);
+          .text('SAFE HOME & AYURVEDIC SUPPORTIVE CARE (NON-PHARMACOLOGICAL):', 50, currentY + 6);
         
         let remY = currentY + 18;
         cleanRemedies.slice(0, 3).forEach(rem => {

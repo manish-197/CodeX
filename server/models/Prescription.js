@@ -22,6 +22,9 @@ const prescriptionSchema = new mongoose.Schema({
   homeRemedies: [{
     type: String,
   }],
+  ayurvedicRemedies: [{
+    type: String,
+  }],
   patientDetails: {
     name: { type: String, default: 'Patient' },
     age: { type: Number, default: 42 },

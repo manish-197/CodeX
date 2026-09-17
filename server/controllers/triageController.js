@@ -2,6 +2,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Prescription } from '../models/Prescription.js';
+import { isDbConnected } from '../config/db.js';
+import { memoryDb, generateMemoryId } from '../services/inMemoryStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -617,5 +620,335 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
   } catch (err) {
     console.error('[Triage Controller Error]', err);
     res.status(500).json({ error: 'Clinical triage analysis could not be completed.' });
+  }
+}
+
+/**
+ * Helper to generate Ayurvedic supportive remedies
+ */
+function getFallbackAyurvedicRemedies(symptoms, lang = 'mr') {
+  const s = String(symptoms || '').toLowerCase();
+  const isMr = lang === 'mr';
+  const isHi = lang === 'hi';
+
+  if (s.includes('खोकला') || s.includes('सर्दी') || s.includes('घसा') || s.includes('cough') || s.includes('cold')) {
+    return [
+      isMr ? 'आले, तुळशीची पाने व काळी मिरी यांचा ताजा काढा मध घालून प्यावा.' : isHi ? 'अदरक, तुलसी और काली मिर्च का काढ़ा पिएं।' : 'Drink warm ginger, tulsi, and black pepper herbal decoction (kadha).',
+      isMr ? 'रात्री झोपण्यापूर्वी हळद घातलेले कोमट दूध (गोल्डन मिल्क) घ्यावे.' : isHi ? 'रात में हल्दी वाला गुनगुना दूध पिएं।' : 'Take warm turmeric milk (Golden Milk) at bedtime.',
+      isMr ? 'पाण्यात ओवा किंवा लवंग टाकून दिवसातून दोनदा वाफ घ्यावी.' : isHi ? 'अजवाइन या लौंग डालकर भाप लें।' : 'Inhale steam infused with ajwain seeds.'
+    ];
+  }
+
+  if (s.includes('जुलाब') || s.includes('पोट') || s.includes('मळमळ') || s.includes('उलटी') || s.includes('diarrhea') || s.includes('vomit')) {
+    return [
+      isMr ? 'जिरे आणि ओवा उकळवून कोमट केलेले पाणी थोडे थोडे प्यावे.' : isHi ? 'जीरा और अजवाइन का उबला पानी पिएं।' : 'Sip warm cumin and ajwain infused water through the day.',
+      isMr ? 'डाळिंबाच्या सालीचा हलका काढा किंवा ताजे ताक चिमूटभर भाजलेले जिरे टाकून घ्यावे.' : isHi ? 'भुने जीरे के साथ ताजा छाछ पिएं।' : 'Fresh buttermilk with roasted cumin powder.',
+      isMr ? 'ओवा आणि काळे मीठ कोमट पाण्यासोबत घेतल्यास पोटदुखीत आराम मिळतो.' : isHi ? 'अजवाइन और काला नमक गुनगुने पानी के साथ लें।' : 'Ajwain and black salt with warm water for gut soothing.'
+    ];
+  }
+
+  if (s.includes('ॲसिडिटी') || s.includes('पित्त') || s.includes('जळजळ') || s.includes('acidity') || s.includes('gas')) {
+    return [
+      isMr ? 'बडीशेप आणि खडीसाखर बारीक करून जेवणानंतर एक चमचा खावी.' : isHi ? 'सौंफ और मिश्री का सेवन करें।' : 'Chew fennel seeds (saunf) with unrefined rock sugar after meals.',
+      isMr ? 'थंड दूध किंवा ताज्या आवळ्याचा रस रिकाम्या पोटी घेतल्यास पित्त शमते.' : isHi ? 'ठंडा दूध या आंवले का रस पिएं।' : 'Drink cold milk or fresh amla juice to balance acidity.',
+      isMr ? 'धने व जिरे रात्रभर पाण्यात भिजवून सकाळी ते पाणी गाळून प्यावे.' : isHi ? 'धनिया और जीरा का पानी पिएं।' : 'Coriander and cumin seed water soaked overnight.'
+    ];
+  }
+
+  if (s.includes('सांधे') || s.includes('कंबर') || s.includes('अंगदुखी') || s.includes('joint') || s.includes('back')) {
+    return [
+      isMr ? 'एरंडेल तेल किंवा मोहरीच्या तेलात लसूण तळून त्या तेलाने हलका मसाज करावा.' : isHi ? 'सरसों के तेल में लहसुन गर्म करके मालिश करें।' : 'Gentle massage with warm mustard or sesame oil infused with garlic.',
+      isMr ? 'सुंठ आणि हळद घातलेले गरम दूध प्यावे, ज्यामुळे सूज व वेदना कमी होतात.' : isHi ? 'सोंठ और हल्दी वाला दूध पिएं।' : 'Warm milk with dried ginger powder (sunth) and turmeric.',
+      isMr ? 'शेंदेलोण (सेंधा मीठ) कोमट पाण्यात टाकून शेक घ्यावा.' : isHi ? 'सेंधा नमक के पानी से सेक करें।' : 'Warm salt compress on the painful area.'
+    ];
+  }
+
+  return [
+    isMr ? 'रात्री झोपताना चिमूटभर हळद व सुंठ घालून कोमट दूध प्यावे.' : isHi ? 'रात में हल्दी दूध का सेवन करें।' : 'Drink warm turmeric milk before sleeping.',
+    isMr ? 'तुळस, आले व गवती चहाचा काढा रोगप्रतिकारशक्तीसाठी उपयुक्त ठरतो.' : isHi ? 'तुलसी और अदरक की चाय पिएं।' : 'Herbal tea prepared with tulsi, ginger, and lemongrass.'
+  ];
+}
+
+/**
+ * Offline clinical fallback for custom symptom write-in
+ */
+function generateFallbackCustomTriage(symptoms, lang = 'mr') {
+  const s = String(symptoms || '').toLowerCase();
+  const isMr = lang === 'mr';
+  const isHi = lang === 'hi';
+
+  const criticalKeywords = [
+    'छातीत कळ', 'छाती दुख', 'डावा हात', 'श्वास घेता येत नाही', 'गुदमर',
+    'साप चावला', 'सर्पदंश', 'विंचू', 'कीटकनाशक', 'औषध पोटात', 'विष',
+    'बेशुद्ध', 'झटके', 'फिट', 'चेहरा वाकडा', 'बोलता येत नाही', 'रक्तस्त्राव',
+    'डोक्याला मार', 'chest pain', 'breathless', 'snake bite', 'poison', 'unconscious', 'seizure', 'stroke'
+  ];
+
+  if (criticalKeywords.some(kw => s.includes(kw))) {
+    return {
+      riskLevel: 'CRITICAL',
+      likelyDiagnosis: isMr 
+        ? 'अतिगंभीर वैद्यकीय आणीबाणी (तातडीने रुग्णालयात जाणे आवश्यक)' 
+        : isHi 
+          ? 'गंभीर आपातकालीन स्थिति (तुरंत अस्पताल जाएं)' 
+          : 'Critical Medical Emergency (Immediate Hospitalization Required)',
+      clinicalExplanation: isMr
+        ? 'या आजाराची लक्षणे अतिगंभीर स्वरूपाची आहेत. स्वतः कोणतेही औषध घेऊ नका, त्वरित जवळच्या उपजिल्हा/ग्रामीण रुग्णालयात दाखल व्हा किंवा १०८ रुग्णवाहिका बोलवा.'
+        : isHi
+          ? 'यह अत्यंत गंभीर स्थिति है। कोई भी दवा खुद न लें और तुरंत नजदीकी अस्पताल पहुंचे।'
+          : 'High risk detected. Strictly avoid self-medication and reach the nearest trauma/emergency centre immediately.',
+      suggestedMedicines: [],
+      homeRemedies: [
+        isMr ? 'रुग्णाला हवेशीर जागी शांत बसवून ठेवावे.' : 'Keep patient calm with fresh airflow.',
+        isMr ? 'मानेवरील व छातीवरील घट्ट कपडे सैल करावेत.' : 'Loosen tight clothing.',
+        isMr ? 'तातडीने १०८ रुग्णवाहिका किंवा स्थानिक डॉक्टरांना पाचारण करावे.' : 'Call 108 Emergency Ambulance immediately.'
+      ],
+      ayurvedicRemedies: [],
+      warningSigns: [
+        isMr ? 'बेशुद्ध पडणे, श्वास मंदावणे किंवा रक्तदाब खालावणे.' : 'Loss of consciousness or respiratory failure.'
+      ]
+    };
+  }
+
+  // Common condition matching
+  if (s.includes('खोकला') || s.includes('cough') || s.includes('घसा')) {
+    return {
+      riskLevel: 'LOW',
+      likelyDiagnosis: isMr ? '२ दिवसांचे प्राथमिक निदान: खोकला व घशाची खवखव' : 'Preliminary 2-Day Assessment: Cough & Throat Irritation',
+      clinicalExplanation: isMr ? 'हवामानातील बदलामुळे किंवा संसर्गामुळे खोकला व घशात जळजळ जाणवत आहे.' : 'Temporary airway irritation or mild viral cough.',
+      suggestedMedicines: [
+        {
+          name: 'Herbal Throat Lozenges (OTC)',
+          nameLocal: isMr ? 'घसा आराम हर्बल कफ ड्रॉप्स' : 'Herbal Cough Lozenges',
+          category: 'ENT Care',
+          dosage: '1 Lozenge',
+          instructions: isMr ? 'दिवसातून २-३ वेळा चघळावी [२ दिवस]' : 'Dissolve slowly in mouth 2-3 times daily [2 Days]',
+          timing: isMr ? 'दिवसभरात ३ वेळा' : '3 times daily'
+        }
+      ],
+      homeRemedies: [
+        isMr ? 'कोमट पाण्यात थोडे मीठ घालून दिवसातून ३ वेळा गुळण्या करा.' : 'Gargle with warm salt water 3 times daily.',
+        isMr ? 'गरम पाण्याची वाफ घ्या आणि थंड पाणी पिणे टाळा.' : 'Inhale warm steam and avoid cold water.'
+      ],
+      ayurvedicRemedies: getFallbackAyurvedicRemedies(symptoms, lang),
+      warningSigns: [isMr ? '३ दिवसांपेक्षा जास्त ताप किंवा खोकल्यातून रक्त आल्यास डॉक्टरांना भेटा.' : 'Consult doctor if fever persists > 3 days.']
+    };
+  }
+
+  if (s.includes('जुलाब') || s.includes('diarrhea') || s.includes('पोट बिघड')) {
+    return {
+      riskLevel: 'LOW',
+      likelyDiagnosis: isMr ? '२ दिवसांचे प्राथमिक निदान: सौम्य जुलाब व डिहायड्रेशन' : 'Preliminary 2-Day Assessment: Mild Diarrhea & Dehydration',
+      clinicalExplanation: isMr ? 'आहारातील बदलामुळे किंवा संसर्गामुळे पोट बिघडले आहे. शरीरातील पाण्याचे प्रमाण टिकवणे महत्त्वाचे आहे.' : 'Mild gastroenteritis; fluid rehydration is essential.',
+      suggestedMedicines: [
+        {
+          name: 'Oral Rehydration Salts (WHO ORS Sachet)',
+          nameLocal: isMr ? 'ओआरएस इलेक्ट्रोलाइट रिहायड्रेशन सॅचेट' : 'WHO ORS Electrolyte Sachet',
+          category: 'Electrolyte Replenisher',
+          dosage: '1 Sachet in 1 Litre Water',
+          instructions: isMr ? '१ लिटर स्वच्छ पाण्यात मिसळून दिवसभर थोडे थोडे प्यावे [२ दिवस]' : 'Mix 1 sachet in 1 Litre water and sip through the day [2 Days]',
+          timing: isMr ? 'सकाळ, दुपार व रात्र' : 'Throughout the day'
+        }
+      ],
+      homeRemedies: [
+        isMr ? 'ताजे ताक, डाळिंबाचा रस किंवा भाताची पेज प्यावी.' : 'Drink fresh buttermilk, rice kanji, or pomegranate juice.',
+        isMr ? 'मसालेदार आणि तेलकट अन्न पूर्णपणे टाळावे.' : 'Avoid spicy and oily food completely.'
+      ],
+      ayurvedicRemedies: getFallbackAyurvedicRemedies(symptoms, lang),
+      warningSigns: [isMr ? 'उलट्या न थांबणे किंवा तीव्र अशक्तपणा आल्यास त्वरित डॉक्टरकडे जावे.' : 'Visit doctor if vomiting is uncontrollable.']
+    };
+  }
+
+  // General Mild Default
+  return {
+    riskLevel: 'LOW',
+    likelyDiagnosis: isMr ? '२ दिवसांचे प्राथमिक तात्पुरते निदान: सामान्य शारीरिक अस्वस्थता' : '2-Day Preliminary Assessment: General Mild Ailment',
+    clinicalExplanation: isMr ? 'लक्षणे सौम्य स्वरूपाची असून प्राथमिक २ दिवसांच्या काळजीने आणि योग्य विश्रांतीने आराम मिळू शकतो.' : 'Mild temporary symptoms manageable with supportive care.',
+    suggestedMedicines: [
+      {
+        name: 'Tab. Paracetamol 500mg',
+        nameLocal: isMr ? 'पॅरासिटामॉल सौम्य आराम (Tab. Paracetamol)' : 'Tab. Paracetamol 500mg',
+        category: 'Analgesic / Antipyretic',
+        dosage: '1 Tablet',
+        instructions: isMr ? 'जेवणानंतर कोमट पाण्यासोबत घ्यावी [फक्त २ दिवस]' : 'Take post-meals with warm water [Strictly 2 Days]',
+        timing: isMr ? 'सकाळी व रात्री (२ वेळा)' : 'Twice daily [2 Days]'
+      }
+    ],
+    homeRemedies: [
+      isMr ? 'दिवसभरात भरपूर कोमट पाणी प्या आणि ताजे पौष्टिक जेवण घ्या.' : 'Drink plenty of warm water and eat fresh light food.',
+      isMr ? 'शांत अंधाऱ्या खोलीत पुरेशी ८ तासांची विश्रांती घ्या.' : 'Get at least 8 hours of restful sleep.'
+    ],
+    ayurvedicRemedies: getFallbackAyurvedicRemedies(symptoms, lang),
+    warningSigns: [isMr ? 'त्रास ४८ तासांपेक्षा जास्त राहिल्यास प्राथमिक आरोग्य केंद्रात (PHC) दाखवा.' : 'Consult PHC doctor if unresolved in 48 hours.']
+  };
+}
+
+/**
+ * Custom Symptom Triage with Gemini AI + Ayurvedic Remedies + Direct Prescription Creation
+ */
+export async function triageCustomSymptom(req, res) {
+  try {
+    const {
+      symptoms,
+      language = 'mr',
+      familyMemberId = 'self_1',
+      patientDetails = {},
+      userId
+    } = req.body;
+
+    if (!symptoms || !symptoms.trim()) {
+      return res.status(400).json({ error: 'Symptoms description is required.' });
+    }
+
+    const detectedLang = detectLanguageFromText(symptoms);
+    const effectiveLanguage = (detectedLang !== 'en') ? detectedLang : (language || 'mr');
+
+    console.log(`[Custom Symptom Triage] Symptoms: "${symptoms}" | Lang: ${effectiveLanguage} | Member: ${familyMemberId}`);
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    const modelName = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+
+    let triageResult = null;
+
+    if (apiKey && apiKey !== 'your_gemini_api_key_here') {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const prompt = `
+You are ArogyaRakshak AI, an expert rural tele-triage physician and integrative health advisor in India.
+The patient has submitted their symptoms as free text: "${symptoms}".
+
+CRITICAL TRIAGE & CLINICAL SAFETY RULES:
+1. LANGUAGE: Respond ENTIRELY in the detected language (${effectiveLanguage}):
+   - If Marathi (mr), all text fields must be in clear, polite Marathi (मराठी).
+   - If Hindi (hi), respond in Hindi.
+   - If English (en), respond in English.
+2. RISK ASSESSMENT:
+   - If symptoms involve severe red flags (e.g., severe chest pain, radiating left arm pain, difficulty breathing, snake/scorpion bite, pesticide ingestion/poisoning, head trauma with vomiting, stroke signs, sudden loss of consciousness, uncontrolled bleeding, convulsions), set "riskLevel": "CRITICAL".
+   - For CRITICAL risk: "suggestedMedicines" MUST BE []. Instruct immediate transfer to nearest hospital / 108 ambulance.
+   - If mild or moderate: set "riskLevel": "LOW" or "MODERATE", and recommend a temporary 2-day OTC schedule.
+3. REMEDIES REQUIREMENT:
+   - Provide 2-3 safe "homeRemedies" (non-drug supportive home actions).
+   - Provide 2-3 safe "ayurvedicRemedies" (traditional, widely-known herbal/Ayurvedic supportive solutions such as golden turmeric milk, ginger-tulsi decoction, ajwain water, triphala, clove, etc.).
+4. MEDICINE SUGGESTIONS (For LOW / MODERATE only):
+   - Only suggest standard, safe OTC formulations (e.g., Tab. Paracetamol 500mg, WHO ORS Sachet, Cap. Omeprazole 20mg, Tab. Cetirizine 10mg, Diclofenac Gel).
+   - State strictly that this is a 2-day temporary relief schedule to be checked by a dispensing pharmacist.
+
+Return ONLY a raw JSON object (no markdown, no backticks):
+{
+  "riskLevel": "CRITICAL" | "MODERATE" | "LOW",
+  "likelyDiagnosis": "Assessment title in detected language",
+  "clinicalExplanation": "Plain-language explanation in detected language",
+  "suggestedMedicines": [
+    {
+      "name": "Standard generic medicine name in Latin/English (e.g. Tab. Paracetamol 500mg)",
+      "nameLocal": "Medicine name in detected language",
+      "category": "Pharmacological Category",
+      "dosage": "1 Tablet / Sachet",
+      "instructions": "Guidance in detected language (Strictly 2 Days)",
+      "timing": "Morning & Night [2 Days]"
+    }
+  ],
+  "homeRemedies": ["Safe home remedy in detected language"],
+  "ayurvedicRemedies": ["Safe Ayurvedic / Herbal supportive remedy in detected language"],
+  "warningSigns": ["Red flags when to visit doctor immediately"]
+}
+`;
+        const response = await model.generateContent(prompt);
+        const text = response.response.text();
+        const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        triageResult = JSON.parse(cleaned);
+      } catch (err) {
+        console.warn('[Custom Symptom Gemini Error, using clinical rules]', err.message);
+      }
+    }
+
+    // Offline / Fallback rules engine if Gemini did not produce a result
+    if (!triageResult) {
+      triageResult = generateFallbackCustomTriage(symptoms, effectiveLanguage);
+    }
+
+    const isCritical = triageResult.riskLevel === 'CRITICAL';
+
+    // Format medicines
+    const formattedMedicines = isCritical ? [] : (triageResult.suggestedMedicines || []).map(m => ({
+      name: m.name || 'Tab. Paracetamol 500mg',
+      category: m.category || 'General OTC Care',
+      instructions: m.instructions || 'Take post-meals with warm water [Strictly 2 Days]',
+      timing: m.timing || 'Twice daily [2 Days]',
+    }));
+
+    // Ensure fallback Ayurvedic remedies if empty
+    const ayurvedicRemediesList = (triageResult.ayurvedicRemedies && triageResult.ayurvedicRemedies.length > 0)
+      ? triageResult.ayurvedicRemedies
+      : getFallbackAyurvedicRemedies(symptoms, effectiveLanguage);
+
+    const homeRemediesList = triageResult.homeRemedies || [
+      effectiveLanguage === 'mr' ? 'भरपूर विश्रांती घ्या आणि कोमट पाणी प्या.' : 'Take adequate rest and drink warm water.'
+    ];
+
+    // Build and save prescription
+    let savedDoc;
+    const diagnosisText = triageResult.likelyDiagnosis || (isCritical ? 'Critical Emergency Condition' : '2-Day Symptom Relief Protocol');
+
+    if (isDbConnected()) {
+      savedDoc = await Prescription.create({
+        familyMemberId,
+        userId,
+        patientDetails: {
+          name: patientDetails.name || 'Patient',
+          age: patientDetails.age || 42,
+          bloodGroup: patientDetails.bloodGroup || 'B+',
+          abhaId: patientDetails.abhaId || '14-2026-9812-4456',
+        },
+        createdBy: 'symptom_checklist',
+        medicines: formattedMedicines,
+        homeRemedies: homeRemediesList,
+        ayurvedicRemedies: ayurvedicRemediesList,
+        durationDays: 2,
+        diagnosisSummary: diagnosisText,
+        riskLevel: triageResult.riskLevel || 'LOW',
+        verificationStatus: 'unverified'
+      });
+      savedDoc.pdfUrl = `/api/prescriptions/${savedDoc._id}/pdf`;
+      await savedDoc.save();
+    } else {
+      const memId = generateMemoryId();
+      savedDoc = {
+        _id: memId,
+        id: memId,
+        familyMemberId,
+        userId,
+        patientDetails: {
+          name: patientDetails.name || 'Patient',
+          age: patientDetails.age || 42,
+          bloodGroup: patientDetails.bloodGroup || 'B+',
+          abhaId: patientDetails.abhaId || '14-2026-9812-4456',
+        },
+        createdBy: 'symptom_checklist',
+        medicines: formattedMedicines,
+        homeRemedies: homeRemediesList,
+        ayurvedicRemedies: ayurvedicRemediesList,
+        durationDays: 2,
+        diagnosisSummary: diagnosisText,
+        riskLevel: triageResult.riskLevel || 'LOW',
+        verificationStatus: 'unverified',
+        pdfUrl: `/api/prescriptions/${memId}/pdf`,
+        createdAt: new Date(),
+      };
+      memoryDb.prescriptions.set(memId, savedDoc);
+    }
+
+    console.log(`[Custom Symptom Rx Created] ID: ${savedDoc._id || savedDoc.id} Risk: ${savedDoc.riskLevel}`);
+
+    res.json({
+      success: true,
+      prescription: savedDoc,
+      triageDetails: triageResult
+    });
+  } catch (err) {
+    console.error('[triageCustomSymptom Error]', err);
+    res.status(500).json({ error: 'Failed to evaluate custom symptom and create prescription.' });
   }
 }
