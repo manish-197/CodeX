@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import VitalsCard from './VitalsCard';
 import LogVitalsModal from './LogVitalsModal';
 import AddMemberModal from './AddMemberModal';
+import HealthCardModal from './HealthCardModal';
 import { 
   UserPlus, 
   CreditCard, 
@@ -16,7 +17,6 @@ export default function FamilyHub({
   currentUser, 
   onVitalsChange, 
   onNavigateToPrescription,
-  onDownloadHealthCard,
   onOpenBleModal,
   onTriggerDoctorDispatch
 }) {
@@ -46,6 +46,7 @@ export default function FamilyHub({
   const [activeMemberId, setActiveMemberId] = useState(members[0]?.id || null);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
 
   const activeMember = members.find(m => m.id === activeMemberId) || members[0];
 
@@ -200,10 +201,10 @@ export default function FamilyHub({
                 </div>
               </div>
 
-              {/* Action Buttons for Slice 9 and Slice 11 */}
+              {/* Action Buttons */}
               <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10 space-y-2">
                 <button
-                  onClick={() => onDownloadHealthCard && onDownloadHealthCard(activeMember)}
+                  onClick={() => setIsCardModalOpen(true)}
                   className="w-full btn-teal text-xs py-2.5 px-3 flex items-center justify-center gap-2 dark:bg-sky-mist dark:text-deep-teal"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -290,6 +291,13 @@ export default function FamilyHub({
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddMember={handleAddMember}
+      />
+
+      {/* ABDM Health Card Modal with Encrypted QR and PDF download */}
+      <HealthCardModal
+        isOpen={isCardModalOpen}
+        onClose={() => setIsCardModalOpen(false)}
+        member={activeMember}
       />
 
     </div>
