@@ -3,7 +3,7 @@ import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
 import FamilyHub from './components/family/FamilyHub';
 import KioskDashboard from './components/kiosk/KioskDashboard';
-import VoiceTriage from './components/triage/VoiceTriage';
+import SymptomChecklistTriage from './components/triage/SymptomChecklistTriage';
 import HospitalNavigation from './components/navigation/HospitalNavigation';
 import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
@@ -55,6 +55,7 @@ function AppContent() {
     return null;
   });
 
+  const [targetHospital, setTargetHospital] = useState(null);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   // Sync dark class and data-theme on document element and localStorage
@@ -83,7 +84,7 @@ function AppContent() {
     }
 
     // Protected features require auth
-    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Voice Triage' : 'Hospital Navigation'}.`)) {
+    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Symptom Checklist Triage' : 'Hospital Navigation'}.`)) {
       setCurrentTab(targetTab);
     }
   };
@@ -134,8 +135,11 @@ function AppContent() {
 
       {currentTab === 'triage' && (
         <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Symptom Checklist & 2-Day Rx Triage">
-          <VoiceTriage 
-            onNavigateToHospital={() => setCurrentTab('navigation')}
+          <SymptomChecklistTriage 
+            onNavigateToHospital={(hosp) => {
+              if (hosp) setTargetHospital(hosp);
+              setCurrentTab('navigation');
+            }}
             onNavigateToHub={() => setCurrentTab('hub')}
             activeVitals={activeVitals}
             currentUser={currentUser}
@@ -147,7 +151,7 @@ function AppContent() {
 
       {currentTab === 'navigation' && (
         <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Hospital Road Navigation">
-          <HospitalNavigation />
+          <HospitalNavigation targetHospital={targetHospital} />
         </AuthGuard>
       )}
 
