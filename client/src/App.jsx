@@ -126,13 +126,14 @@ function AppContent() {
               onVitalsChange={handleVitalsChange}
               onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
               onSelectActiveMember={setActiveMember}
+              onNavigateToTriage={() => setCurrentTab('triage')}
             />
           )}
         </AuthGuard>
       )}
 
       {currentTab === 'triage' && (
-        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Voice AI Clinical Triage">
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Symptom Checklist & 2-Day Rx Triage">
           <VoiceTriage 
             onNavigateToHospital={() => setCurrentTab('navigation')}
             onNavigateToHub={() => setCurrentTab('hub')}

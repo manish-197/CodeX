@@ -7,7 +7,7 @@ export const translations = {
     // Nav
     nav_home: 'Home',
     nav_hub: 'Family Hub',
-    nav_triage: 'Voice AI Triage',
+    nav_triage: 'Symptom & Rx Triage',
     nav_navigation: 'Hospital Route',
     nav_citizen_mode: 'Citizen Mode',
     nav_kiosk_mode: 'Gram Panchayat Kiosk',
@@ -26,8 +26,8 @@ export const translations = {
     // Hero
     hero_badge: 'Rural Healthcare Accessibility • ग्रामीण आरोग्य',
     hero_headline: "Healthcare that speaks Bharat's languages, reaches Bharat's roads.",
-    hero_subheadline: "Empowering 65%+ of India's population with bilingual voice AI clinical triage, true road-geometry emergency hospital routing, zero-default vitals monitoring, and offline-capable digital records.",
-    hero_cta_triage: 'Voice AI Triage',
+    hero_subheadline: "Empowering 65%+ of India's population with categorized symptom checklist triage, true road-geometry emergency hospital routing, zero-default vitals monitoring, and offline-capable digital records.",
+    hero_cta_triage: 'Check Symptoms & Get 2-Day Rx',
     hero_cta_hospital: 'Nearest Hospital Route',
     hero_zero_vitals_badge: 'Zero-Default Vitals (0/0 mmHg, 0 BPM)',
     hero_state_detect_badge: 'State-Wise Auto Language Detection',
@@ -39,8 +39,8 @@ export const translations = {
     hero_3d_idle: '3D Digital Twin • 0 BPM (Idle)',
 
     // Feature cards
-    feat_triage_title: 'Bilingual Voice AI Triage',
-    feat_triage_desc: 'Speak symptoms in your native tongue. Gemini 2.5 Flash classifies risk and speaks home remedies.',
+    feat_triage_title: 'Symptom Checklist & 2-Day Rx',
+    feat_triage_desc: 'Select symptoms from common to extreme. Get instant 2-day OTC medicines, safe home remedies, and emergency hospital routing.',
     feat_nav_title: 'Real Road-to-Road Navigation',
     feat_nav_desc: 'Accurate OSRM driving routes to the nearest rural PHC or hospital — real drivable roads, not aerial straight lines.',
     feat_hub_title: 'ABDM Health Records Hub',
@@ -102,7 +102,7 @@ export const translations = {
     // Nav
     nav_home: 'मुख्यपृष्ठ',
     nav_hub: 'कुटुंब आरोग्य केंद्र',
-    nav_triage: 'व्हॉइस एआय ट्रायज',
+    nav_triage: 'आरोग्य लक्षणे व तपासणी',
     nav_navigation: 'रुग्णालय मार्ग',
     nav_citizen_mode: 'नागरिक मोड',
     nav_kiosk_mode: 'ग्रामपंचायत किओस्क',
@@ -121,8 +121,8 @@ export const translations = {
     // Hero
     hero_badge: 'ग्रामीण आरोग्य सेवा • आरोग्य सर्वांसाठी',
     hero_headline: 'भारताच्या भाषांमध्ये बोलणारी, गावांच्या रस्त्यांपर्यंत पोहोचणारी आरोग्य सेवा.',
-    hero_subheadline: 'भारतातील ६५%+ ग्रामीण नागरिकांसाठी द्विभाषिक व्हॉइस एआय ट्रायज, अचूक रस्ता-नेव्हिगेशन, शून्य-डिफॉल्ट जीवनचिन्हे आणि ऑफलाइन डिजिटल आरोग्य नोंद.',
-    hero_cta_triage: 'व्हॉइस एआय ट्रायज सुरू करा',
+    hero_subheadline: 'भारतातील ६५%+ ग्रामीण नागरिकांसाठी लक्षणे चेकलिस्ट ट्रायज, २ दिवसांचे औषधोपचार, अचूक रस्ता-नेव्हिगेशन आणि ऑफलाइन डिजिटल आरोग्य नोंद.',
+    hero_cta_triage: 'लक्षणे तपासा व प्रिस्क्रिप्शन मिळवा',
     hero_cta_hospital: 'जवळचे रुग्णालय मार्ग',
     hero_zero_vitals_badge: 'शून्य-डिफॉल्ट जीवनचिन्हे (0/0 mmHg, 0 BPM)',
     hero_state_detect_badge: 'राज्यनिहाय स्वयंचलित भाषा निवड',
@@ -134,8 +134,8 @@ export const translations = {
     hero_3d_idle: '३डी डिजिटल ट्विन • ० ठोके (निष्क्रिय)',
 
     // Feature cards
-    feat_triage_title: 'द्विभाषिक व्हॉइस एआय ट्रायज',
-    feat_triage_desc: 'तुमच्या भाषेत लक्षणे सांगा. जेमिनी २.५ फ्लॅश आजाराचे गांभीर्य तपासून घरगुती उपाय सांगते.',
+    feat_triage_title: 'लक्षणे चेकलिस्ट व २-दिवसीय औषधे',
+    feat_triage_desc: 'सामान्य ते अतिगंभीर आजार निवडा. तात्काळ २ दिवसांची औषधे, सुरक्षित घरगुती उपाय आणि आणीबाणीत थेट रुग्णालय मार्ग मिळवा.',
     feat_nav_title: 'खरा रस्ता-नेव्हिगेशन',
     feat_nav_desc: 'जवळच्या प्राथमिक आरोग्य केंद्र किंवा रुग्णालयासाठी अचूक ओएसआरएम वाहन मार्ग — हवाई अंतर नाही.',
     feat_hub_title: 'कुटुंब आरोग्य केंद्र (ABDM)',
@@ -197,7 +197,7 @@ export const translations = {
     // Nav
     nav_home: 'होम',
     nav_hub: 'परिवार स्वास्थ्य केंद्र',
-    nav_triage: 'वॉयस एआई ट्रायज',
+    nav_triage: 'लक्षण एवं दवा जांच',
     nav_navigation: 'अस्पताल रास्ता',
     nav_citizen_mode: 'नागरिक मोड',
     nav_kiosk_mode: 'ग्राम पंचायत कियोस्क',
@@ -216,8 +216,8 @@ export const translations = {
     // Hero
     hero_badge: 'ग्रामीण स्वास्थ्य सेवा • आरोग्य सबके लिए',
     hero_headline: 'भारत की भाषाओं में बात करने वाली, गांव की सड़कों तक पहुंचने वाली स्वास्थ्य सेवा।',
-    hero_subheadline: 'भारत के ६५%+ ग्रामीण नागरिकों के लिए द्विभाषी वॉयस एआई ट्रायज, वास्तविक सड़क नेविगेशन, शून्य-डिफ़ॉल्ट जीवन संकेत और ऑफ़लाइन डिजिटल रिकॉर्ड।',
-    hero_cta_triage: 'वॉयस एआई ट्रायज शुरू करें',
+    hero_subheadline: 'भारत के ६५%+ ग्रामीण नागरिकों के लिए लक्षण चेकलिस्ट ट्रायज, २ दिनों की दवा, वास्तविक सड़क नेविगेशन और ऑफ़लाइन डिजिटल रिकॉर्ड।',
+    hero_cta_triage: 'लक्षण जांचें व २-दिवसीय दवा लें',
     hero_cta_hospital: 'निकटतम अस्पताल रास्ता',
     hero_zero_vitals_badge: 'शून्य-डिफ़ॉल्ट जीवन संकेत (0/0 mmHg, 0 BPM)',
     hero_state_detect_badge: 'राज्य-वार स्वचालित भाषा चयन',
@@ -229,8 +229,8 @@ export const translations = {
     hero_3d_idle: '3D डिजिटल ट्विन • ० धड़कन (निष्क्रिय)',
 
     // Feature cards
-    feat_triage_title: 'द्विभाषी वॉयस एआई ट्रायज',
-    feat_triage_desc: 'अपनी भाषा में लक्षण बोलें। जेमिनी २.५ फ्लैश गंभीरता की जांच कर घरेलू उपचार बताता है।',
+    feat_triage_title: 'लक्षण चेकलिस्ट व २-दिवसीय दवा',
+    feat_triage_desc: 'सामान्य से अतिगंभीर लक्षण चुनें। तुरंत २ दिनों की दवा, सुरक्षित घरेलू उपचार और आपातकालीन अस्पताल मार्ग प्राप्त करें।',
     feat_nav_title: 'सच्चा सड़क नेविगेशन',
     feat_nav_desc: 'निकटतम प्राथमिक स्वास्थ्य केंद्र तक वास्तविक ओएसआरएम ड्राइविंग रास्ता — हवाई सीधी रेखा नहीं।',
     feat_hub_title: 'परिवार स्वास्थ्य केंद्र (ABDM)',
@@ -291,7 +291,7 @@ export const translations = {
   ta: {
     nav_home: 'முகப்பு',
     nav_hub: 'குடும்ப மையம்',
-    nav_triage: 'குரல் AI ட்ரையrecord',
+    nav_triage: 'அறிகுறி சரிபார்ப்பு & மருந்து',
     nav_navigation: 'மருத்துவமனை பாதை',
     nav_citizen_mode: 'குடிமக்கள் பயன்முறை',
     nav_kiosk_mode: 'கிராம பஞ்சாயத்து கியோஸ்க்',
@@ -302,8 +302,8 @@ export const translations = {
     state_toast_dismiss: 'சரி',
     hero_badge: 'கிராமப்புற சுகாதார அணுகல்',
     hero_headline: 'பாரதத்தின் மொழிகளில் பேசும், சாலைகளை சென்றடையும் சுகாதார சேவை.',
-    hero_subheadline: 'குரல் AI மருத்துவ ட்ரையாஜ் மற்றும் ஜிபிஎஸ் சாலை வழிசெலுத்தல் மூலம் கிராமப்புற மக்களுக்கு சேவை செய்கிறது.',
-    hero_cta_triage: 'குரல் AI ட்ரையாஜ்',
+    hero_subheadline: 'அறிகுறி சரிபார்ப்பு ட்ரையாஜ் மற்றும் ஜிபிஎஸ் சாலை வழிசெலுத்தல் மூலம் கிராமப்புற மக்களுக்கு சேவை செய்கிறது.',
+    hero_cta_triage: 'அறிகுறிகளை சரிபார்த்து மருந்து பெறவும்',
     hero_cta_hospital: 'அருகிலுள்ள மருத்துவமனை',
     vitals_bp: 'இரத்த அழுத்தம்',
     vitals_heart: 'இதய துடிப்பு',
@@ -315,7 +315,7 @@ export const translations = {
   kn: {
     nav_home: 'ಮುಖಪುಟ',
     nav_hub: 'ಕುಟುಂಬ ಕೇಂದ್ರ',
-    nav_triage: 'ಧ್ವನಿ AI ಟ್ರಯೇಜ್',
+    nav_triage: 'ರೋಗಲಕ್ಷಣ ಪರಿಶೀಲನೆ & ಔಷಧ',
     nav_navigation: 'ಆಸ್ಪತ್ರೆ ಮಾರ್ಗ',
     nav_citizen_mode: 'ನಾಗರಿಕ ಮೋಡ್',
     nav_kiosk_mode: 'ಗ್ರಾಮ ಪಂಚಾಯತ್ ಕಿಯೋಸ್ಕ್',
@@ -326,8 +326,8 @@ export const translations = {
     state_toast_dismiss: 'ಸರಿ',
     hero_badge: 'ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಸೇವೆ',
     hero_headline: 'ಭಾರತದ ಭಾಷೆಗಳಲ್ಲಿ ಮಾತನಾಡುವ, ರಸ್ತೆಗಳನ್ನು ತಲುಪುವ ಆರೋಗ್ಯ ಸೇವೆ.',
-    hero_subheadline: 'ದ್ವಿಭಾಷಾ ಧ್ವನಿ AI ಮತ್ತು ರಸ್ತೆ ಮಟ್ಟದ ತುರ್ತು ನ್ಯಾವಿಗೇಷನ್ ಮೂಲಕ ಗ್ರಾಮೀಣ ಜನರನ್ನು ಸಬಲೀಕರಣಗೊಳಿಸುವುದು.',
-    hero_cta_triage: 'ಧ್ವನಿ AI ಟ್ರಯೇಜ್',
+    hero_subheadline: 'ರೋಗಲಕ್ಷಣ ಪರಿಶೀಲನೆ ಮತ್ತು ರಸ್ತೆ ಮಟ್ಟದ ತುರ್ತು ನ್ಯಾವಿಗೇಷನ್ ಮೂಲಕ ಗ್ರಾಮೀಣ ಜನರನ್ನು ಸಬಲೀಕರಣಗೊಳಿಸುವುದು.',
+    hero_cta_triage: 'ರೋಗಲಕ್ಷಣ ಪರೀಕ್ಷಿಸಿ ಔಷಧ ಪಡೆಯಿರಿ',
     hero_cta_hospital: 'ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆ',
     vitals_bp: 'ರಕ್ತದೊತ್ತಡ',
     vitals_heart: 'ಹೃದಯ ಬಡಿತ',
@@ -339,7 +339,7 @@ export const translations = {
   bn: {
     nav_home: 'হোম',
     nav_hub: 'পারিবারিক হাব',
-    nav_triage: 'ভয়েস এআই ট্রায়াজ',
+    nav_triage: 'উপসর্গ ট্রায়াজ ও প্রেসক্রিপশন',
     nav_navigation: 'হাসপাতাল রুট',
     nav_citizen_mode: 'নাগরিক মোড',
     nav_kiosk_mode: 'গ্রাম পঞ্চায়েত কিয়স্ক',
@@ -350,8 +350,8 @@ export const translations = {
     state_toast_dismiss: 'বুঝেছি',
     hero_badge: 'গ্রামীণ স্বাস্থ্য পরিষেবা',
     hero_headline: 'ভারতের ভাষায় কথা বলা, প্রত্যন্ত গ্রামের পথ পর্যন্ত স্বাস্থ্যসেবা।',
-    hero_subheadline: 'ভয়েস এআই ট্রায়াজ এবং রোড-লেভেল জিপিএস নেভিগেশন সহ গ্রামীণ জনগণের ক্ষমতায়ন।',
-    hero_cta_triage: 'ভয়েস এআই ট্রায়াজ',
+    hero_subheadline: 'উপসর্গ চেকলিস্ট ট্রায়াজ এবং রোড-লেভেল জিপিএস নেভিগেশন সহ গ্রামীಣ জনগণের ক্ষমতায়ন।',
+    hero_cta_triage: 'উপসর্গ পরীক্ষা ও প্রেসক্রিপশন পান',
     hero_cta_hospital: 'নিকটতম হাসপাতাল রুট',
     vitals_bp: 'রক্তচাপ',
     vitals_heart: 'হৃদস্পন্দন',

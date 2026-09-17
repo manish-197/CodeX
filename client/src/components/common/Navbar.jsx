@@ -9,7 +9,7 @@ import {
   X, 
   Activity, 
   Navigation, 
-  PhoneCall,
+  Stethoscope,
   LogOut,
   LogIn,
   Check,
@@ -49,7 +49,7 @@ export default function Navbar({
   const allNavItems = [
     { id: 'home', label: t('nav_home'), icon: Activity, public: true },
     { id: 'hub', label: t('nav_hub'), icon: UserCheck, public: false },
-    { id: 'triage', label: t('nav_triage'), icon: PhoneCall, public: false },
+    { id: 'triage', label: t('nav_triage'), icon: Stethoscope, public: false },
     { id: 'navigation', label: t('nav_navigation'), icon: Navigation, public: false },
   ];
 

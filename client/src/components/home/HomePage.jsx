@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import HeartDigitalTwin from './HeartDigitalTwin';
 import { 
-  PhoneCall, 
+  Stethoscope, 
   Navigation, 
   ShieldCheck, 
   Users, 
@@ -54,10 +54,10 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
     {
       title: t('feat_triage_title'),
       description: t('feat_triage_desc'),
-      icon: PhoneCall,
+      icon: Stethoscope,
       actionText: t('hero_cta_triage'),
       tab: 'triage',
-      badge: 'Gemini 2.5 Flash',
+      badge: 'Checklist & 2-Day Rx',
       badgeColor: 'bg-medical-blue/15 text-medical-blue',
     },
     {

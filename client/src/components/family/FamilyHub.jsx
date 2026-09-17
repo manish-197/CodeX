@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import VitalsCard from './VitalsCard';
-import LogVitalsModal from './LogVitalsModal';
 import AddMemberModal from './AddMemberModal';
 import HealthCardModal from './HealthCardModal';
 import PrescriptionModal from './PrescriptionModal';
-import BleDeviceModal from './BleDeviceModal';
 import { 
   UserPlus, 
   CreditCard, 
@@ -21,7 +18,10 @@ import {
   HeartPulse,
   ShieldAlert,
   Clock,
-  QrCode
+  QrCode,
+  User,
+  Stethoscope,
+  ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -29,7 +29,8 @@ export default function FamilyHub({
   currentUser, 
   onVitalsChange, 
   onTriggerDoctorDispatch,
-  onSelectActiveMember
+  onSelectActiveMember,
+  onNavigateToTriage
 }) {
   const { t } = useLanguage();
 
@@ -72,11 +73,9 @@ export default function FamilyHub({
   const [prescriptions, setPrescriptions] = useState([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [verifyingId, setVerifyingId] = useState(null);
-  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
-  const [isBleModalOpen, setIsBleModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [pendingSyncCount, setPendingSyncCount] = useState(() => {
     try {
@@ -284,7 +283,7 @@ export default function FamilyHub({
         </button>
       </div>
 
-      {/* Sub-Navigation Tabs: Health Profile & Vitals vs Prescription History */}
+      {/* Sub-Navigation Tabs: Health Profile vs Prescription History */}
       <div className="flex items-center gap-2 border-b border-deep-navy/10 dark:border-white/10 pb-3">
         <button
           id="family-tab-overview"
@@ -295,8 +294,8 @@ export default function FamilyHub({
               : 'glass-card text-deep-navy dark:text-clinical-white hover:border-medical-blue/40'
           }`}
         >
-          <HeartPulse className="w-4 h-4" />
-          <span>Health Profile & Vitals</span>
+          <User className="w-4 h-4" />
+          <span>Health Profile & ABHA</span>
         </button>
         <button
           id="family-tab-prescriptions"
@@ -604,37 +603,81 @@ export default function FamilyHub({
             </div>
           </div>
 
-          {/* Right Column: Zero-Default Vitals & Diagnostics */}
+          {/* Right Column: Family Member Health & Triage Dashboard */}
           <div className="lg:col-span-8 space-y-6">
             
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-display font-bold text-xl text-deep-navy dark:text-clinical-white">
-                  {t('vitals_title')}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  {t('vitals_subtitle')}
-                </p>
+            {/* Quick Action Banner: Symptom Checklist & 2-Day Prescription Triage */}
+            <div className="glass-card p-6 sm:p-7 border-2 border-medical-blue/30 bg-gradient-to-br from-medical-blue/10 via-white/40 to-health-green/10 dark:from-medical-blue/20 dark:via-dark-base/40 dark:to-health-green/15 rounded-3xl space-y-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 rounded-2xl bg-medical-blue text-white shadow-md shrink-0 mt-0.5">
+                    <Stethoscope className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-medical-blue/20 text-medical-blue border border-medical-blue/30">
+                      Symptom Checklist Triage
+                    </span>
+                    <h4 className="font-display font-bold text-lg sm:text-xl text-deep-navy dark:text-clinical-white mt-1.5">
+                      आरोग्य लक्षणे व २-दिवसांचे प्रिस्क्रिप्शन
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-lg leading-relaxed">
+                      {activeMember.name} यांच्यासाठी सामान्य ते अतिगंभीर लक्षणे तपासा. तात्काळ २ दिवसांची औषधे, सुरक्षित घरगुती उपाय आणि आणीबाणीत थेट रुग्णालय मार्ग मिळवा.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  id="family-start-checklist-btn"
+                  onClick={() => onNavigateToTriage && onNavigateToTriage()}
+                  className="btn-navy text-xs sm:text-sm py-3 px-5 flex items-center justify-center gap-2 whitespace-nowrap shadow-lg self-start sm:self-center"
+                >
+                  <Stethoscope className="w-4 h-4" />
+                  <span>तपासणी सुरू करा →</span>
+                </button>
               </div>
             </div>
 
-            {/* Zero-Default Vitals Card */}
-            <VitalsCard 
-              vitals={activeMember.vitals}
-              onOpenLogModal={() => setIsLogModalOpen(true)}
-              onOpenBleModal={() => setIsBleModalOpen(true)}
-              onTriggerDoctorDispatch={onTriggerDoctorDispatch}
-            />
-
-            {/* Vitals Baseline Guidance */}
-            <div className="glass-card p-4 sm:p-5 flex items-start gap-3.5 text-xs text-slate-700 dark:text-slate-300 shadow-md">
-              <ShieldCheck className="w-5 h-5 text-health-green shrink-0 mt-0.5" />
-              <div>
-                <strong className="block text-deep-navy dark:text-clinical-white font-bold mb-0.5">
-                  Rural Clinical Baseline Protocol
-                </strong>
-                Readings above 140 mmHg systolic instantly trigger the village emergency doctor dispatch sequence. All readings sync with the 3D heart digital twin on your home screen.
+            {/* Prescriptions & Medical History Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Prescription History Quick Card */}
+              <div className="glass-card p-5 sm:p-6 space-y-3.5 border border-white/70 dark:border-white/10 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-deep-navy dark:text-clinical-white font-bold text-sm">
+                    <FileText className="w-4 h-4 text-medical-blue" />
+                    <span>प्रिस्क्रिप्शन रेकॉर्ड्स</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-medical-blue/15 text-medical-blue">
+                    {prescriptions.length} {prescriptions.length === 1 ? 'Record' : 'Records'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {activeMember.name} यांच्यासाठी तयार केलेले २ दिवसांचे प्रिस्क्रिप्शन स्लिप्स व फार्मसी पडताळणी रेकॉर्ड्स.
+                </p>
+                <button
+                  onClick={() => setHubTab('prescriptions')}
+                  className="w-full btn-glass text-xs py-2.5 px-4 flex items-center justify-center gap-1.5 text-medical-blue hover:text-white"
+                >
+                  <span>प्रिस्क्रिप्शन हिस्टरी पहा</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
+
+              {/* Emergency Health Baseline Support */}
+              <div className="glass-card p-5 sm:p-6 space-y-3.5 border border-white/70 dark:border-white/10 shadow-lg">
+                <div className="flex items-center gap-2 text-deep-navy dark:text-clinical-white font-bold text-sm">
+                  <ShieldCheck className="w-4 h-4 text-health-green" />
+                  <span>आपत्कालीन आरोग्य मदत</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  कोणत्याही गंभीर किंवा आणीबाणीच्या परिस्थितीत स्वतः औषधे न घेता थेट १०८ रुग्णवाहिका किंवा जवळच्या प्राथमिक आरोग्य केंद्राशी संपर्क साधा.
+                </p>
+                <div className="p-2.5 rounded-xl bg-alert-red/10 border border-alert-red/20 text-[11px] font-semibold text-alert-red flex items-center justify-between">
+                  <span>राष्ट्रीय आपत्कालीन रुग्णवाहिका:</span>
+                  <strong className="text-xs font-bold">हेल्पलाइन १०८</strong>
+                </div>
+              </div>
+
             </div>
 
           </div>
@@ -658,17 +701,6 @@ export default function FamilyHub({
         </div>
       )}
 
-      {/* Log Vitals Modal */}
-      <LogVitalsModal 
-        isOpen={isLogModalOpen}
-        onClose={() => setIsLogModalOpen(false)}
-        onSaveVitals={handleSaveVitals}
-        memberName={activeMember?.name}
-        currentVitals={activeMember?.vitals}
-        isKioskOperator={false}
-        onOpenBleModal={() => setIsBleModalOpen(true)}
-      />
-
       {/* Add Member Modal */}
       <AddMemberModal 
         isOpen={isAddModalOpen}
@@ -688,14 +720,6 @@ export default function FamilyHub({
         isOpen={isPrescriptionModalOpen}
         onClose={() => setIsPrescriptionModalOpen(false)}
         member={activeMember}
-      />
-
-      {/* Web Bluetooth BLE Device Sync Modal */}
-      <BleDeviceModal
-        isOpen={isBleModalOpen}
-        onClose={() => setIsBleModalOpen(false)}
-        onSyncVitals={handleSaveVitals}
-        currentMemberName={activeMember?.name}
       />
 
     </div>
