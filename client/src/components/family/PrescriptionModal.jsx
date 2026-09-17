@@ -91,7 +91,7 @@ export default function PrescriptionModal({ isOpen, onClose, member }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-2xl neo-glass-card p-6 sm:p-8 relative shadow-2xl bg-white/95 dark:bg-dark-card/95 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-2xl glass-card p-6 sm:p-8 relative shadow-2xl bg-white/95 dark:bg-dark-card/95 max-h-[90vh] overflow-y-auto"
         data-lenis-prevent="true"
       >
         <button

@@ -50,7 +50,7 @@ export default function LogVitalsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-md neo-glass-card p-6 relative shadow-2xl bg-white/95 dark:bg-dark-card/95"
+        className="w-full max-w-md glass-card p-6 relative shadow-2xl bg-white/95 dark:bg-dark-card/95"
         data-lenis-prevent="true"
       >
         <button

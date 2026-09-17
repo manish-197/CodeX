@@ -6,7 +6,16 @@ import {
   ShieldCheck, 
   Users, 
   ChevronRight,
-  ArrowUpRight
+  ArrowUpRight,
+  Activity,
+  Globe,
+  Radio,
+  FileText,
+  Clock,
+  Heart,
+  Bluetooth,
+  WifiOff,
+  MessageSquare
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -19,20 +28,20 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from('.hero-fade-in', {
-        y: 24,
+        y: 20,
         opacity: 0,
         duration: 0.8,
-        stagger: 0.15,
+        stagger: 0.12,
         ease: 'power3.out',
       });
 
       gsap.from('.feature-card', {
-        y: 30,
+        y: 28,
         opacity: 0,
         duration: 0.7,
         stagger: 0.1,
         ease: 'power2.out',
-        delay: 0.3,
+        delay: 0.25,
       });
     }, heroRef);
 
@@ -47,6 +56,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       actionText: t('hero_cta_triage'),
       tab: 'triage',
       badge: 'Gemini 2.5 Flash',
+      badgeColor: 'bg-terracotta/15 text-terracotta',
     },
     {
       title: t('feat_nav_title'),
@@ -55,6 +65,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       actionText: t('hero_cta_hospital'),
       tab: 'navigation',
       badge: 'OSRM + Leaflet',
+      badgeColor: 'bg-deep-teal/15 text-deep-teal dark:text-sky-mist',
     },
     {
       title: t('feat_hub_title'),
@@ -62,7 +73,8 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       icon: Users,
       actionText: t('nav_hub'),
       tab: 'hub',
-      badge: 'ABDM',
+      badge: 'ABDM Compatible',
+      badgeColor: 'bg-leaf-green/15 text-leaf-green',
     },
     {
       title: t('feat_kiosk_title'),
@@ -71,6 +83,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       actionText: t('nav_kiosk_mode'),
       tab: 'hub',
       badge: 'Senior Care',
+      badgeColor: 'bg-sun-gold/20 text-deep-teal dark:text-sun-gold',
     },
   ];
 
@@ -80,26 +93,30 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
       {/* Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         
-        {/* Left Col: Hero Copy */}
+        {/* Left Column: Hero Copy & CTA */}
         <div className="lg:col-span-7 space-y-6">
           
-          <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-1.5 rounded-full neo-glass-card text-xs font-semibold text-deep-teal dark:text-sky-mist">
-            <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse" />
+          {/* Top Mission Pill */}
+          <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-bold text-deep-teal dark:text-sky-mist shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-terracotta animate-pulse" />
             <span>{t('hero_badge')}</span>
           </div>
 
-          <h1 className="hero-fade-in font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-deep-teal dark:text-sky-mist leading-[1.12] tracking-tight">
-            {t('hero_headline')}
+          {/* Hero Headline in Fraunces Serif */}
+          <h1 className="hero-fade-in font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-deep-teal dark:text-sky-mist leading-[1.14] tracking-tight">
+            Healthcare that speaks <span className="text-terracotta italic font-normal">Bharat's</span> languages, reaches Bharat's roads.
           </h1>
 
-          <p className="hero-fade-in text-base sm:text-lg text-deep-teal/80 dark:text-sky-mist/80 leading-relaxed font-sans max-w-2xl">
+          {/* Subheadline */}
+          <p className="hero-fade-in text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-sans max-w-2xl">
             {t('hero_subheadline')}
           </p>
 
+          {/* Action CTAs */}
           <div className="hero-fade-in flex flex-wrap items-center gap-4 pt-2">
             <button 
               onClick={() => onNavigate('triage')}
-              className="btn-terracotta text-sm sm:text-base py-3.5 px-7"
+              className="btn-terracotta text-sm sm:text-base py-3.5 px-8"
             >
               <PhoneCall className="w-5 h-5" />
               <span>{t('hero_cta_triage')}</span>
@@ -108,54 +125,63 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
 
             <button 
               onClick={() => onNavigate('navigation')}
-              className="btn-teal text-sm sm:text-base py-3.5 px-6 dark:bg-sky-mist dark:text-deep-teal"
+              className="btn-teal text-sm sm:text-base py-3.5 px-7"
             >
               <Navigation className="w-5 h-5" />
               <span>{t('hero_cta_hospital')}</span>
             </button>
           </div>
 
-          {/* Trust badges */}
-          <div className="hero-fade-in pt-4 flex flex-wrap items-center gap-6 text-xs text-deep-teal/70 dark:text-dark-muted font-medium border-t border-deep-teal/10 dark:border-white/10">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-leaf-green" />
-              <span>{t('hero_zero_vitals_badge')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-sun-gold" />
-              <span>{t('hero_state_detect_badge')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-terracotta" />
-              <span>{t('hero_sos_badge')}</span>
+          {/* Distinct Feature Highlight Chips with generous spacing */}
+          <div className="hero-fade-in pt-2">
+            <div className="flex flex-wrap gap-3">
+              <div className="glass-card px-4 py-2.5 flex items-center gap-2.5 text-xs font-bold text-deep-teal dark:text-sky-mist shadow-sm">
+                <Activity className="w-4 h-4 text-leaf-green shrink-0" />
+                <span>{t('hero_zero_vitals_badge')}</span>
+              </div>
+              
+              <div className="glass-card px-4 py-2.5 flex items-center gap-2.5 text-xs font-bold text-deep-teal dark:text-sky-mist shadow-sm">
+                <Globe className="w-4 h-4 text-sun-gold shrink-0" />
+                <span>{t('hero_state_detect_badge')}</span>
+              </div>
+              
+              <div className="glass-card px-4 py-2.5 flex items-center gap-2.5 text-xs font-bold text-deep-teal dark:text-sky-mist shadow-sm">
+                <Radio className="w-4 h-4 text-alert-crimson shrink-0" />
+                <span>{t('hero_sos_badge')}</span>
+              </div>
             </div>
           </div>
 
         </div>
 
-        {/* Right Col: 3D Anatomical Heart Digital Twin */}
+        {/* Right Column: 3D Anatomical Heart Digital Twin wrapped in a styled .glass-card */}
         <div className="hero-fade-in lg:col-span-5 flex flex-col items-center">
-          <div className="w-full neo-glass-card p-6 relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-2">
+          <div className="w-full glass-card p-6 sm:p-7 relative overflow-hidden shadow-2xl border border-white/70 dark:border-white/10 group">
+            
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-terracotta">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-terracotta block">
                   {t('hero_3d_tag')}
                 </span>
-                <h3 className="font-display font-bold text-lg text-deep-teal dark:text-sky-mist">
+                <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist">
                   {t('hero_3d_title')}
                 </h3>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
-                Three.js
+              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                Three.js WebGL
               </span>
             </div>
 
-            {/* Three.js Canvas Container */}
-            <HeartDigitalTwin heartRate={heartRate} />
+            {/* Three.js Anatomical Heart Canvas */}
+            <div className="relative rounded-2xl overflow-hidden py-2">
+              <HeartDigitalTwin heartRate={heartRate} />
+            </div>
 
-            <div className="mt-4 pt-3 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between text-xs text-deep-teal/70 dark:text-dark-muted">
+            <div className="mt-4 pt-3 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between text-xs text-deep-teal/80 dark:text-dark-muted">
               <span>{t('hero_3d_sub')}</span>
-              <span className="text-terracotta font-semibold">{heartRate > 0 ? t('hero_3d_pulse_live') : t('hero_3d_idle')}</span>
+              <span className="text-terracotta font-bold">
+                {heartRate > 0 ? t('hero_3d_pulse_live') : t('hero_3d_idle')}
+              </span>
             </div>
           </div>
         </div>
@@ -173,6 +199,9 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               Engineered for Bharat's Real Healthcare Challenges
             </h2>
           </div>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md">
+            Overcoming doctor shortages, regional language barriers, and rural road navigation gaps with inclusive AI.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -182,14 +211,14 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               <div 
                 key={idx}
                 onClick={() => onNavigate(item.tab)}
-                className="feature-card neo-glass-card p-6 flex flex-col justify-between cursor-pointer group hover:border-terracotta/50 transition-all duration-300"
+                className="feature-card glass-card p-6 flex flex-col justify-between cursor-pointer group hover:border-terracotta/60"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
                       <Icon className="w-6 h-6" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${item.badgeColor}`}>
                       {item.badge}
                     </span>
                   </div>
@@ -198,7 +227,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
                     <h3 className="font-display font-bold text-lg text-deep-teal dark:text-sky-mist group-hover:text-terracotta transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-deep-teal/75 dark:text-dark-muted mt-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
@@ -211,6 +240,50 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* Six Extra Features Overview Strip */}
+      <section className="glass-card p-6 sm:p-8 space-y-5 border-l-4 border-terracotta shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-terracotta">
+              Complete Rural Ecosystem
+            </span>
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-deep-teal dark:text-sky-mist">
+              Six Specialized Accessibility Features Integrated End-to-End
+            </h3>
+          </div>
+          <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-leaf-green/20 text-leaf-green self-start sm:self-auto">
+            All 6 Slices Activated
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 text-xs">
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-teal/10 shadow-sm">
+            <span className="font-bold text-deep-teal dark:text-sky-mist block">Prescription OCR</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Gemini Vision scanner</span>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-alert-crimson/20 shadow-sm">
+            <span className="font-bold text-alert-crimson block">1-Tap SOS Beacon</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">3s abort + 108 dispatch</span>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-teal/10 shadow-sm">
+            <span className="font-bold text-deep-teal dark:text-sky-mist block">Offline PWA</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">IndexedDB auto sync</span>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-teal/10 shadow-sm">
+            <span className="font-bold text-deep-teal dark:text-sky-mist block">WhatsApp Bot</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Voice triage for elders</span>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-teal/10 shadow-sm">
+            <span className="font-bold text-deep-teal dark:text-sky-mist block">ABDM Health Card</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Signed JWT QR PDF</span>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-white/75 dark:bg-dark-card/75 border border-deep-teal/10 shadow-sm">
+            <span className="font-bold text-deep-teal dark:text-sky-mist block">Bluetooth BLE</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Live GATT vitals pairing</span>
+          </div>
         </div>
       </section>
 

@@ -205,7 +205,7 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
       
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full neo-glass-card text-xs font-bold text-terracotta uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-bold text-terracotta uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Gemini 2.5 Flash Clinical Triage</span>
         </div>
@@ -218,7 +218,7 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
       </div>
 
       {/* Voice Capture Hero Interface */}
-      <div className="neo-glass-card p-6 sm:p-10 space-y-6 text-center relative overflow-hidden">
+      <div className="glass-card p-6 sm:p-10 space-y-6 text-center relative overflow-hidden">
         
         {/* Pulsing Mic Button */}
         <div className="relative inline-block">
@@ -303,7 +303,7 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
 
       {/* Triage Assessment Results Card */}
       {triageResult && (
-        <div className="neo-glass-card p-6 sm:p-8 space-y-6 animate-fadeIn border-2 border-deep-teal/20">
+        <div className="glass-card p-6 sm:p-8 space-y-6 animate-fadeIn border-2 border-deep-teal/20">
           
           {/* Top banner: Risk level + Audio Player */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-deep-teal/10 dark:border-white/10">

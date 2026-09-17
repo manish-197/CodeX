@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --sky-mist: #EAF4F4;
@@ -9,122 +7,160 @@
   --sun-gold: #F4B942;
   --alert-crimson: #D64550;
   --leaf-green: #4C9A6A;
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(15, 94, 94, 0.12);
-  --glass-shadow: 0 8px 32px 0 rgba(15, 94, 94, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 10px 32px -4px rgba(15, 94, 94, 0.08), 0 4px 16px -2px rgba(228, 113, 78, 0.05);
 }
 
-.dark {
+.dark, [data-theme="dark"] {
   --sky-mist: #0B1616;
-  --deep-teal: #143535;
-  --glass-bg: rgba(19, 36, 36, 0.78);
-  --glass-border: rgba(234, 244, 244, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  --deep-teal: #1A3E3E;
+  --terracotta: #E4714E;
+  --glass-bg: rgba(19, 36, 36, 0.82);
+  --glass-border: rgba(234, 244, 244, 0.12);
+  --glass-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
 }
 
-@layer base {
-  body {
-    background-color: var(--sky-mist);
-    color: #0F5E5E;
-    overflow-x: hidden;
-  }
-  .dark body {
-    color: #EAF4F4;
-  }
-  h1, h2, .font-display {
-    font-family: 'Fraunces', serif;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky-mist: #0B1616;
+    --deep-teal: #1A3E3E;
+    --glass-bg: rgba(19, 36, 36, 0.82);
+    --glass-border: rgba(234, 244, 244, 0.12);
   }
 }
 
-@layer components {
-  /* Soft Neo-Glass Card with translucent backdrop over gradient blobs */
-  .neo-glass-card {
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    border-radius: 1.75rem;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+/* Global Base Typography and Warm Gradient Canvas */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Manrope', 'Poppins', system-ui, -apple-system, sans-serif;
+  color: #0F5E5E;
+  background: linear-gradient(135deg, #EAF4F4 0%, #F4F9F9 35%, #FDF9F7 70%, #F5FBFB 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
 
-  .neo-glass-card:hover {
-    box-shadow: 0 14px 44px 0 rgba(15, 94, 94, 0.12);
-  }
+.dark html, .dark body {
+  background: linear-gradient(135deg, #071010 0%, #0B1616 45%, #0E1B1B 100%);
+  color: #EAF4F4;
+}
 
-  .dark .neo-glass-card:hover {
-    box-shadow: 0 14px 44px 0 rgba(0, 0, 0, 0.6);
-  }
+h1, h2, h3, .font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
 
-  /* Primary Terracotta Action Button */
-  .btn-terracotta {
-    background-color: #E4714E;
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: 9999px;
-    padding: 0.75rem 1.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px 0 rgba(228, 113, 78, 0.35);
-  }
+/* Master Glassmorphism Card Utility (Standard .glass-card and .neo-glass-card alias) */
+.glass-card, .neo-glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-  .btn-terracotta:hover {
-    background-color: #cf5a37;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px 0 rgba(228, 113, 78, 0.45);
-  }
+.glass-card:hover, .neo-glass-card:hover {
+  box-shadow: 0 16px 44px -4px rgba(15, 94, 94, 0.14), 0 6px 20px -2px rgba(228, 113, 78, 0.12);
+  border-color: rgba(228, 113, 78, 0.35);
+  transform: translateY(-2px);
+}
 
-  .btn-terracotta:active {
-    transform: translateY(0);
-  }
+.dark .glass-card:hover, .dark .neo-glass-card:hover {
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.65);
+  border-color: rgba(228, 113, 78, 0.45);
+}
 
-  /* Deep Teal Secondary Action Button */
-  .btn-teal {
-    background-color: #0F5E5E;
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: 9999px;
-    padding: 0.75rem 1.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px 0 rgba(15, 94, 94, 0.25);
-  }
+/* Primary Terracotta CTA Button */
+.btn-terracotta {
+  background-color: #E4714E !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 9999px;
+  padding: 0.75rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 20px -2px rgba(228, 113, 78, 0.42);
+  border: none;
+  cursor: pointer;
+}
 
-  .btn-teal:hover {
-    background-color: #0a4242;
-    transform: translateY(-1px);
-  }
+.btn-terracotta:hover {
+  background-color: #cf5a37 !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 24px -2px rgba(228, 113, 78, 0.55);
+}
 
-  /* Outline Glass Button */
-  .btn-glass {
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    color: inherit;
-    font-weight: 600;
-    border-radius: 9999px;
-    padding: 0.75rem 1.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-  }
+.btn-terracotta:active {
+  transform: translateY(0);
+}
 
-  .btn-glass:hover {
-    border-color: #0F5E5E;
-    transform: translateY(-1px);
-  }
+/* Deep Teal Secondary Action Button */
+.btn-teal {
+  background-color: #0F5E5E !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 9999px;
+  padding: 0.75rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 18px -2px rgba(15, 94, 94, 0.35);
+  border: none;
+  cursor: pointer;
+}
 
-  .dark .btn-glass:hover {
-    border-color: #EAF4F4;
-  }
+.btn-teal:hover {
+  background-color: #0b4545 !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 24px -2px rgba(15, 94, 94, 0.45);
+}
+
+.dark .btn-teal {
+  background-color: #EAF4F4 !important;
+  color: #0F5E5E !important;
+  box-shadow: 0 6px 18px -2px rgba(0, 0, 0, 0.4);
+}
+
+.dark .btn-teal:hover {
+  background-color: #ffffff !important;
+}
+
+/* Glass Outline Button */
+.btn-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: #0F5E5E;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dark .btn-glass {
+  color: #EAF4F4;
+}
+
+.btn-glass:hover {
+  border-color: #E4714E;
+  color: #E4714E;
+  transform: translateY(-1px);
 }
 
 /* Custom minimal scrollbar */

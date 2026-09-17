@@ -8,7 +8,7 @@ export default function StateLanguageToast() {
   if (!stateToast) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-md neo-glass-card p-4 shadow-2xl border-2 border-terracotta/40 bg-white/95 dark:bg-dark-card/95 animate-fadeIn">
+    <div className="fixed bottom-6 right-6 z-50 max-w-md glass-card p-4 shadow-2xl border-2 border-terracotta/40 bg-white/95 dark:bg-dark-card/95 animate-fadeIn">
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-2xl bg-terracotta/15 text-terracotta flex items-center justify-center shrink-0 mt-0.5">
           <MapPin className="w-5 h-5" />

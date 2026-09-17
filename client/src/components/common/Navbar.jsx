@@ -51,7 +51,7 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-50 w-full px-4 sm:px-8 py-3 transition-all duration-200">
-      <div className="max-w-7xl mx-auto neo-glass-card px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto glass-card px-4 sm:px-6 py-3 flex items-center justify-between border border-white/80 dark:border-white/10 shadow-lg">
         
         {/* Brand Logo & Name */}
         <div 
@@ -59,14 +59,14 @@ export default function Navbar({
           className="flex items-center gap-3 cursor-pointer select-none group"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-200">
-            <Heart className="w-6 h-6 fill-white" />
+            <Heart className="w-5 h-5 fill-white" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-deep-teal dark:text-sky-mist">
                 ArogyaRakshak
               </span>
-              <span className="bg-sun-gold/20 text-deep-teal dark:text-sun-gold text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="bg-sun-gold/25 text-deep-teal dark:text-sun-gold text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 AI
               </span>
             </div>
@@ -77,7 +77,7 @@ export default function Navbar({
         </div>
 
         {/* Desktop Nav Items */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
@@ -85,13 +85,13 @@ export default function Navbar({
               <button
                 key={item.id}
                 onClick={() => setCurrentTab(item.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
                   isActive 
-                    ? 'bg-deep-teal text-white shadow-sm dark:bg-sky-mist dark:text-deep-teal' 
-                    : 'text-deep-teal/80 dark:text-sky-mist/80 hover:bg-deep-teal/5 dark:hover:bg-white/5'
+                    ? 'btn-teal shadow-md' 
+                    : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/8 dark:hover:bg-white/10'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
               </button>
             );
@@ -105,7 +105,7 @@ export default function Navbar({
           <button
             onClick={onOpenWhatsApp}
             title="Launch WhatsApp Voice Bot for Senior Citizens"
-            className="p-2 rounded-full hover:bg-leaf-green/10 text-leaf-green transition-colors border border-leaf-green/20 flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-full hover:bg-leaf-green/15 text-leaf-green transition-colors border border-leaf-green/30 flex items-center gap-1.5 bg-leaf-green/10"
             aria-label="WhatsApp Elder Voice Bot"
           >
             <MessageCircle className="w-4 h-4" />
@@ -116,7 +116,7 @@ export default function Navbar({
           <button
             onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
             title="Toggle between Citizen and Gram Panchayat Kiosk mode"
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-deep-teal/15 dark:border-white/10 hover:border-terracotta transition-colors"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border border-deep-teal/20 dark:border-white/10 hover:border-terracotta transition-colors glass-card"
           >
             <span className={`w-2 h-2 rounded-full ${userRole === 'kiosk' ? 'bg-sun-gold animate-pulse' : 'bg-leaf-green'}`} />
             <span className="text-deep-teal dark:text-sky-mist">
@@ -128,7 +128,7 @@ export default function Navbar({
           <div className="relative">
             <button
               onClick={() => setLangMenuOpen(!langMenuOpen)}
-              className="p-2 rounded-full hover:bg-deep-teal/5 dark:hover:bg-white/5 text-deep-teal dark:text-sky-mist transition-colors flex items-center gap-1.5 border border-deep-teal/10"
+              className="p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors flex items-center gap-1.5 border border-deep-teal/15 glass-card"
               aria-label="Language selector"
             >
               <Globe className="w-4 h-4 text-terracotta" />
@@ -137,7 +137,7 @@ export default function Navbar({
 
             {langMenuOpen && (
               <div 
-                className="absolute right-0 mt-2 w-48 neo-glass-card shadow-2xl py-2 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15"
+                className="absolute right-0 mt-2 w-48 glass-card shadow-2xl py-2 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 rounded-3xl"
                 data-lenis-prevent="true"
               >
                 <div className="px-3 py-1 text-[10px] font-bold text-deep-teal/60 dark:text-dark-muted uppercase tracking-wider">
@@ -168,7 +168,7 @@ export default function Navbar({
           {/* Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full hover:bg-deep-teal/5 dark:hover:bg-white/5 text-deep-teal dark:text-sky-mist transition-colors"
+            className="p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors glass-card border border-deep-teal/15"
             aria-label="Toggle dark mode"
           >
             {darkMode ? <Sun className="w-4 h-4 text-sun-gold" /> : <Moon className="w-4 h-4" />}
@@ -177,7 +177,7 @@ export default function Navbar({
           {/* User Auth status & Single Clean Logout */}
           {currentUser ? (
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-block text-xs font-bold text-deep-teal dark:text-sky-mist px-2.5 py-1 rounded-full bg-deep-teal/5 dark:bg-white/10">
+              <span className="hidden sm:inline-block text-xs font-bold text-deep-teal dark:text-sky-mist px-3 py-1 rounded-full bg-deep-teal/10 dark:bg-white/10">
                 {currentUser.name.split(' ')[0]}
               </span>
               <button
@@ -192,7 +192,7 @@ export default function Navbar({
           ) : (
             <button
               onClick={onOpenAuth}
-              className="btn-terracotta text-xs py-1.5 px-3 sm:px-4"
+              className="btn-terracotta text-xs py-2 px-4"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t('nav_sign_in')}</span>
@@ -212,7 +212,7 @@ export default function Navbar({
 
       {/* Mobile Nav Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-2 neo-glass-card p-4 mx-auto max-w-7xl animate-fadeIn space-y-2">
+        <div className="md:hidden mt-2 glass-card p-4 mx-auto max-w-7xl animate-fadeIn space-y-2 border border-white/80">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
@@ -225,7 +225,7 @@ export default function Navbar({
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors ${
                   isActive 
-                    ? 'bg-deep-teal text-white' 
+                    ? 'btn-teal text-white w-full' 
                     : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/5'
                 }`}
               >
@@ -240,7 +240,7 @@ export default function Navbar({
               if (onOpenWhatsApp) onOpenWhatsApp();
               setMobileMenuOpen(false);
             }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/10"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/15"
           >
             <MessageCircle className="w-4 h-4" />
             <span>Launch WhatsApp Elder Bot</span>
@@ -250,7 +250,7 @@ export default function Navbar({
             <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Mode</span>
             <button
               onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
-              className="px-3 py-1 rounded-full text-xs font-medium bg-terracotta/10 text-terracotta"
+              className="px-3 py-1 rounded-full text-xs font-medium bg-terracotta/15 text-terracotta"
             >
               {userRole === 'kiosk' ? t('nav_citizen_mode') : t('nav_kiosk_mode')}
             </button>

@@ -120,7 +120,7 @@ export default function EmergencySOSBeacon({ onNavigateToHospital, activeVitals,
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
           <div 
-            className="w-full max-w-md neo-glass-card p-6 sm:p-8 relative shadow-2xl bg-white dark:bg-dark-card border-4 border-alert-crimson text-center space-y-6"
+            className="w-full max-w-md glass-card p-6 sm:p-8 relative shadow-2xl bg-white/95 dark:bg-dark-card/95 border-4 border-alert-crimson text-center space-y-6"
             data-lenis-prevent="true"
           >
             {isCounting && (

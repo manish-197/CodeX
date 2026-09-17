@@ -40,11 +40,11 @@ export default function Layout({
 
   return (
     <div className={`relative min-h-screen flex flex-col ${darkMode ? 'dark' : ''}`}>
-      {/* Ambient background soft glowing blobs for soft neo-glass effect */}
+      {/* Ambient background glowing gradient blobs for Soft Neo-Glass, Earth & Sky */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-terracotta/15 dark:bg-terracotta/10 blur-3xl" />
-        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-sun-gold/15 dark:bg-sun-gold/5 blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] rounded-full bg-deep-teal/15 dark:bg-deep-teal/20 blur-3xl" />
+        <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#E4714E]/20 dark:bg-[#E4714E]/12 blur-[100px]" />
+        <div className="absolute top-1/4 -right-32 w-[520px] h-[520px] rounded-full bg-[#F4B942]/25 dark:bg-[#F4B942]/10 blur-[110px]" />
+        <div className="absolute bottom-10 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0F5E5E]/15 dark:bg-[#0F5E5E]/20 blur-[120px]" />
       </div>
 
       {/* Global Navigation Bar */}

@@ -245,7 +245,7 @@ export default function HospitalNavigation() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={acquireGPS}
-            className="neo-glass-card px-3.5 py-1.5 text-xs font-semibold flex items-center gap-2 text-deep-teal dark:text-sky-mist hover:border-terracotta transition-colors"
+            className="glass-card px-3.5 py-1.5 text-xs font-semibold flex items-center gap-2 text-deep-teal dark:text-sky-mist hover:border-terracotta transition-colors"
           >
             <LocateFixed className="w-3.5 h-3.5 text-terracotta" />
             <span>{locationSource}</span>
@@ -257,13 +257,13 @@ export default function HospitalNavigation() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Interactive Leaflet Map with glowing polyline */}
-        <div className="lg:col-span-8 neo-glass-card overflow-hidden relative p-2 shadow-xl flex flex-col h-[520px]">
+        <div className="lg:col-span-8 glass-card overflow-hidden relative p-2 shadow-xl flex flex-col h-[520px]">
           
           <div ref={mapContainerRef} className="w-full h-full rounded-2xl z-0" />
 
           {/* Floating Route Overview Pill */}
           {routeData && (
-            <div className="absolute top-5 left-5 z-10 neo-glass-card px-4 py-2.5 shadow-xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex items-center gap-4 text-xs font-bold">
+            <div className="absolute top-5 left-5 z-10 glass-card px-4 py-2.5 shadow-xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex items-center gap-4 text-xs font-bold">
               <div className="flex items-center gap-1.5 text-terracotta">
                 <Compass className="w-4 h-4" />
                 <span className="text-sm">{routeData.distanceKm} km</span>
@@ -277,7 +277,7 @@ export default function HospitalNavigation() {
           )}
 
           {/* Bottom Controls Bar on Map */}
-          <div className="absolute bottom-5 left-5 right-5 z-10 neo-glass-card p-3 shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="absolute bottom-5 left-5 right-5 z-10 glass-card p-3 shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-xs flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-600 shadow-sm" />
               <span className="font-semibold text-deep-teal dark:text-sky-mist">
@@ -302,7 +302,7 @@ export default function HospitalNavigation() {
         {/* Right Column: Nearest Hospitals List & Turn-by-Turn Maneuvers */}
         <div className="lg:col-span-4 space-y-4">
           
-          <div className="neo-glass-card p-5 space-y-3">
+          <div className="glass-card p-5 space-y-3">
             <h4 className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist uppercase tracking-wide">
               Nearest Rural Health Centers
             </h4>
@@ -357,7 +357,7 @@ export default function HospitalNavigation() {
           </div>
 
           {/* Turn-by-Turn Navigation Steps Card */}
-          <div className="neo-glass-card p-5 space-y-3">
+          <div className="glass-card p-5 space-y-3">
             <h4 className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist uppercase tracking-wide flex items-center justify-between">
               <span>Turn-by-Turn Route</span>
               <span className="text-[10px] text-terracotta font-mono">OSRM Engine</span>
