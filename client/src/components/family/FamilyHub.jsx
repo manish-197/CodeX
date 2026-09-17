@@ -4,6 +4,7 @@ import LogVitalsModal from './LogVitalsModal';
 import AddMemberModal from './AddMemberModal';
 import HealthCardModal from './HealthCardModal';
 import PrescriptionModal from './PrescriptionModal';
+import BleDeviceModal from './BleDeviceModal';
 import { 
   UserPlus, 
   CreditCard, 
@@ -17,7 +18,6 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function FamilyHub({ 
   currentUser, 
   onVitalsChange, 
-  onOpenBleModal,
   onTriggerDoctorDispatch
 }) {
   const { t } = useLanguage();
@@ -48,6 +48,7 @@ export default function FamilyHub({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [isBleModalOpen, setIsBleModalOpen] = useState(false);
 
   const activeMember = members.find(m => m.id === activeMemberId) || members[0];
 
@@ -242,7 +243,7 @@ export default function FamilyHub({
             <VitalsCard 
               vitals={activeMember.vitals}
               onOpenLogModal={() => setIsLogModalOpen(true)}
-              onOpenBleModal={onOpenBleModal}
+              onOpenBleModal={() => setIsBleModalOpen(true)}
               onTriggerDoctorDispatch={onTriggerDoctorDispatch}
             />
 
@@ -306,6 +307,14 @@ export default function FamilyHub({
         isOpen={isPrescriptionModalOpen}
         onClose={() => setIsPrescriptionModalOpen(false)}
         member={activeMember}
+      />
+
+      {/* Web Bluetooth BLE Device Sync Modal */}
+      <BleDeviceModal
+        isOpen={isBleModalOpen}
+        onClose={() => setIsBleModalOpen(false)}
+        onSyncVitals={handleSaveVitals}
+        currentMemberName={activeMember?.name}
       />
 
     </div>
