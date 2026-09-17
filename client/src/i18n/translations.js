@@ -2,7 +2,9 @@
 // Contains full localizations for English (en), Marathi (mr), and Hindi (hi),
 // with regional support for Tamil (ta), Kannada (kn), and Bengali (bn).
 
-export const translations = {
+import { triageTranslations } from './triageTranslations.js';
+
+const rawTranslations = {
   en: {
     // Nav
     nav_home: 'Home',
@@ -359,6 +361,15 @@ export const translations = {
     vitals_btn_connect_device: 'রেকর্ড করতে ডিভাইস সংযোগ করুন',
     btn_close: 'বন্ধ করুন',
   }
+};
+
+export const translations = {
+  en: { ...rawTranslations.en, ...(triageTranslations.en || {}) },
+  mr: { ...rawTranslations.mr, ...(triageTranslations.mr || {}) },
+  hi: { ...rawTranslations.hi, ...(triageTranslations.hi || {}) },
+  ta: { ...rawTranslations.ta, ...(triageTranslations.ta || {}) },
+  kn: { ...rawTranslations.kn, ...(triageTranslations.kn || {}) },
+  bn: { ...rawTranslations.bn, ...(triageTranslations.bn || {}) },
 };
 
 export const stateToLanguageMap = {

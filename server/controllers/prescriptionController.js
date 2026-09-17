@@ -137,6 +137,108 @@ export async function getPrescriptionsByMember(req, res) {
 }
 
 /**
+ * Helper sanitizers for PDFKit rendering (Helvetica standard font).
+ * Converts or extracts clean English/Latin text so PDF never outputs corrupted byte hashes.
+ */
+function cleanAscii(str, fallback = '') {
+  if (!str) return fallback;
+  const cleaned = String(str).replace(/[^\x20-\x7E]/g, ' ').replace(/\s+/g, ' ').trim();
+  return cleaned.length >= 2 ? cleaned : fallback;
+}
+
+function extractEnglishParentheses(text) {
+  if (!text) return '';
+  const match = String(text).match(/\(([A-Za-z0-9\s.,:\-_/+%]+)\)/);
+  return match && match[1].trim().length >= 2 ? match[1].trim() : '';
+}
+
+function sanitizeMedicineName(name) {
+  const paren = extractEnglishParentheses(name);
+  if (paren && (paren.toLowerCase().includes('paracetamol') || paren.toLowerCase().includes('tab') || paren.toLowerCase().includes('cap') || paren.toLowerCase().includes('sachet') || paren.toLowerCase().includes('gel') || paren.toLowerCase().includes('drops') || paren.toLowerCase().includes('lozenges') || paren.toLowerCase().includes('ors') || paren.toLowerCase().includes('analgesic'))) {
+    return paren;
+  }
+  const n = String(name || '').toLowerCase();
+  if (n.includes('पॅरासिटामॉल') || n.includes('paracetamol')) return 'Tab. Paracetamol 500mg';
+  if (n.includes('ओआरएस') || n.includes('ors') || n.includes('इलेक्ट्रोलाइट')) return 'Oral Rehydration Salts (WHO ORS Sachet)';
+  if (n.includes('ओमेप्राझोल') || n.includes('omeprazole')) return 'Cap. Omeprazole 20mg';
+  if (n.includes('सिट्रिझिन') || n.includes('cetirizine')) return 'Tab. Cetirizine 10mg';
+  if (n.includes('सलाईन') || n.includes('saline')) return 'Saline Nasal Drops (0.9%)';
+  if (n.includes('डायक्लोफेनाक') || n.includes('diclofenac')) return 'Diclofenac Sodium Gel 1%';
+  if (n.includes('कफ ड्रॉप्स') || n.includes('lozenges') || n.includes('घसा')) return 'Herbal Throat Lozenges (OTC)';
+  if (n.includes('डोलो') || n.includes('dolo')) return 'Tab. Dolo 650mg';
+
+  return paren || cleanAscii(name, 'Generic OTC Formulation');
+}
+
+function sanitizeCategory(cat) {
+  const paren = extractEnglishParentheses(cat);
+  if (paren) return paren;
+  const c = String(cat || '').toLowerCase();
+  if (c.includes('वेदना') || c.includes('ताप') || c.includes('analgesic') || c.includes('antipyretic')) return 'Antipyretic / Analgesic';
+  if (c.includes('अ‍ॅसिडिटी') || c.includes('antacid') || c.includes('गॅस')) return 'Antacid (Proton Pump Inhibitor)';
+  if (c.includes('सर्दी') || c.includes('अ‍ॅलर्जी') || c.includes('antihistamine')) return 'Antihistamine / Anti-allergy';
+  if (c.includes('थकवा') || c.includes('सामान्य') || c.includes('general') || c.includes('supportive')) return 'Supportive Care Formulation';
+  if (c.includes('घसा') || c.includes('ईएनटी') || c.includes('ent')) return 'ENT Supportive Care';
+  if (c.includes('स्नायू') || c.includes('ortho') || c.includes('topical')) return 'Topical NSAID Pain Relief';
+  if (c.includes('ट्रॉमा') || c.includes('trauma')) return 'Trauma & Emergency Care';
+  return cleanAscii(cat, 'General OTC Care');
+}
+
+function sanitizeInstructions(inst) {
+  const paren = extractEnglishParentheses(inst);
+  if (paren && paren.length > 5) return paren;
+  const i = String(inst || '').toLowerCase();
+  if (i.includes('कोमट पाण्यासोबत') || (i.includes('जेवणानंतर') && i.includes('गोळी'))) return '1 Tablet post-meals with warm water [Strictly 2 Days]';
+  if (i.includes('जेवणापूर्वी') || (i.includes('सकाळी') && i.includes('पोटी'))) return '1 Capsule 30 mins before breakfast [Strictly 2 Days]';
+  if (i.includes('झोपण्यापूर्वी') || i.includes('रात्री')) return '1 Tablet at bedtime with water [Strictly 2 Days]';
+  if (i.includes('पाण्यात मिसळून') || i.includes('थोडे थोडे')) return 'Mix 1 sachet in 1 Litre drinking water; sip through day [2 Days]';
+  if (i.includes('नाकात') || i.includes('थेंब')) return 'Instill 2 drops in each nostril 2-3 times daily [2 Days]';
+  if (i.includes('हलक्या हाताने') || i.includes('लावा')) return 'Apply gently over painful area 2-3 times daily [External use]';
+  if (i.includes('चघळावी')) return 'Dissolve 1 lozenge slowly in mouth every 4-6 hours [2 Days]';
+  return cleanAscii(inst, 'Take post-meals with water as advised by pharmacist [Strictly 2 Days]');
+}
+
+function sanitizeTiming(tim) {
+  const paren = extractEnglishParentheses(tim);
+  if (paren) return paren;
+  const t = String(tim || '').toLowerCase();
+  if (t.includes('सकाळी व रात्री') || t.includes('२ वेळा') || t.includes('twice')) return 'Morning & Night [Twice daily, 2 Days]';
+  if (t.includes('सकाळी') || t.includes('morning')) return 'Morning post-breakfast [Once daily, 2 Days]';
+  if (t.includes('रात्री') || t.includes('night') || t.includes('bedtime')) return 'At Bedtime [Once daily, 2 Days]';
+  if (t.includes('३ वेळा') || t.includes('thrice')) return '3 times daily after food [2 Days]';
+  return cleanAscii(tim, 'Twice daily post-meals [2 Days]');
+}
+
+function sanitizeRemedy(rem) {
+  const paren = extractEnglishParentheses(rem);
+  if (paren && paren.length > 10) return paren;
+  const r = String(rem || '').toLowerCase();
+  if (r.includes('गुळण्या') || r.includes('मीठ') || r.includes('हळद') || r.includes('salt')) return 'Gargle with warm salt water 3 times daily and stay hydrated.';
+  if (r.includes('विश्रांती') || r.includes('शांत') || r.includes('झोप') || r.includes('rest')) return 'Take rest in a quiet, dark room and ensure at least 8 hours of sleep.';
+  if (r.includes('वाफ') || r.includes('तुलसी') || r.includes('steam')) return 'Inhale plain water steam twice daily; drink warm ginger/tulsi herbal tea.';
+  if (r.includes('ताक') || r.includes('खिचडी') || r.includes('हलका') || r.includes('diet')) return 'Eat light, easily digestible meals (khichdi, buttermilk); avoid oily foods.';
+  if (r.includes('दूध') || r.includes('मसालेदार') || r.includes('milk')) return 'Sip cool milk or tender coconut water; avoid hot, sour, and spicy foods.';
+  if (r.includes('आंघोळ') || r.includes('bath')) return 'Take a warm bath and avoid strenuous physical labour.';
+  if (r.includes('१०८') || r.includes('रुग्णवाहिका') || r.includes('ambulance')) return 'Call 108 Emergency Ambulance immediately; transfer patient to nearest trauma centre.';
+  if (r.includes('हवेशीर') || r.includes('बसवा')) return 'Keep patient seated comfortably in a well-ventilated area with calm breathing.';
+  if (r.includes('सैल') || r.includes('कपडे')) return 'Loosen tight clothing around neck, chest, and abdomen.';
+  return cleanAscii(rem, 'Maintain adequate hydration and physical rest.');
+}
+
+function sanitizeDiagnosis(diag, riskLevel = 'LOW') {
+  const paren = extractEnglishParentheses(diag);
+  if (paren && paren.length >= 4) return paren;
+  const cleaned = cleanAscii(diag);
+  if (cleaned && cleaned.length >= 6) return cleaned;
+  if (riskLevel === 'CRITICAL') {
+    return 'Critical Emergency Condition: Urgent medical and trauma hospital intervention required.';
+  } else if (riskLevel === 'MODERATE') {
+    return 'Moderate Symptom Profile: 48-Hour OTC relief protocol and follow-up medical review.';
+  }
+  return '2-Day Temporary Symptom Assessment & Supportive Care Protocol';
+}
+
+/**
  * Generate PDF Prescription Slip (Styled like a real medical slip with Pharmacist Verification)
  */
 export async function generatePrescriptionPdf(req, res) {
@@ -171,7 +273,7 @@ export async function generatePrescriptionPdf(req, res) {
     // Header Background & Branding
     doc.rect(40, 40, 515, 65).fill('#0F4C5C'); // Deep teal header
     doc.fillColor('#FFFFFF').fontSize(18).font('Helvetica-Bold')
-      .text('ArogyaRakshak AI — Health Accessibility Record', 55, 52);
+      .text('ArogyaRakshak AI - Health Accessibility Record', 55, 52);
     doc.fontSize(10).font('Helvetica')
       .text('National Digital Health Mission Aligned | ABHA Connected Rural Tele-Triage', 55, 75);
 
@@ -179,13 +281,13 @@ export async function generatePrescriptionPdf(req, res) {
     doc.rect(40, 115, 515, 30).fill('#FFF3CD');
     doc.rect(40, 115, 515, 30).stroke('#FFEBAA');
     doc.fillColor('#856404').fontSize(10).font('Helvetica-Bold')
-      .text('AI-Assisted Health Suggestion — Requires Pharmacist/Doctor Verification', 50, 124, { align: 'center', width: 495 });
+      .text('AI-Assisted Health Suggestion - Requires Pharmacist/Doctor Verification', 50, 124, { align: 'center', width: 495 });
 
     // Patient Information Card
-    const patientName = presc.patientDetails?.name || 'Self (Registered Citizen)';
+    const patientName = cleanAscii(presc.patientDetails?.name, 'Self (Registered Citizen)');
     const patientAge = presc.patientDetails?.age || 42;
     const patientBlood = presc.patientDetails?.bloodGroup || 'B+';
-    const abhaId = presc.patientDetails?.abhaId || '14-2026-9812-4456';
+    const abhaId = cleanAscii(presc.patientDetails?.abhaId, '14-2026-9812-4456');
     const recordDate = new Date(presc.createdAt || Date.now()).toLocaleDateString('en-IN', {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
@@ -225,9 +327,9 @@ export async function generatePrescriptionPdf(req, res) {
     doc.rect(40, 238, 515, 45).fill(assessmentBg);
     doc.rect(40, 238, 515, 45).stroke(assessmentBorder);
     doc.fillColor(isCritical ? '#991B1B' : '#212529').fontSize(10).font('Helvetica-Bold')
-      .text(isCritical ? 'CRITICAL EMERGENCY NOTICE / तातडीची वैद्यकीय आणीबाणी:' : 'Clinical Assessment / Diagnosis Summary:', 55, 246);
+      .text(isCritical ? 'CRITICAL EMERGENCY NOTICE / IMMEDIATE MEDICAL ATTENTION REQUIRED:' : 'Clinical Assessment / Diagnosis Summary:', 55, 246);
     doc.fontSize(9.5).font('Helvetica')
-      .text(`${presc.diagnosisSummary || 'General Health Assessment'}  |  Risk Level: ${presc.riskLevel || 'LOW'}`, 55, 262, { width: 485 });
+      .text(`${sanitizeDiagnosis(presc.diagnosisSummary, presc.riskLevel)}  |  Risk Level: ${presc.riskLevel || 'LOW'}`, 55, 262, { width: 485 });
 
     let currentY = 292;
 
@@ -237,7 +339,7 @@ export async function generatePrescriptionPdf(req, res) {
       doc.rect(40, currentY, 515, 65).stroke('#DC2626');
 
       doc.fillColor('#DC2626').fontSize(12).font('Helvetica-Bold')
-        .text('EMERGENCY: STRICTLY NO SELF-MEDICATION (कोणतेही औषध स्वतः घेऊ नका)', 55, currentY + 12);
+        .text('EMERGENCY: STRICTLY NO SELF-MEDICATION', 55, currentY + 12);
       doc.fillColor('#7F1D1D').fontSize(9).font('Helvetica')
         .text('Extreme risk detected. OTC medicine is NOT safe for this condition. Immediately visit the nearest emergency trauma hospital or call 108 for ambulance dispatch.', 55, currentY + 30, { width: 485 });
 
@@ -247,7 +349,7 @@ export async function generatePrescriptionPdf(req, res) {
       doc.rect(40, currentY, 515, 20).fill('#FEF3C7');
       doc.rect(40, currentY, 515, 20).stroke('#F59E0B');
       doc.fillColor('#92400E').fontSize(9).font('Helvetica-Bold')
-        .text('STRICT 2-DAY OTC RELIEF PROTOCOL (कालावधी: फक्त २ दिवस) - Discontinue & consult doctor if unresolved', 55, currentY + 5, { align: 'center', width: 495 });
+        .text('STRICT 2-DAY OTC RELIEF PROTOCOL - DURATION: 2 DAYS ONLY (TEMPORARY RELIEF)', 55, currentY + 5, { align: 'center', width: 495 });
 
       currentY += 26;
 
@@ -262,21 +364,26 @@ export async function generatePrescriptionPdf(req, res) {
       currentY += 22;
       const meds = presc.medicines && presc.medicines.length > 0
         ? presc.medicines
-        : [{ name: 'Paracetamol OTC Category', category: 'Antipyretic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Post-meals [2 Days]' }];
+        : [{ name: 'Tab. Paracetamol 500mg', category: 'Antipyretic / Analgesic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Post-meals [2 Days]' }];
 
       meds.forEach((med, index) => {
         const bgColor = index % 2 === 0 ? '#FFFFFF' : '#F8F9FA';
         doc.rect(40, currentY, 515, 30).fill(bgColor);
         doc.rect(40, currentY, 515, 30).stroke('#E5E7EB');
 
+        const mName = sanitizeMedicineName(med.name || med.medicineName);
+        const mCat = sanitizeCategory(med.category);
+        const mInst = sanitizeInstructions(med.instructions || med.dosage);
+        const mTim = sanitizeTiming(med.timing);
+
         doc.fillColor('#1F2937').fontSize(8.5).font('Helvetica-Bold')
-          .text(med.name || 'Medicine', 50, currentY + 6, { width: 160 });
+          .text(mName, 50, currentY + 6, { width: 160 });
 
         doc.font('Helvetica').fillColor('#4B5563')
-          .text(med.category || 'General OTC', 215, currentY + 6, { width: 110 });
+          .text(mCat, 215, currentY + 6, { width: 110 });
 
-        doc.text(med.instructions || 'Consult pharmacist', 330, currentY + 6, { width: 130 });
-        doc.text(med.timing || 'As advised [2 Days]', 465, currentY + 6, { width: 85 });
+        doc.text(mInst, 330, currentY + 6, { width: 130 });
+        doc.text(mTim, 465, currentY + 6, { width: 85 });
 
         currentY += 32;
       });
@@ -284,16 +391,17 @@ export async function generatePrescriptionPdf(req, res) {
       // Safe Home Remedies Box
       if (presc.homeRemedies && presc.homeRemedies.length > 0) {
         currentY += 6;
-        const remediesCount = presc.homeRemedies.length;
-        const boxHeight = Math.min(60, 20 + remediesCount * 14);
+        const cleanRemedies = presc.homeRemedies.map(r => sanitizeRemedy(r)).filter(Boolean);
+        const remediesCount = Math.min(cleanRemedies.length, 3);
+        const boxHeight = Math.min(65, 22 + remediesCount * 14);
         doc.rect(40, currentY, 515, boxHeight).fill('#F0FDF4');
         doc.rect(40, currentY, 515, boxHeight).stroke('#86EFAC');
 
         doc.fillColor('#166534').fontSize(8.5).font('Helvetica-Bold')
-          .text('SAFE HOME REMEDIES / SUPPORTIVE CARE (घरगुती सुरक्षित उपाय):', 50, currentY + 6);
+          .text('SAFE HOME REMEDIES / SUPPORTIVE CARE (NON-PHARMACOLOGICAL):', 50, currentY + 6);
         
         let remY = currentY + 18;
-        presc.homeRemedies.slice(0, 3).forEach(rem => {
+        cleanRemedies.slice(0, 3).forEach(rem => {
           doc.fillColor('#15803D').fontSize(8).font('Helvetica')
             .text(`* ${rem}`, 55, remY, { width: 480 });
           remY += 13;
@@ -318,7 +426,8 @@ export async function generatePrescriptionPdf(req, res) {
 
     doc.fontSize(8.5).font('Helvetica');
     if (isVerified) {
-      doc.fillColor('#15803D').text(`Status: VERIFIED by ${presc.verifiedBy || 'Registered Pharmacist'}`, 155, currentY + 28);
+      const verifierClean = cleanAscii(presc.verifiedBy, 'Registered Pharmacist');
+      doc.fillColor('#15803D').text(`Status: VERIFIED by ${verifierClean}`, 155, currentY + 28);
       doc.text(`Verified On: ${new Date(presc.verifiedAt || Date.now()).toLocaleString('en-IN')}`, 155, currentY + 41);
     } else {
       doc.fillColor('#B45309').text('Status: UNVERIFIED (Awaiting local medical store verification)', 155, currentY + 28);

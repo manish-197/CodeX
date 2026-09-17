@@ -20,9 +20,10 @@ async function runSymptomTriageFlowTest() {
   const firstHosp = hospData.hospitals[0];
   console.log(`   Sample: ${firstHosp.name} (${firstHosp.distanceKm} km, ${firstHosp.specialties?.join(', ')})`);
 
+  const runId = Date.now();
   // Test 2: Save 2-Day Mild Prescription strictly tied to Aai (Family Member 1)
   const aaiMember = {
-    id: 'mem_aai_radha_101',
+    id: `mem_aai_radha_${runId}`,
     name: 'Radhabai Patil (आई)',
     age: 64,
     bloodGroup: 'B+',
@@ -92,7 +93,7 @@ async function runSymptomTriageFlowTest() {
     throw new Error('Expected at least 1 prescription under Aai');
   }
 
-  const babaMemberId = 'mem_baba_shankar_102';
+  const babaMemberId = `mem_baba_shankar_${runId}`;
   const fetchBabaRes = await fetch(`${BASE_URL}/api/prescriptions/member/${babaMemberId}`);
   const fetchBabaData = await fetchBabaRes.json();
   console.log(`   Prescriptions under Baba (${babaMemberId}): ${fetchBabaData.prescriptions?.length || 0}`);
@@ -137,7 +138,7 @@ async function runSymptomTriageFlowTest() {
   // Test 6: Critical Emergency Flow (Level 3 symptom checklist)
   console.log('\n🚨 6. Testing Critical Emergency Flow (Level 3 symptoms - Chest pain / Breathlessness)...');
   const criticalMember = {
-    id: 'mem_baba_shankar_102',
+    id: `mem_baba_shankar_${runId}`,
     name: 'Shankar Patil (बाबा)',
     age: 68,
     bloodGroup: 'A+',

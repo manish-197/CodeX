@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Sparkles
 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function PrescriptionResultModal({
   isOpen,
@@ -27,6 +28,7 @@ export default function PrescriptionResultModal({
   nearestDoctors = [],
   onNavigateToHospital
 }) {
+  const { lang, t } = useLanguage();
   const [bookedAppointment, setBookedAppointment] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
 
@@ -43,108 +45,118 @@ export default function PrescriptionResultModal({
       const tokenNo = 'EMG-' + Math.floor(1000 + Math.random() * 9000);
       setBookedAppointment({
         doctorName: doc.doctorName || 'Dr. Suhas Joshi',
-        specialty: doc.specialty || 'Emergency Cardiology',
+        specialty: doc.specialty || 'Emergency Specialist',
         hospitalName: doc.hospitalName || 'District Civil Hospital Aundh',
         tokenNo,
-        time: 'Within 15 minutes (Emergency Priority Lane)'
+        time: lang === 'mr' ? '१५ मिनिटांत (आपत्कालीन प्राधान्य लेन)' : lang === 'hi' ? '१५ मिनट के भीतर (प्राथमिकता लेन)' : 'Within 15 minutes (Emergency Priority Lane)'
       });
       setBookingLoading(false);
     }, 600);
   };
 
+  const patientName = selectedMember?.name || prescription.patientDetails?.name || 'Patient';
+  const patientAge = selectedMember?.age || prescription.patientDetails?.age || 42;
+  const patientBlood = selectedMember?.bloodGroup || prescription.patientDetails?.bloodGroup || 'B+';
+  const patientRelation = selectedMember?.relation || 'Self';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep-navy/70 backdrop-blur-md animate-fadeIn overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-deep-navy/75 backdrop-blur-md animate-fadeIn">
       <div 
-        className="relative w-full max-w-3xl my-8 bg-clinical-white dark:bg-dark-base rounded-3xl shadow-2xl border border-white/40 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-3xl h-[88vh] max-h-[88vh] bg-clinical-white dark:bg-dark-base rounded-3xl shadow-2xl border border-white/40 dark:border-white/10 flex flex-col min-h-0 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         
-        {/* Header */}
-        <div className={`p-6 sm:p-7 text-white flex items-start justify-between gap-4 ${
+        {/* Header - Fixed Height / Never Shrinks */}
+        <div className={`shrink-0 p-5 sm:p-6 text-white flex items-start justify-between gap-4 ${
           isCritical 
             ? 'bg-gradient-to-r from-alert-red via-alert-red/90 to-amber-700' 
             : 'bg-gradient-to-r from-teal-800 via-medical-blue to-teal-900'
         }`}>
-          <div className="space-y-1.5">
+          <div className="space-y-1 text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-sm">
               {isCritical ? <ShieldAlert className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
-              <span>{isCritical ? 'तात्काळ वैद्यकीय आणीबाणी (Critical Emergency)' : '२ दिवसांचे तात्पुरते प्रिस्क्रिप्शन (2-Day Rx)'}</span>
+              <span>{isCritical ? t('rx_modal_critical_badge') : t('rx_modal_2day_badge')}</span>
             </div>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-white">
-              {isCritical ? 'तातडीने रुग्णालय तपासणी आवश्यक' : 'आरोग्य मूल्यांकन व औषध सल्ला'}
+              {isCritical ? t('rx_modal_critical_title') : t('rx_modal_standard_title')}
             </h3>
             <p className="text-xs sm:text-sm text-white/90">
-              रुग्ण: <strong>{selectedMember?.name || prescription.patientDetails?.name || 'Patient'}</strong> ({selectedMember?.relation || 'Self'} • वय: {selectedMember?.age || 42} वर्षे • रक्तगट: {selectedMember?.bloodGroup || 'B+'})
+              {t('rx_modal_patient')} <strong>{patientName}</strong> ({patientRelation} • {t('rx_modal_age')} {patientAge} {t('rx_modal_years')} • {t('rx_modal_blood')} {patientBlood})
             </p>
           </div>
 
           <button
             onClick={onClose}
             className="p-2 rounded-full bg-white/15 hover:bg-white/30 text-white transition-colors shrink-0"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Scrollable Body */}
-        <div className="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1 text-deep-navy dark:text-clinical-white">
+        {/* Scrollable Body - Strictly Constrained with min-h-0 and overscroll-contain */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-7 space-y-6 text-deep-navy dark:text-clinical-white">
 
           {/* CRITICAL RISK SECTION */}
           {isCritical ? (
             <div className="space-y-6">
               
               {/* Emergency Banner */}
-              <div className="p-5 rounded-2xl bg-alert-red/15 border-2 border-alert-red flex items-start gap-4">
+              <div className="p-5 rounded-2xl bg-alert-red/15 border-2 border-alert-red flex items-start gap-4 text-left">
                 <ShieldAlert className="w-8 h-8 text-alert-red shrink-0 mt-0.5 animate-pulse" />
-                <div className="space-y-1 text-left">
+                <div className="space-y-1">
                   <h4 className="font-bold text-base text-alert-red">
-                    धोक्याचा इशारा: स्वतः कोणतेही औषध घेऊ नका!
+                    {t('rx_modal_critical_alert')}
                   </h4>
                   <p className="text-xs sm:text-sm text-deep-navy dark:text-clinical-white leading-relaxed">
-                    निवडलेली लक्षणे अतिगंभीर स्वरूपाची असून तात्काळ वैद्यकीय मदतीची गरज आहे. घरगुती गोळ्या किंवा औषधांमुळे वेळ वाया जाऊ शकतो. कृपया खालील जवळच्या तज्ज्ञ डॉक्टरांशी संपर्क साधा किंवा १०८ रुग्णवाहिका बोलवा.
+                    {t('rx_modal_critical_desc')}
                   </p>
                 </div>
               </div>
 
               {/* Nearest Specialist Doctors & Hospital Route Section */}
-              <div className="space-y-4">
+              <div className="space-y-4 text-left">
                 <div className="flex items-center justify-between">
                   <h4 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-alert-red" />
-                    <span>जवळचे विशेषज्ञ डॉक्टर व रुग्णालये (GPS द्वारे शोधलेले)</span>
+                    <span>{t('rx_modal_doctors_title')}</span>
                   </h4>
                   <span className="text-xs text-medical-blue font-bold">
-                    स्थानिक आपत्कालीन सुविधा
+                    {t('rx_modal_doctors_subtitle')}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {nearestDoctors.map((doc, idx) => (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {nearestDoctors.map((doc) => (
                     <div 
-                      key={idx}
-                      className="p-4 rounded-2xl bg-white/80 dark:bg-dark-base/70 border border-deep-navy/15 dark:border-white/10 space-y-3 shadow-md hover:border-alert-red/50 transition-all text-left"
+                      key={doc.id}
+                      className="p-4 rounded-2xl glass-card border border-deep-navy/15 dark:border-white/10 hover:border-alert-red/50 transition-all space-y-2.5 text-left flex flex-col justify-between"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h5 className="font-bold text-sm text-deep-navy dark:text-clinical-white">
-                            {doc.doctorName}
-                          </h5>
-                          <p className="text-xs text-medical-blue font-semibold">
-                            {doc.specialty}
-                          </p>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-                            <Building2 className="w-3.5 h-3.5 shrink-0" />
-                            <span>{doc.hospitalName}</span>
-                          </p>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-alert-red/15 text-alert-red">
+                            {doc.distanceKm} km
+                          </span>
+                          <span className="text-[10px] font-semibold text-health-green flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-health-green animate-ping" />
+                            <span>{lang === 'mr' ? 'उपलब्ध' : lang === 'hi' ? 'उपलब्ध' : 'Available'}</span>
+                          </span>
                         </div>
-                        <span className="px-2 py-1 rounded-xl text-xs font-extrabold bg-medical-blue/15 text-medical-blue shrink-0">
-                          {doc.distanceKm} km
-                        </span>
-                      </div>
 
-                      <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                        <Phone className="w-3.5 h-3.5 text-health-green shrink-0" />
-                        <span className="font-mono font-bold">{doc.phone}</span>
+                        <div className="font-bold text-xs sm:text-sm text-deep-navy dark:text-clinical-white">
+                          {doc.doctorName}
+                        </div>
+                        <div className="text-[11px] font-semibold text-medical-blue">
+                          {doc.specialty}
+                        </div>
+                        <div className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                          <Building2 className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{doc.hospitalName}</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                          <Phone className="w-3 h-3 shrink-0" />
+                          <span>{doc.phone}</span>
+                        </div>
                       </div>
 
                       {/* Action Buttons: Appointment & Hospital Map Route */}
@@ -152,10 +164,10 @@ export default function PrescriptionResultModal({
                         <button
                           onClick={() => handleBookEmergencySlot(doc)}
                           disabled={bookingLoading}
-                          className="btn-navy text-[11px] py-2 px-2.5 flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                          className="btn-navy text-[11px] py-2 px-2 flex items-center justify-center gap-1 shadow-sm whitespace-nowrap"
                         >
                           <Calendar className="w-3.5 h-3.5" />
-                          <span>टोकन मिळवा</span>
+                          <span>{t('rx_modal_token_btn')}</span>
                         </button>
 
                         <button
@@ -179,10 +191,10 @@ export default function PrescriptionResultModal({
                               onClose();
                             }
                           }}
-                          className="btn-medical-blue text-[11px] py-2 px-2.5 flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                          className="btn-medical-blue text-[11px] py-2 px-2 flex items-center justify-center gap-1 shadow-sm whitespace-nowrap"
                         >
                           <Navigation className="w-3.5 h-3.5" />
-                          <span>मॅपवर रस्ता पहा</span>
+                          <span>{t('rx_modal_route_btn')}</span>
                         </button>
                       </div>
                     </div>
@@ -195,23 +207,23 @@ export default function PrescriptionResultModal({
                 <div className="p-4 rounded-2xl bg-health-green/15 border border-health-green space-y-2 animate-fadeIn text-left">
                   <div className="flex items-center gap-2 text-health-green font-bold text-sm">
                     <CheckCircle className="w-5 h-5 shrink-0" />
-                    <span>आपत्कालीन स्लॉट बुक झाला आहे!</span>
+                    <span>{t('rx_modal_token_booked')}</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-deep-navy dark:text-clinical-white pt-1">
                     <div>
-                      <span className="text-[10px] text-slate-500 block">टोकन क्रमांक:</span>
+                      <span className="text-[10px] text-slate-500 block">{t('rx_modal_token_no')}</span>
                       <strong className="text-sm font-mono text-medical-blue">{bookedAppointment.tokenNo}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 block">डॉक्टर:</span>
+                      <span className="text-[10px] text-slate-500 block">{t('rx_modal_token_doctor')}</span>
                       <strong className="font-bold">{bookedAppointment.doctorName}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 block">रुग्णालय:</span>
+                      <span className="text-[10px] text-slate-500 block">{t('rx_modal_token_hospital')}</span>
                       <strong className="font-bold">{bookedAppointment.hospitalName}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 block">प्राधान्य वेळ:</span>
+                      <span className="text-[10px] text-slate-500 block">{t('rx_modal_token_time')}</span>
                       <strong className="text-alert-red font-bold">{bookedAppointment.time}</strong>
                     </div>
                   </div>
@@ -229,11 +241,11 @@ export default function PrescriptionResultModal({
                   <div className="flex items-center gap-2">
                     <Pill className="w-5 h-5 text-medical-blue" />
                     <h4 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white">
-                      २ दिवसांचे तात्पुरते औषधोपचार (Strict 2-Day Relief Schedule)
+                      {t('rx_modal_schedule_title')}
                     </h4>
                   </div>
                   <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-caution-amber/25 text-deep-navy dark:text-caution-amber border border-caution-amber/40 self-start sm:self-auto">
-                    कालावधी: फक्त २ दिवस (2 Days Only)
+                    {t('rx_modal_schedule_badge')}
                   </span>
                 </div>
 
@@ -241,37 +253,37 @@ export default function PrescriptionResultModal({
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-medical-blue/15 dark:bg-dark-muted/20 text-deep-navy dark:text-clinical-white font-bold border-b border-deep-navy/10 dark:border-white/10">
-                        <th className="p-3.5">औषधाचा गट (Category)</th>
-                        <th className="p-3.5">डोस (Dosage)</th>
-                        <th className="p-3.5 text-center">सकाळी</th>
-                        <th className="p-3.5 text-center">दुपारी</th>
-                        <th className="p-3.5 text-center">रात्री</th>
-                        <th className="p-3.5">सूचना (Instructions)</th>
+                        <th className="p-3.5">{t('rx_modal_tbl_cat')}</th>
+                        <th className="p-3.5">{t('rx_modal_tbl_dosage')}</th>
+                        <th className="p-3.5 text-center">{t('rx_modal_tbl_morning')}</th>
+                        <th className="p-3.5 text-center">{t('rx_modal_tbl_afternoon')}</th>
+                        <th className="p-3.5 text-center">{t('rx_modal_tbl_night')}</th>
+                        <th className="p-3.5">{t('rx_modal_tbl_inst')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-deep-navy/5 dark:divide-white/5">
                       {medicines.map((med, idx) => (
                         <tr key={idx} className="hover:bg-medical-blue/5 transition-colors">
                           <td className="p-3.5 font-bold text-deep-navy dark:text-clinical-white">
-                            {med.name}
+                            {med.nameLocal || med.name}
                             <span className="block text-[10px] text-slate-500 font-normal mt-0.5">
-                              {med.category}
+                              {med.categoryLocal || med.category}
                             </span>
                           </td>
                           <td className="p-3.5 font-medium">
-                            {med.dosage || '१ गोळी'}
+                            {med.dosageLocal || med.dosage || '1 Tablet'}
                           </td>
                           <td className="p-3.5 text-center font-bold text-medical-blue">
-                            {med.timingSchedule?.morning ? '✓ (१)' : '—'}
+                            {med.timingSchedule?.morning ? '✓ (1)' : '—'}
                           </td>
                           <td className="p-3.5 text-center font-bold text-medical-blue">
-                            {med.timingSchedule?.afternoon ? '✓ (१)' : '—'}
+                            {med.timingSchedule?.afternoon ? '✓ (1)' : '—'}
                           </td>
                           <td className="p-3.5 text-center font-bold text-medical-blue">
-                            {med.timingSchedule?.night ? '✓ (१)' : '—'}
+                            {med.timingSchedule?.night ? '✓ (1)' : '—'}
                           </td>
                           <td className="p-3.5 text-xs text-slate-700 dark:text-slate-300">
-                            {med.instructions || 'जेवणानंतर कोमट पाण्यासोबत घ्यावे.'}
+                            {med.instructionsLocal || med.instructions || 'Take with water post-meals.'}
                           </td>
                         </tr>
                       ))}
@@ -281,26 +293,28 @@ export default function PrescriptionResultModal({
               </div>
 
               {/* Safe Home Remedies Grid */}
-              <div className="p-5 rounded-2xl bg-health-green/10 border border-health-green/20 space-y-3">
-                <div className="flex items-center gap-2 text-health-green font-bold text-sm">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>घरगुती सुरक्षित उपाय (Safe Home Remedies)</span>
+              {homeRemedies.length > 0 && (
+                <div className="p-5 rounded-2xl bg-health-green/10 border border-health-green/20 space-y-3">
+                  <div className="flex items-center gap-2 text-health-green font-bold text-sm">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>{t('rx_modal_remedies_title')}</span>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-deep-navy dark:text-clinical-white">
+                    {homeRemedies.map((remedy, rIdx) => (
+                      <li key={rIdx} className="flex items-start gap-2 bg-white/60 dark:bg-dark-base/50 p-2.5 rounded-xl border border-health-green/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-health-green mt-1.5 shrink-0" />
+                        <span>{remedy}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-deep-navy dark:text-clinical-white">
-                  {homeRemedies.map((remedy, rIdx) => (
-                    <li key={rIdx} className="flex items-start gap-2 bg-white/60 dark:bg-dark-base/50 p-2.5 rounded-xl border border-health-green/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-health-green mt-1.5 shrink-0" />
-                      <span>{remedy}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
 
               {/* Mandatory Medical Safety Disclaimer */}
               <div className="p-3.5 rounded-2xl bg-caution-amber/20 border border-caution-amber/40 flex items-start gap-2.5 text-xs text-deep-navy dark:text-caution-amber">
                 <AlertTriangle className="w-4 h-4 text-caution-amber shrink-0 mt-0.5" />
                 <span>
-                  <strong>वैद्यकीय सूचना:</strong> हे २ दिवसांचे प्राथमिक लक्षणमुक्ती प्रिस्क्रिप्शन आहे. जर २ दिवसांत आराम न पडल्यास किंवा लक्षणे वाढल्यास तात्काळ वैद्यकीय अधिकाऱ्यांचा सल्ला घ्यावा.
+                  {t('rx_modal_disclaimer')}
                 </span>
               </div>
 
@@ -309,10 +323,10 @@ export default function PrescriptionResultModal({
 
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-5 sm:p-6 bg-slate-50 dark:bg-dark-base/90 border-t border-deep-navy/10 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Footer Actions - Fixed Height / Never Shrinks */}
+        <div className="shrink-0 p-4 sm:p-5 bg-slate-50 dark:bg-dark-base/90 border-t border-deep-navy/10 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-slate-600 dark:text-slate-400">
-            प्रिस्क्रिप्शन आयडी: <span className="font-mono font-bold text-deep-navy dark:text-clinical-white">{prescId}</span>
+            {t('rx_modal_id')} <span className="font-mono font-bold text-deep-navy dark:text-clinical-white">{prescId}</span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -324,14 +338,14 @@ export default function PrescriptionResultModal({
               className="w-full sm:w-auto btn-medical-blue text-xs py-2.5 px-5 flex items-center justify-center gap-2 shadow-md"
             >
               <Download className="w-4 h-4" />
-              <span>प्रिस्क्रिप्शन PDF डाउनलोड करा</span>
+              <span>{t('rx_modal_download_pdf')}</span>
             </a>
 
             <button
               onClick={onClose}
               className="w-full sm:w-auto btn-glass text-xs py-2.5 px-5"
             >
-              बंद करा
+              {t('rx_modal_close')}
             </button>
           </div>
         </div>

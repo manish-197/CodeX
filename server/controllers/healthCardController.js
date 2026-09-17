@@ -96,20 +96,22 @@ export async function generateHealthCardPdf(req, res) {
     doc.rect(5, 53, 350, 3).fill('#E4714E');
 
     // Demographic Info Column
-    doc.fillColor('#0F5E5E').fontSize(8).font('Helvetica-Bold').text('NAME / नाव', 20, 70);
-    doc.fillColor('#1A2E2E').fontSize(11).font('Helvetica-Bold').text(name.toUpperCase(), 20, 81);
+    const cleanName = String(name || 'Family Member').replace(/[^\x20-\x7E]/g, ' ').replace(/\s+/g, ' ').trim();
+    doc.fillColor('#0F5E5E').fontSize(8).font('Helvetica-Bold').text('CITIZEN NAME', 20, 70);
+    doc.fillColor('#1A2E2E').fontSize(11).font('Helvetica-Bold').text(cleanName.toUpperCase(), 20, 81);
 
-    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('ABHA ADDRESS / आभा क्रमांक', 20, 102);
+    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('ABHA ADDRESS / ID', 20, 102);
     doc.fillColor('#E4714E').fontSize(11).font('Helvetica-Bold').text(abhaId, 20, 112);
 
-    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('GENDER / लिंग', 20, 134);
+    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('GENDER', 20, 134);
     doc.fillColor('#1A2E2E').fontSize(9).font('Helvetica').text(gender, 20, 144);
 
     doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('BLOOD GROUP', 110, 134);
     doc.fillColor('#D64550').fontSize(10).font('Helvetica-Bold').text(bloodGroup, 110, 143);
 
     doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('RELATION / AGE', 20, 162);
-    doc.fillColor('#1A2E2E').fontSize(8).font('Helvetica').text(`${relation} • ${age} yrs`, 20, 172);
+    const cleanRelation = String(relation || 'Self').replace(/[^\x20-\x7E]/g, ' ').trim();
+    doc.fillColor('#1A2E2E').fontSize(8).font('Helvetica').text(`${cleanRelation} | ${age} yrs`, 20, 172);
 
     // QR Code Image on Right
     doc.image(qrBuffer, 225, 68, { width: 110, height: 110 });
