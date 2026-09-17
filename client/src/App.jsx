@@ -12,6 +12,7 @@ import OfflineSyncIndicator from './components/common/OfflineSyncIndicator';
 import WhatsAppBotModal from './components/common/WhatsAppBotModal';
 import ProfileCompletionModal from './components/profile/ProfileCompletionModal';
 import EditProfileModal from './components/profile/EditProfileModal';
+import ProfilePage from './components/profile/ProfilePage';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import AuthGuard from './auth/AuthGuard';
@@ -88,7 +89,7 @@ function AppContent() {
     }
 
     // Protected features require auth
-    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Symptom Checklist Triage' : 'Hospital Navigation'}.`)) {
+    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Symptom Checklist Triage' : targetTab === 'profile' ? 'My Health Profile' : 'Hospital Navigation'}.`)) {
       setCurrentTab(targetTab);
     }
   };
@@ -108,7 +109,7 @@ function AppContent() {
         setCurrentTab('home');
       }}
       onOpenWhatsApp={() => setWhatsAppModalOpen(true)}
-      onOpenEditProfile={() => setIsEditProfileOpen(true)}
+      onOpenEditProfile={() => handleTabNavigation('profile')}
     >
       {currentTab === 'home' && (
         <HomePage 
@@ -157,6 +158,15 @@ function AppContent() {
       {currentTab === 'navigation' && (
         <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Hospital Road Navigation">
           <HospitalNavigation targetHospital={targetHospital} />
+        </AuthGuard>
+      )}
+
+      {currentTab === 'profile' && (
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="My Health Profile">
+          <ProfilePage 
+            onNavigateHome={() => setCurrentTab('home')}
+            onNavigate={handleTabNavigation}
+          />
         </AuthGuard>
       )}
 

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function EditMemberModal({ isOpen, onClose, member, onMemberUpdated }) {
+export default function EditMemberModal({ isOpen, onClose, member, onMemberUpdated, onUpdateMember }) {
   const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
@@ -60,13 +60,56 @@ export default function EditMemberModal({ isOpen, onClose, member, onMemberUpdat
     setLoading(true);
     setError('');
 
+    const medHistoryArray = formData.medicalHistory
+      ? formData.medicalHistory.split(',').map(s => s.trim()).filter(Boolean)
+      : [];
+
+    const isSelf = member.relation === 'Self' || member.id === 'self' || String(member._id).startsWith('self_');
+    const updateCallback = onUpdateMember || onMemberUpdated;
+
     try {
       const token = localStorage.getItem('arogya_token');
-      const medHistoryArray = formData.medicalHistory
-        ? formData.medicalHistory.split(',').map(s => s.trim()).filter(Boolean)
-        : [];
 
-      const res = await fetch(`http://localhost:5000/api/family/${member.id || member._id}`, {
+      if (isSelf) {
+        // Update user profile
+        const res = await fetch('http://localhost:5000/api/auth/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            age: formData.age ? Number(formData.age) : undefined,
+            gender: formData.gender,
+            bloodGroup: formData.bloodGroup,
+            phone: formData.phone.trim(),
+            emergencyContact: { phone: formData.emergencyContact.trim() },
+            medicalConditions: medHistoryArray
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update citizen profile.');
+
+        const updatedSelf = {
+          ...member,
+          name: formData.name.trim(),
+          age: formData.age ? Number(formData.age) : member.age,
+          gender: formData.gender,
+          bloodGroup: formData.bloodGroup,
+          phone: formData.phone.trim(),
+          emergencyContact: formData.emergencyContact.trim(),
+          medicalHistory: medHistoryArray
+        };
+
+        if (updateCallback) updateCallback(updatedSelf);
+        onClose();
+        return;
+      }
+
+      // Family member update
+      const targetId = member._id || member.id;
+      const res = await fetch(`http://localhost:5000/api/family/${targetId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -89,13 +132,23 @@ export default function EditMemberModal({ isOpen, onClose, member, onMemberUpdat
         throw new Error(data.error || 'Failed to update family member.');
       }
 
-      if (onMemberUpdated) {
-        onMemberUpdated(data.member);
-      }
+      const updatedMember = data.member || {
+        ...member,
+        name: formData.name.trim(),
+        relation: formData.relation,
+        age: formData.age ? Number(formData.age) : member.age,
+        gender: formData.gender,
+        bloodGroup: formData.bloodGroup,
+        phone: formData.phone.trim(),
+        emergencyContact: formData.emergencyContact.trim(),
+        medicalHistory: medHistoryArray
+      };
+
+      if (updateCallback) updateCallback(updatedMember);
       onClose();
     } catch (err) {
       console.error('[Edit Member Error]', err);
-      // Fallback local update if offline or network error
+      // Fallback local update
       const updatedLocal = {
         ...member,
         name: formData.name.trim(),
@@ -105,11 +158,9 @@ export default function EditMemberModal({ isOpen, onClose, member, onMemberUpdat
         bloodGroup: formData.bloodGroup,
         phone: formData.phone.trim(),
         emergencyContact: formData.emergencyContact.trim(),
-        medicalHistory: formData.medicalHistory.split(',').map(s => s.trim()).filter(Boolean)
+        medicalHistory: medHistoryArray
       };
-      if (onMemberUpdated) {
-        onMemberUpdated(updatedLocal);
-      }
+      if (updateCallback) updateCallback(updatedLocal);
       onClose();
     } finally {
       setLoading(false);

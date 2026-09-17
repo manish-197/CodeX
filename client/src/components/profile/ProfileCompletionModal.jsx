@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShieldCheck, 
   User, 
@@ -10,12 +10,21 @@ import {
   Activity, 
   Save, 
   Sparkles,
-  Award
+  Award,
+  CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../auth/AuthContext';
 
-export default function ProfileCompletionModal({ isOpen, currentUser, onProfileCompleted }) {
+export default function ProfileCompletionModal({ 
+  isOpen, 
+  currentUser, 
+  onProfileComplete, 
+  onProfileCompleted 
+}) {
   const { t } = useLanguage();
+  const { updateUser: authUpdateUser, token: authToken } = useAuth();
+  const formRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: currentUser?.name || '',
@@ -33,7 +42,28 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
   });
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  // Re-sync form data whenever currentUser loads or changes
+  useEffect(() => {
+    if (currentUser) {
+      setFormData(prev => ({
+        name: currentUser.name || prev.name || '',
+        age: currentUser.age || prev.age || '',
+        gender: currentUser.gender || prev.gender || 'Male',
+        bloodGroup: currentUser.bloodGroup && currentUser.bloodGroup !== 'Unknown' ? currentUser.bloodGroup : (prev.bloodGroup || 'B+'),
+        phone: currentUser.phone || prev.phone || '',
+        village: currentUser.village || prev.village || '',
+        district: currentUser.district || prev.district || '',
+        state: currentUser.state || prev.state || 'Maharashtra',
+        pincode: currentUser.pincode || prev.pincode || '',
+        emergencyContactName: currentUser.emergencyContact?.name || prev.emergencyContactName || '',
+        emergencyContactPhone: currentUser.emergencyContact?.phone || prev.emergencyContactPhone || '',
+        emergencyContactRel: currentUser.emergencyContact?.relation || prev.emergencyContactRel || 'Spouse',
+      }));
+    }
+  }, [currentUser, isOpen]);
 
   if (!isOpen) return null;
 
@@ -46,26 +76,27 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
     e.preventDefault();
     if (!formData.name.trim()) {
       setError(t('profile_name_label') + ' is required.');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!formData.age || Number(formData.age) <= 0) {
       setError('Please enter a valid age (वय).');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!formData.bloodGroup || formData.bloodGroup === 'Unknown') {
       setError('Please select a blood group (रक्तगट).');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!formData.phone.trim()) {
       setError('Please provide a mobile number (मोबाईल नंबर).');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!formData.village.trim() || !formData.district.trim()) {
       setError('Please provide your village and district (गाव व जिल्हा).');
-      return;
-    }
-    if (!formData.emergencyContactPhone.trim()) {
-      setError('Please provide an emergency contact mobile number (आपत्कालीन मोबाईल नंबर).');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -73,7 +104,10 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
     setError('');
 
     try {
-      const token = localStorage.getItem('arogya_token');
+      const token = authToken || localStorage.getItem('arogya_token');
+      const emergencyPhone = formData.emergencyContactPhone.trim() || formData.phone.trim();
+      const emergencyName = formData.emergencyContactName.trim() || 'Family Contact';
+
       const res = await fetch('http://localhost:5000/api/auth/profile', {
         method: 'PUT',
         headers: {
@@ -88,11 +122,11 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
           phone: formData.phone.trim(),
           village: formData.village.trim(),
           district: formData.district.trim(),
-          state: formData.state.trim(),
-          pincode: formData.pincode.trim(),
+          state: formData.state.trim() || 'Maharashtra',
+          pincode: formData.pincode.trim() || '',
           emergencyContact: {
-            name: formData.emergencyContactName.trim() || 'Family Contact',
-            phone: formData.emergencyContactPhone.trim(),
+            name: emergencyName,
+            phone: emergencyPhone,
             relation: formData.emergencyContactRel
           }
         })
@@ -103,12 +137,21 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
         throw new Error(data.error || 'Failed to update profile.');
       }
 
-      if (onProfileCompleted) {
-        onProfileCompleted(data.user);
+      setSuccess(true);
+
+      const callback = onProfileComplete || onProfileCompleted;
+      if (data.user) {
+        if (authUpdateUser) {
+          authUpdateUser(data.user);
+        }
+        if (callback) {
+          callback(data.user);
+        }
       }
     } catch (err) {
       console.error('[Profile Completion Error]', err);
       setError(err.message || 'Could not save profile. Please check details.');
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
@@ -146,7 +189,7 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0 text-left">
+        <form onSubmit={handleSubmit} ref={formRef} className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0 text-left">
           {error && (
             <div className="p-3.5 rounded-2xl bg-alert-red/10 border border-alert-red/30 text-xs font-semibold text-alert-red flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -376,10 +419,19 @@ export default function ProfileCompletionModal({ isOpen, currentUser, onProfileC
             </p>
             <button
               type="submit"
-              disabled={loading}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-medical-blue to-teal-600 hover:from-blue-600 hover:to-teal-700 text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              disabled={loading || success}
+              className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl text-white font-bold text-sm shadow-xl flex items-center justify-center gap-2 transition-all ${
+                success 
+                  ? 'bg-health-green' 
+                  : 'bg-gradient-to-r from-medical-blue to-teal-600 hover:from-blue-600 hover:to-teal-700'
+              } disabled:opacity-75`}
             >
-              {loading ? (
+              {success ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-white animate-bounce" />
+                  <span>✓ {t('profile_success_activated') || 'ArogyaRakshak Health Card Activated!'}</span>
+                </>
+              ) : loading ? (
                 <>
                   <Activity className="w-4 h-4 animate-spin" />
                   <span>{t('profile_saving_btn')}</span>

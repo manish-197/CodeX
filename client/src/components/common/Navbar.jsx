@@ -265,14 +265,14 @@ export default function Navbar({
                     {currentUser.role !== 'kiosk_operator' && (
                       <button
                         onClick={() => {
-                          if (onOpenEditProfile) onOpenEditProfile();
+                          setCurrentTab('profile');
                           setProfileMenuOpen(false);
                         }}
                         className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-deep-navy/10 transition-colors flex items-center justify-between"
                       >
                         <span className="flex items-center gap-2">
-                          <Edit3 className="w-3.5 h-3.5 text-medical-blue" />
-                          <span>{t('profile_edit_title') || 'Edit Profile / प्रोफाइल बदला'}</span>
+                          <User className="w-3.5 h-3.5 text-medical-blue" />
+                          <span>{lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile'}</span>
                         </span>
                         <span className="text-medical-blue">→</span>
                       </button>
@@ -384,13 +384,13 @@ export default function Navbar({
                 {currentUser.role !== 'kiosk_operator' && (
                   <button
                     onClick={() => {
-                      if (onOpenEditProfile) onOpenEditProfile();
+                      setCurrentTab('profile');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full py-2 px-4 rounded-xl text-xs font-bold text-medical-blue bg-medical-blue/10 flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-medical-blue bg-medical-blue/10 flex items-center justify-center gap-2"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>{t('profile_edit_title') || 'Edit Profile / प्रोफाइल बदला'}</span>
+                    <User className="w-3.5 h-3.5" />
+                    <span>{lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile'}</span>
                   </button>
                 )}
                 <button
