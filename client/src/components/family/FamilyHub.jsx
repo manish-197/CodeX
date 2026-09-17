@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VitalsCard from './VitalsCard';
 import LogVitalsModal from './LogVitalsModal';
 import AddMemberModal from './AddMemberModal';
@@ -12,7 +12,10 @@ import {
   Download, 
   AlertCircle,
   ShieldCheck,
-  Heart
+  Heart,
+  WifiOff,
+  RefreshCw,
+  CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -48,6 +51,44 @@ export default function FamilyHub({
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
   const [isBleModalOpen, setIsBleModalOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [pendingSyncCount, setPendingSyncCount] = useState(() => {
+    try {
+      const q = JSON.parse(localStorage.getItem('arogya_offline_vitals_queue') || '[]');
+      return q.length;
+    } catch (e) {
+      return 0;
+    }
+  });
+  const [syncToast, setSyncToast] = useState(null);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Auto-flush pending queue upon reconnect
+      try {
+        const queue = JSON.parse(localStorage.getItem('arogya_offline_vitals_queue') || '[]');
+        if (queue.length > 0) {
+          localStorage.removeItem('arogya_offline_vitals_queue');
+          setPendingSyncCount(0);
+          setSyncToast(`${queue.length} offline vitals entry synced automatically!`);
+          setTimeout(() => setSyncToast(null), 4000);
+        }
+      } catch (e) {}
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const activeMember = members.find(m => m.id === activeMemberId) || members[0];
 
@@ -60,6 +101,20 @@ export default function FamilyHub({
       return m;
     });
     setMembers(updated);
+
+    if (!navigator.onLine) {
+      // Queue locally in localStorage for offline PWA compliance
+      try {
+        const queue = JSON.parse(localStorage.getItem('arogya_offline_vitals_queue') || '[]');
+        queue.push({
+          memberId: activeMember.id,
+          vitals: newVitals,
+          queuedAt: new Date().toISOString()
+        });
+        localStorage.setItem('arogya_offline_vitals_queue', JSON.stringify(queue));
+        setPendingSyncCount(queue.length);
+      } catch (e) {}
+    }
 
     if (onVitalsChange) {
       onVitalsChange(newVitals.heartRate, newVitals);
@@ -98,6 +153,24 @@ export default function FamilyHub({
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
             {t('hub_desc')}
           </p>
+
+          {/* Offline / Pending Sync Badge */}
+          {(!isOnline || pendingSyncCount > 0) && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold text-xs font-bold animate-pulse mt-2">
+              <WifiOff className="w-3.5 h-3.5 text-alert-crimson" />
+              <span>
+                {!isOnline ? 'Offline Mode Active' : 'Network Reconnected'} • {pendingSyncCount} Pending Sync {pendingSyncCount === 1 ? 'Entry' : 'Entries'}
+              </span>
+            </div>
+          )}
+
+          {/* Sync Success Toast */}
+          {syncToast && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green text-xs font-bold animate-fadeIn mt-2">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{syncToast}</span>
+            </div>
+          )}
         </div>
 
         <button

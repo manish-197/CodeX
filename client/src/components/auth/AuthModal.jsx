@@ -290,8 +290,67 @@ export default function AuthModal({
           </button>
         </form>
 
+        {/* 1-Click Demo Logins for Testing and Hackathon Review */}
+        <div className="mt-5 pt-4 border-t border-deep-teal/10 dark:border-white/10 space-y-2">
+          <p className="text-[11px] font-bold text-deep-teal/60 dark:text-dark-muted text-center uppercase tracking-wider">
+            1-Click Demo Evaluation Profiles
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const demoCitizen = {
+                  id: 'usr_citizen_ramesh',
+                  name: 'Ramesh Patil',
+                  phone: '9876543210',
+                  role: 'citizen',
+                  abhaId: '91-4820-9182-3901',
+                  village: 'Shirwal',
+                  district: 'Satara',
+                  state: 'Maharashtra',
+                  preferredLanguage: 'mr'
+                };
+                const demoToken = 'demo_jwt_citizen_' + Date.now();
+                localStorage.setItem('arogya_token', demoToken);
+                localStorage.setItem('arogya_user', JSON.stringify(demoCitizen));
+                if (onAuthSuccess) onAuthSuccess(demoCitizen, demoToken);
+                onClose();
+              }}
+              className="px-2.5 py-2 rounded-xl bg-deep-teal/5 hover:bg-deep-teal/10 dark:bg-white/5 dark:hover:bg-white/10 border border-deep-teal/15 dark:border-white/10 text-[11px] font-semibold text-deep-teal dark:text-sky-mist text-left flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-leaf-green shrink-0" />
+              <span className="truncate">Ramesh Patil (Citizen)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const demoKiosk = {
+                  id: 'usr_kiosk_sunita',
+                  name: 'Sunita Deshmukh',
+                  phone: '9876543211',
+                  role: 'kiosk_operator',
+                  kioskId: 'GP-SHIRWAL-01',
+                  village: 'Shirwal Gram Panchayat',
+                  district: 'Satara',
+                  state: 'Maharashtra',
+                  preferredLanguage: 'mr'
+                };
+                const demoToken = 'demo_jwt_kiosk_' + Date.now();
+                localStorage.setItem('arogya_token', demoToken);
+                localStorage.setItem('arogya_user', JSON.stringify(demoKiosk));
+                if (onAuthSuccess) onAuthSuccess(demoKiosk, demoToken);
+                onClose();
+              }}
+              className="px-2.5 py-2 rounded-xl bg-terracotta/10 hover:bg-terracotta/15 border border-terracotta/20 text-[11px] font-semibold text-terracotta text-left flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-terracotta shrink-0" />
+              <span className="truncate">Sunita (Kiosk Operator)</span>
+            </button>
+          </div>
+        </div>
+
         {/* Toggle Login vs Register */}
-        <div className="mt-5 text-center text-xs text-deep-teal/70 dark:text-dark-muted">
+        <div className="mt-4 text-center text-xs text-deep-teal/70 dark:text-dark-muted">
           {isLogin ? (
             <p>
               Don't have an account yet?{' '}
