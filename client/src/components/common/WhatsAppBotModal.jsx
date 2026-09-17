@@ -117,15 +117,15 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
       <div 
-        className="w-full max-w-md bg-[#ECE5DD] dark:bg-[#121B22] rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[600px] border border-deep-navy/20"
+        className="w-[95vw] sm:w-[420px] h-[82vh] max-h-[620px] bg-[#ECE5DD] dark:bg-[#121B22] rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-deep-navy/20"
         data-lenis-prevent="true"
       >
         {/* WhatsApp Header */}
-        <div className="bg-[#075E54] dark:bg-[#1F2C34] text-white px-4 py-3 flex items-center justify-between shadow-md">
+        <div className="bg-[#075E54] dark:bg-[#1F2C34] text-white px-4 py-3 flex items-center justify-between shadow-md shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-health-green flex items-center justify-center text-white font-bold text-sm shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-health-green flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
               AR
             </div>
             <div>
@@ -159,10 +159,10 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
         </div>
 
         {/* Chat Thread */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-3">
-          <div className="text-center my-2">
+        <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3">
+          <div className="text-center my-1">
             <span className="bg-[#D1EBE7] dark:bg-[#182229] text-deep-navy dark:text-clinical-white text-[10px] font-semibold px-3 py-1 rounded-lg shadow-sm">
-              Elder Care Mode • No Login Required
+              Elder Care Mode • 24/7 Voice Support
             </span>
           </div>
 
@@ -198,28 +198,28 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
         </div>
 
         {/* Sample Quick Questions for Elders */}
-        <div className="px-3 py-1.5 bg-[#F0F2F5] dark:bg-[#202C33] border-t border-deep-navy/10 flex gap-2 overflow-x-auto text-[11px] scrollbar-none">
+        <div className="px-3 py-2 bg-[#F0F2F5] dark:bg-[#202C33] border-t border-deep-navy/10 flex gap-2 overflow-x-auto text-[11px] scrollbar-none shrink-0">
           <button
-            onClick={() => setInputText('मला २ दिवसांपासून ताप आणि खोकला आहे')}
-            className="px-2.5 py-1 rounded-full bg-white dark:bg-dark-base text-deep-navy dark:text-clinical-white border border-deep-navy/10 whitespace-nowrap hover:border-health-green"
+            onClick={() => setInputText(lang === 'mr' ? 'मला २ दिवसांपासून ताप आणि खोकला आहे' : 'I have fever and cough for 2 days')}
+            className="px-2.5 py-1 rounded-full bg-white dark:bg-dark-base text-deep-navy dark:text-clinical-white border border-deep-navy/10 whitespace-nowrap hover:border-health-green font-medium"
           >
-            ताप आणि खोकला (Fever & Cough)
+            {lang === 'mr' ? 'ताप आणि खोकला' : 'Fever & Cough'}
           </button>
           <button
-            onClick={() => setInputText('छातीत दुखत आहे आणि धाप लागत आहे')}
-            className="px-2.5 py-1 rounded-full bg-alert-red/10 text-alert-red border border-alert-red/20 whitespace-nowrap"
+            onClick={() => setInputText(lang === 'mr' ? 'छातीत दुखत आहे आणि धाप लागत आहे' : 'Severe chest pain and breathlessness')}
+            className="px-2.5 py-1 rounded-full bg-alert-red/10 text-alert-red border border-alert-red/20 whitespace-nowrap font-medium"
           >
-            छातीत दुखणे (Chest Pain SOS)
+            {lang === 'mr' ? 'छातीत दुखणे (SOS)' : 'Chest Pain (SOS)'}
           </button>
         </div>
 
         {/* Input Bar */}
-        <form onSubmit={handleSendMessage} className="p-3 bg-[#F0F2F5] dark:bg-[#202C33] flex items-center gap-2">
+        <form onSubmit={handleSendMessage} className="p-3 bg-[#F0F2F5] dark:bg-[#202C33] flex items-center gap-2 shrink-0">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type or send message..."
+            placeholder={lang === 'mr' ? 'लक्षणे किंवा प्रश्न येथे लिहा...' : 'Type symptoms or health query...'}
             className="flex-1 px-4 py-2.5 rounded-full bg-white dark:bg-[#2A3942] text-xs text-deep-navy dark:text-white focus:outline-none"
           />
           <button

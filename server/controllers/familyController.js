@@ -1,4 +1,5 @@
 import { FamilyMember } from '../models/FamilyMember.js';
+import { User } from '../models/User.js';
 import { isDbConnected } from '../config/db.js';
 import { memoryDb, generateMemoryId } from '../services/inMemoryStore.js';
 import { formatAbhaId } from './authController.js';
@@ -36,6 +37,8 @@ export async function addFamilyMember(req, res) {
       gender = 'Other', 
       bloodGroup = 'Unknown',
       medicalHistory = [],
+      phone,
+      emergencyContact,
       abhaId
     } = req.body;
 
@@ -43,7 +46,25 @@ export async function addFamilyMember(req, res) {
       return res.status(400).json({ error: 'Member name is required.' });
     }
 
-    const finalAbhaId = formatAbhaId(abhaId);
+    // Determine family member ArogyaRakshak series ID: AR-2026-XXXXX-01, AR-2026-XXXXX-02, etc.
+    let memberCount = 1;
+    let parentArogyaId = 'AR-2026-00001';
+    if (isDbConnected()) {
+      const parentUser = await User.findById(userId).lean();
+      if (parentUser?.arogyaId) parentArogyaId = parentUser.arogyaId;
+      memberCount = (await FamilyMember.countDocuments({ userId })) + 1;
+    } else {
+      const parentUser = memoryDb.users?.get(userId);
+      if (parentUser?.arogyaId) parentArogyaId = parentUser.arogyaId;
+      let count = 0;
+      for (const [, m] of memoryDb.familyMembers) {
+        if (String(m.userId) === String(userId)) count++;
+      }
+      memberCount = count + 1;
+    }
+
+    const assignedArogyaId = `${parentArogyaId}-${String(memberCount).padStart(2, '0')}`;
+    const finalAbhaId = assignedArogyaId;
     let newMember;
 
     if (isDbConnected()) {
@@ -55,7 +76,10 @@ export async function addFamilyMember(req, res) {
         gender,
         bloodGroup,
         userId,
+        arogyaId: assignedArogyaId,
         abhaId: finalAbhaId,
+        phone: phone || undefined,
+        emergencyContact: emergencyContact || undefined,
         medicalHistory,
         vitals: {
           bp: { sys: 0, dia: 0 },
@@ -76,7 +100,10 @@ export async function addFamilyMember(req, res) {
         gender,
         bloodGroup,
         userId,
+        arogyaId: assignedArogyaId,
         abhaId: finalAbhaId,
+        phone: phone || null,
+        emergencyContact: emergencyContact || null,
         medicalHistory,
         vitals: {
           bp: { sys: 0, dia: 0 },
@@ -96,6 +123,93 @@ export async function addFamilyMember(req, res) {
   } catch (err) {
     console.error('[AddFamilyMember Error]', err);
     res.status(500).json({ error: 'Failed to add family member.' });
+  }
+}
+
+export async function updateFamilyMember(req, res) {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const {
+      name,
+      relation,
+      age,
+      gender,
+      bloodGroup,
+      phone,
+      emergencyContact,
+      medicalHistory
+    } = req.body;
+
+    let member;
+    if (isDbConnected()) {
+      member = await FamilyMember.findOne({ _id: id, userId });
+      if (!member) {
+        return res.status(404).json({ error: 'Family member not found.' });
+      }
+      if (name) member.name = name.trim();
+      if (relation) member.relation = relation;
+      if (age !== undefined && age !== '') member.age = Number(age);
+      if (gender) member.gender = gender;
+      if (bloodGroup) member.bloodGroup = bloodGroup;
+      if (phone !== undefined) member.phone = phone.trim();
+      if (emergencyContact !== undefined) member.emergencyContact = emergencyContact;
+      if (medicalHistory) member.medicalHistory = Array.isArray(medicalHistory) ? medicalHistory : [medicalHistory];
+
+      await member.save();
+    } else {
+      member = memoryDb.familyMembers.get(id);
+      if (!member || String(member.userId) !== String(userId)) {
+        return res.status(404).json({ error: 'Family member not found.' });
+      }
+      if (name) member.name = name.trim();
+      if (relation) member.relation = relation;
+      if (age !== undefined && age !== '') member.age = Number(age);
+      if (gender) member.gender = gender;
+      if (bloodGroup) member.bloodGroup = bloodGroup;
+      if (phone !== undefined) member.phone = phone.trim();
+      if (emergencyContact !== undefined) member.emergencyContact = emergencyContact;
+      if (medicalHistory) member.medicalHistory = Array.isArray(medicalHistory) ? medicalHistory : [medicalHistory];
+
+      memoryDb.familyMembers.set(id, member);
+    }
+
+    res.json({
+      message: 'Family member updated successfully',
+      member
+    });
+  } catch (err) {
+    console.error('[UpdateFamilyMember Error]', err);
+    res.status(500).json({ error: 'Failed to update family member.' });
+  }
+}
+
+export async function deleteFamilyMember(req, res) {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    if (isDbConnected()) {
+      const deleted = await FamilyMember.findOneAndDelete({ _id: id, userId });
+      if (!deleted) {
+        return res.status(404).json({ error: 'Family member not found or unauthorized.' });
+      }
+    } else {
+      const member = memoryDb.familyMembers.get(id);
+      if (!member || String(member.userId) !== String(userId)) {
+        return res.status(404).json({ error: 'Family member not found or unauthorized.' });
+      }
+      memoryDb.familyMembers.delete(id);
+    }
+
+    res.json({
+      success: true,
+      message: 'Family member deleted successfully',
+      id
+    });
+  } catch (err) {
+    console.error('[DeleteFamilyMember Error]', err);
+    res.status(500).json({ error: 'Failed to delete family member.' });
   }
 }
 

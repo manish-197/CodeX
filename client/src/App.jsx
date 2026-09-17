@@ -10,12 +10,15 @@ import StateLanguageToast from './components/common/StateLanguageToast';
 import EmergencySOSBeacon from './components/common/EmergencySOSBeacon';
 import OfflineSyncIndicator from './components/common/OfflineSyncIndicator';
 import WhatsAppBotModal from './components/common/WhatsAppBotModal';
+import ProfileCompletionModal from './components/profile/ProfileCompletionModal';
+import EditProfileModal from './components/profile/EditProfileModal';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import AuthGuard from './auth/AuthGuard';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState('home');
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('arogya_theme') === 'dark';
@@ -32,6 +35,7 @@ function AppContent() {
     authToast, 
     login, 
     logout, 
+    updateUser,
     openLogin, 
     closeLogin, 
     requireAuth,
@@ -104,6 +108,7 @@ function AppContent() {
         setCurrentTab('home');
       }}
       onOpenWhatsApp={() => setWhatsAppModalOpen(true)}
+      onOpenEditProfile={() => setIsEditProfileOpen(true)}
     >
       {currentTab === 'home' && (
         <HomePage 
@@ -183,6 +188,23 @@ function AppContent() {
 
       {/* State-Based Auto Language Notification Toast */}
       <StateLanguageToast />
+
+      {/* Mandatory Profile Completion Gate for New Registered Users */}
+      {currentUser && currentUser.role === 'citizen' && !currentUser.isProfileComplete && (
+        <ProfileCompletionModal
+          isOpen={true}
+          currentUser={currentUser}
+          onProfileComplete={(updatedUser) => updateUser(updatedUser)}
+        />
+      )}
+
+      {/* Standalone Citizen Profile Edit Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        currentUser={currentUser}
+        onProfileUpdated={(updatedUser) => updateUser(updatedUser)}
+      />
     </Layout>
   );
 }

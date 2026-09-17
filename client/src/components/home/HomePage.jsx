@@ -106,7 +106,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
 
           {/* Hero Headline in Fraunces Serif */}
           <h1 className="hero-fade-in font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-deep-navy dark:text-clinical-white leading-[1.14] tracking-tight">
-            Healthcare that speaks <span className="text-medical-blue italic font-normal">Bharat's</span> languages, reaches Bharat's roads.
+            {t('hero_headline')}
           </h1>
 
           {/* Subheadline */}
@@ -195,14 +195,14 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-medical-blue">
-              Platform Capabilities
+              {t('home_platform_tag')}
             </span>
             <h2 className="font-display font-bold text-2xl sm:text-3xl text-deep-navy dark:text-clinical-white">
-              Engineered for Bharat's Real Healthcare Challenges
+              {t('home_platform_title')}
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md">
-            Overcoming doctor shortages, regional language barriers, and rural road navigation gaps with inclusive AI.
+            {t('home_platform_desc')}
           </p>
         </div>
 
@@ -250,41 +250,41 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-medical-blue">
-              Complete Rural Ecosystem
+              {t('home_ecosystem_tag')}
             </span>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-deep-navy dark:text-clinical-white">
-              Six Specialized Accessibility Features Integrated End-to-End
+              {t('home_ecosystem_title')}
             </h3>
           </div>
           <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-health-green/20 text-health-green self-start sm:self-auto">
-            All 6 Slices Activated
+            {t('home_ecosystem_badge')}
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 text-xs">
           <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
-            <span className="font-bold text-deep-navy dark:text-clinical-white block">Prescription OCR</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Gemini Vision scanner</span>
+            <span className="font-bold text-deep-navy dark:text-clinical-white block">{t('home_feat_ocr_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_ocr_sub')}</span>
           </div>
           <div className="p-3.5 rounded-2xl glass-card border border-alert-red/20 shadow-sm">
-            <span className="font-bold text-alert-red block">1-Tap SOS Beacon</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">3s abort + 108 dispatch</span>
+            <span className="font-bold text-alert-red block">{t('home_feat_sos_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_sos_sub')}</span>
           </div>
           <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
-            <span className="font-bold text-deep-navy dark:text-clinical-white block">Offline PWA</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">IndexedDB auto sync</span>
+            <span className="font-bold text-deep-navy dark:text-clinical-white block">{t('home_feat_pwa_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_pwa_sub')}</span>
           </div>
           <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
-            <span className="font-bold text-deep-navy dark:text-clinical-white block">WhatsApp Bot</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Voice triage for elders</span>
+            <span className="font-bold text-deep-navy dark:text-clinical-white block">{t('home_feat_wa_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_wa_sub')}</span>
           </div>
           <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
-            <span className="font-bold text-deep-navy dark:text-clinical-white block">ABDM Health Card</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Signed JWT QR PDF</span>
+            <span className="font-bold text-deep-navy dark:text-clinical-white block">{t('home_feat_card_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_card_sub')}</span>
           </div>
           <div className="p-3.5 rounded-2xl glass-card border border-deep-navy/10 dark:border-white/10 shadow-sm">
-            <span className="font-bold text-deep-navy dark:text-clinical-white block">Bluetooth BLE</span>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">Live GATT vitals pairing</span>
+            <span className="font-bold text-deep-navy dark:text-clinical-white block">{t('home_feat_ble_title')}</span>
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">{t('home_feat_ble_sub')}</span>
           </div>
         </div>
       </section>

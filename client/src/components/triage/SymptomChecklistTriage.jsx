@@ -45,7 +45,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'নাক দিয়ে জল পড়া, ঘন ঘন হাঁচি ও গলা শুকিয়ে যাওয়া।',
         },
         category: {
-          en: 'Respiratory (श्वसन)',
+          en: 'Respiratory',
           mr: 'श्वसन (Respiratory)',
           hi: 'श्वसन (Respiratory)',
           ta: 'சுவாசம் (Respiratory)',
@@ -100,7 +100,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'কপালে হালকা ব্যথা, চোখের ওপর চাপ ও ক্লান্তি।',
         },
         category: {
-          en: 'General (सामान्य)',
+          en: 'General',
           mr: 'सामान्य (General)',
           hi: 'सामान्य (General)',
           ta: 'பொதுவானது (General)',
@@ -155,7 +155,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'বুকে ও গলায় জ্বালা, টক ঢেকুর, বমি বমি ভাব।',
         },
         category: {
-          en: 'Gastroenterology (पचनसंस्था)',
+          en: 'Gastroenterology',
           mr: 'पचनसंस्था (Digestive)',
           hi: 'पाचन तंत्र (Digestive)',
           ta: 'செரிமான அமைப்பு (Digestive)',
@@ -210,7 +210,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'শারীরিক পরিশ্রম বা পানিশূন্যতার কারণে শরীরে ব্যথা ও ক্লান্তি।',
         },
         category: {
-          en: 'Supportive Care (सामान्य)',
+          en: 'Supportive Care',
           mr: 'सामान्य (General)',
           hi: 'सामान्य (General)',
           ta: 'பொதுவானது (General)',
@@ -264,7 +264,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'খাবার গিলতে কষ্ট, গলায় কাঁটা ফোটার অনুভূতি ও খুসখুসানি।',
         },
         category: {
-          en: 'ENT (ईएनटी)',
+          en: 'ENT',
           mr: 'ईएनटी (ENT)',
           hi: 'ईएनटी (ENT)',
           ta: 'காது மூக்கு தொண்டை (ENT)',
@@ -319,7 +319,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'দিনে ২-৩ বার পাতলা পায়খানা ও পেটে মৃদু টান।',
         },
         category: {
-          en: 'Gastroenterology (पचनसंस्था)',
+          en: 'Gastroenterology',
           mr: 'पचनसंस्था (Gastro)',
           hi: 'पाचन तंत्र (Gastro)',
           ta: 'செரிமான மண்டலம் (Gastro)',
@@ -374,7 +374,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'কফ ছাড়া শুকনো কাশি ও রাতে কাশির দমক।',
         },
         category: {
-          en: 'Respiratory (श्वसन)',
+          en: 'Respiratory',
           mr: 'श्वसन (Respiratory)',
           hi: 'श्वसन (Respiratory)',
           ta: 'சுவாசம் (Respiratory)',
@@ -429,7 +429,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'খাবার চিবানোর সময় দাঁতে ব্যথা ও মাড়ির সংবেদনশীলতা।',
         },
         category: {
-          en: 'Dental (दंतरोग)',
+          en: 'Dental',
           mr: 'दंतरोग (Dental)',
           hi: 'दंत चिकित्सा (Dental)',
           ta: 'பல் மருத்துவம் (Dental)',
@@ -491,7 +491,7 @@ export const SYMPTOM_CATALOG = {
           bn: '১০১°ফা পর্যন্ত জ্বর, কাঁপুনি ও অতিরিক্ত দুর্বলতা।',
         },
         category: {
-          en: 'Infectious (संसर्गजन्य)',
+          en: 'Infectious',
           mr: 'संसर्गजन्य (Infectious)',
           hi: 'संक्रामक (Infectious)',
           ta: 'தொற்றுநோய் (Infectious)',
@@ -546,7 +546,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'দিনে ৩ বারের বেশি পাতলা পায়খানা বা ঘন ঘন বমি।',
         },
         category: {
-          en: 'Gastroenterology (पचनसंस्था)',
+          en: 'Gastroenterology',
           mr: 'पचनसंस्था (Digestive)',
           hi: 'पाचन तंत्र (Digestive)',
           ta: 'செரிமானம் (Digestive)',
@@ -601,7 +601,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'বুকে কফ জমা ও দমবন্ধ করা কাশি।',
         },
         category: {
-          en: 'Respiratory (श्वसन)',
+          en: 'Respiratory',
           mr: 'श्वसन (Respiratory)',
           hi: 'श्वसन (Respiratory)',
           ta: 'சுவாசம் (Respiratory)',
@@ -656,7 +656,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'গ্যাসের কারণে পেট ফাঁপা ও তীব্র মোচড় দেওয়া পেটব্যথা।',
         },
         category: {
-          en: 'Gastroenterology (पचनसंस्था)',
+          en: 'Gastroenterology',
           mr: 'पचनसंस्था (Digestive)',
           hi: 'पाचन तंत्र (Digestive)',
           ta: 'செரிமானம் (Digestive)',
@@ -711,7 +711,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'ত্বকে লাল চাকা চাকা দাগ, চুলকানি ও ফোলাভাব।',
         },
         category: {
-          en: 'Dermatology (त्वचा)',
+          en: 'Dermatology',
           mr: 'त्वचा (Dermatology)',
           hi: 'त्वचा (Dermatology)',
           ta: 'தோல் நோய் (Dermatology)',
@@ -766,7 +766,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'রোদে কাজ করার পর তীব্র মাথা ঘোরা, দুর্বলতা ও মুখ শুকিয়ে যাওয়া।',
         },
         category: {
-          en: 'Emergency Medicine (आपत्कालीन)',
+          en: 'Emergency Medicine',
           mr: 'आपत्कालीन (Emergency)',
           hi: 'आपातकालीन (Emergency)',
           ta: 'அவசர சிகிச்சை',
@@ -821,7 +821,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'চোখ লাল হওয়া, খচখচ করা ও সকালে চোখের পাতা জুড়ে যাওয়া।',
         },
         category: {
-          en: 'Ophthalmology (नेत्ररोग)',
+          en: 'Ophthalmology',
           mr: 'नेत्ररोग (Ophthalmology)',
           hi: 'नेत्र रोग (Ophthalmology)',
           ta: 'கண் மருத்துவம்',
@@ -1063,7 +1063,7 @@ export const SYMPTOM_CATALOG = {
           bn: 'দাঁতের ক্ষত, তীব্র জ্বালা, ফোলাভাব ও চোখের পাতা ভারী হয়ে যাওয়া।',
         },
         category: {
-          en: 'Emergency Toxicology (विषबाधा व सर्पदंश)',
+          en: 'Emergency Toxicology',
           mr: 'विषबाधा व सर्पदंश (Toxicology)',
           hi: 'विष विज्ञान एवं आपातकाल',
           ta: 'நச்சுயியல் அவசர சிகிச்சை',
@@ -1590,7 +1590,7 @@ export default function SymptomChecklistTriage({
           <span className="text-slate-500">({selectedMember?.relation} • {selectedMember?.age} {t('rx_modal_years')} • {selectedMember?.bloodGroup})</span>
         </div>
         <span className="font-mono text-[11px] text-medical-blue font-bold hidden sm:inline">
-          ABHA: {selectedMember?.abhaId || '14-2026-9812-4456'}
+          AR ID: {selectedMember?.arogyaId || selectedMember?.abhaId || 'AR-2026-00001'}
         </span>
       </div>
 
@@ -1626,10 +1626,10 @@ export default function SymptomChecklistTriage({
                 </div>
                 <div className="space-y-1">
                   <div className="font-bold text-xs sm:text-sm text-deep-navy dark:text-clinical-white leading-tight">
-                    {item.name[lang] || item.name.mr || item.name.en}
+                    {item.name[lang] || item.name.en || item.name.mr}
                   </div>
                   <div className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                    {item.desc[lang] || item.desc.mr || item.desc.en}
+                    {item.desc[lang] || item.desc.en || item.desc.mr}
                   </div>
                   <div className="text-[10px] font-semibold text-medical-blue mt-1">
                     {item.category[lang] || item.category.en}
@@ -1673,10 +1673,10 @@ export default function SymptomChecklistTriage({
                 </div>
                 <div className="space-y-1">
                   <div className="font-bold text-xs sm:text-sm text-deep-navy dark:text-clinical-white leading-tight">
-                    {item.name[lang] || item.name.mr || item.name.en}
+                    {item.name[lang] || item.name.en || item.name.mr}
                   </div>
                   <div className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                    {item.desc[lang] || item.desc.mr || item.desc.en}
+                    {item.desc[lang] || item.desc.en || item.desc.mr}
                   </div>
                   <div className="text-[10px] font-semibold text-medical-blue mt-1">
                     {item.category[lang] || item.category.en}
@@ -1725,10 +1725,10 @@ export default function SymptomChecklistTriage({
                 </div>
                 <div className="space-y-1">
                   <div className="font-bold text-xs sm:text-sm text-alert-red leading-tight">
-                    {item.name[lang] || item.name.mr || item.name.en}
+                    {item.name[lang] || item.name.en || item.name.mr}
                   </div>
                   <div className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                    {item.desc[lang] || item.desc.mr || item.desc.en}
+                    {item.desc[lang] || item.desc.en || item.desc.mr}
                   </div>
                   <div className="text-[10px] font-bold text-medical-blue mt-1">
                     {t('triage_specialist')} {item.specialty[lang] || item.specialty.en}

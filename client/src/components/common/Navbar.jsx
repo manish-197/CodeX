@@ -15,7 +15,8 @@ import {
   Check,
   MessageCircle,
   ShieldCheck,
-  User
+  User,
+  Edit3
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../auth/AuthContext';
@@ -27,7 +28,8 @@ export default function Navbar({
   setDarkMode,
   onOpenAuth,
   onLogout,
-  onOpenWhatsApp
+  onOpenWhatsApp,
+  onOpenEditProfile
 }) {
   const { lang, setLang, t } = useLanguage();
   const { currentUser, isAuthenticated, logout, openLogin } = useAuth();
@@ -245,9 +247,9 @@ export default function Navbar({
                   {/* Identification Details */}
                   <div className="p-2.5 rounded-2xl bg-deep-navy/5 dark:bg-white/5 text-[11px] space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">ABHA / Kiosk ID:</span>
+                      <span className="text-slate-500">ArogyaRakshak ID:</span>
                       <strong className="font-mono text-medical-blue">
-                        {currentUser.abhaId || currentUser.kioskId || '14-2026-9812-4456'}
+                        {currentUser.arogyaId || currentUser.abhaId || currentUser.kioskId || 'AR-2026-00001'}
                       </strong>
                     </div>
                     {currentUser.village && (
@@ -260,6 +262,22 @@ export default function Navbar({
 
                   {/* Actions */}
                   <div className="space-y-1 pt-1">
+                    {currentUser.role !== 'kiosk_operator' && (
+                      <button
+                        onClick={() => {
+                          if (onOpenEditProfile) onOpenEditProfile();
+                          setProfileMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-deep-navy/10 transition-colors flex items-center justify-between"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Edit3 className="w-3.5 h-3.5 text-medical-blue" />
+                          <span>{t('profile_edit_title') || 'Edit Profile / प्रोफाइल बदला'}</span>
+                        </span>
+                        <span className="text-medical-blue">→</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => {
                         setCurrentTab('hub');
@@ -363,6 +381,18 @@ export default function Navbar({
                     {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
                   </span>
                 </div>
+                {currentUser.role !== 'kiosk_operator' && (
+                  <button
+                    onClick={() => {
+                      if (onOpenEditProfile) onOpenEditProfile();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2 px-4 rounded-xl text-xs font-bold text-medical-blue bg-medical-blue/10 flex items-center justify-center gap-2"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>{t('profile_edit_title') || 'Edit Profile / प्रोफाइल बदला'}</span>
+                  </button>
+                )}
                 <button
                   onClick={handleLogoutAction}
                   className="w-full py-2 px-4 rounded-xl text-xs font-bold text-alert-red bg-alert-red/10 flex items-center justify-center gap-2"

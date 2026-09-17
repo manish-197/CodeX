@@ -284,7 +284,7 @@ export async function generatePrescriptionPdf(req, res) {
     doc.fillColor('#FFFFFF').fontSize(18).font('Helvetica-Bold')
       .text('ArogyaRakshak AI - Health Accessibility Record', 55, 52);
     doc.fontSize(10).font('Helvetica')
-      .text('National Digital Health Mission Aligned | ABHA Connected Rural Tele-Triage', 55, 75);
+      .text('Universal Rural Integrated Health Network | ArogyaRakshak Digital Health ID', 55, 75);
 
     // Prominent AI-Assisted Notice Header
     doc.rect(40, 115, 515, 30).fill('#FFF3CD');
@@ -296,7 +296,7 @@ export async function generatePrescriptionPdf(req, res) {
     const patientName = cleanAscii(presc.patientDetails?.name, 'Self (Registered Citizen)');
     const patientAge = presc.patientDetails?.age || 42;
     const patientBlood = presc.patientDetails?.bloodGroup || 'B+';
-    const abhaId = cleanAscii(presc.patientDetails?.abhaId, '14-2026-9812-4456');
+    const arogyaId = cleanAscii(presc.patientDetails?.arogyaId || presc.patientDetails?.abhaId, 'AR-2026-00001');
     const recordDate = new Date(presc.createdAt || Date.now()).toLocaleDateString('en-IN', {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
@@ -311,8 +311,8 @@ export async function generatePrescriptionPdf(req, res) {
     doc.font('Helvetica-Bold').text('AGE / BLOOD GROUP:', 320, 168);
     doc.font('Helvetica').text(`${patientAge} yrs | ${patientBlood}`, 440, 168);
 
-    doc.font('Helvetica-Bold').text('ABHA NUMBER:', 55, 188);
-    doc.font('Helvetica').text(abhaId, 150, 188);
+    doc.font('Helvetica-Bold').text('AROGYARAKSHAK ID:', 55, 188);
+    doc.font('Helvetica').text(arogyaId, 150, 188);
 
     doc.font('Helvetica-Bold').text('DATE / TIME:', 320, 188);
     doc.font('Helvetica').text(recordDate, 440, 188);

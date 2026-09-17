@@ -47,7 +47,7 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
             Add Family Member
           </h3>
           <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
-            Registers under your household ABHA digital health hub
+            Registers under your household ArogyaRakshak digital health network
           </p>
         </div>
 

@@ -56,7 +56,7 @@ export default function HealthCardModal({ isOpen, onClose, member }) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ABDM_Health_Card_${(member.abhaId || '14_2026').replace(/-/g, '_')}.pdf`;
+      a.download = `ArogyaRakshak_Health_Card_${(member.arogyaId || member.abhaId || 'AR_2026').replace(/-/g, '_')}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -85,27 +85,27 @@ export default function HealthCardModal({ isOpen, onClose, member }) {
         <div className="text-center mb-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white text-xs font-bold uppercase tracking-wider mb-2">
             <ShieldCheck className="w-4 h-4 text-health-green" />
-            <span>Ayushman Bharat Digital Mission (ABDM)</span>
+            <span>ArogyaRakshak Digital Health Mission</span>
           </div>
           <h3 className="font-display font-bold text-2xl text-deep-navy dark:text-clinical-white">
-            Digital Health Card
+            {t('profile_card_title')}
           </h3>
           <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
-            National Health Authority compliant ID with cryptographically signed QR
+            Universal Rural Health Network with cryptographically signed QR
           </p>
         </div>
 
-        {/* Realistic ABDM Wallet Card Graphic */}
+        {/* Realistic ArogyaRakshak Wallet Card Graphic */}
         <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-deep-navy/30 bg-white text-deep-navy my-6 relative">
           
           {/* Card Header Band */}
           <div className="bg-deep-navy px-5 py-3 text-white flex items-center justify-between">
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-caution-amber">
-                Government of India • ABDM
+                ArogyaRakshak AI • Universal Health Card
               </div>
               <div className="font-display font-bold text-sm tracking-tight">
-                Ayushman Bharat Health Account
+                ArogyaRakshak Digital Health ID
               </div>
             </div>
             <div className="w-8 h-8 rounded-xl bg-medical-blue flex items-center justify-center text-white">
@@ -121,16 +121,16 @@ export default function HealthCardModal({ isOpen, onClose, member }) {
             {/* Demographics Column */}
             <div className="space-y-3 flex-1 text-left">
               <div>
-                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">Full Name / नाव</span>
+                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">{t('profile_name_label')} / नाव</span>
                 <span className="font-display font-bold text-base text-deep-navy tracking-tight block">
                   {member.name}
                 </span>
               </div>
 
               <div>
-                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">ABHA Number / आभा क्रमांक</span>
+                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">{t('profile_arogya_id')} / आयडी</span>
                 <span className="font-mono font-black text-sm text-medical-blue tracking-wider block">
-                  {member.abhaId || '14-2026-9812-4456'}
+                  {member.arogyaId || member.abhaId || 'AR-2026-00001'}
                 </span>
               </div>
 

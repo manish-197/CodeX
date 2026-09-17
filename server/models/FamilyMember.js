@@ -31,7 +31,19 @@ const familyMemberSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  arogyaId: {
+    type: String,
+    trim: true,
+  },
   abhaId: {
+    type: String,
+    trim: true,
+  },
+  phone: {
+    type: String,
+    trim: true,
+  },
+  emergencyContact: {
     type: String,
     trim: true,
   },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AddMemberModal from './AddMemberModal';
+import EditMemberModal from './EditMemberModal';
 import HealthCardModal from './HealthCardModal';
 import PrescriptionModal from './PrescriptionModal';
 import { 
@@ -21,9 +22,12 @@ import {
   QrCode,
   User,
   Stethoscope,
-  ChevronRight
+  ChevronRight,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../auth/AuthContext';
 
 export default function FamilyHub({ 
   currentUser, 
@@ -32,7 +36,8 @@ export default function FamilyHub({
   onSelectActiveMember,
   onNavigateToTriage
 }) {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
+  const { token } = useAuth();
 
   const [members, setMembers] = useState(() => {
     try {
@@ -44,14 +49,14 @@ export default function FamilyHub({
     } catch (e) {}
     return [
       {
-        id: currentUser?.id || 'self_1',
+        id: currentUser?._id || currentUser?.id || 'self_1',
         name: currentUser?.name || 'Self (Primary Citizen)',
         relation: 'Self',
-        age: 42,
-        gender: 'Male',
-        bloodGroup: 'B+',
-        abhaId: currentUser?.abhaId || '14-2026-9812-4456',
-        medicalHistory: ['Mild Hypertension'],
+        age: currentUser?.age || 42,
+        gender: currentUser?.gender || 'Male',
+        bloodGroup: currentUser?.bloodGroup || 'B+',
+        arogyaId: currentUser?.arogyaId || currentUser?.abhaId || 'AR-2026-00001',
+        medicalHistory: currentUser?.medicalHistory || ['Mild Hypertension'],
         vitals: {
           bp: { sys: 0, dia: 0 },
           heartRate: 0,
@@ -67,13 +72,15 @@ export default function FamilyHub({
       const savedId = localStorage.getItem('arogya_active_member_id');
       if (savedId) return savedId;
     } catch (e) {}
-    return currentUser?.id || 'self_1';
+    return currentUser?._id || currentUser?.id || 'self_1';
   });
   const [hubTab, setHubTab] = useState('overview'); // 'overview' | 'prescriptions'
   const [prescriptions, setPrescriptions] = useState([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [verifyingId, setVerifyingId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditMemberModalOpen, setIsEditMemberModalOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -196,12 +203,94 @@ export default function FamilyHub({
     }
   };
 
-  const handleAddMember = (newMemberData) => {
+  // Fetch family members from server if authenticated
+  useEffect(() => {
+    const fetchFamilyMembers = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch('http://localhost:5000/api/family', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const serverMembers = data.familyMembers || [];
+          const selfMember = {
+            id: currentUser?._id || currentUser?.id || 'self_1',
+            _id: currentUser?._id || currentUser?.id,
+            name: currentUser?.name || 'Self (Primary Citizen)',
+            relation: 'Self',
+            age: currentUser?.age || 42,
+            gender: currentUser?.gender || 'Male',
+            bloodGroup: currentUser?.bloodGroup || 'B+',
+            arogyaId: currentUser?.arogyaId || currentUser?.abhaId || 'AR-2026-00001',
+            medicalHistory: currentUser?.medicalHistory || ['Mild Hypertension'],
+            vitals: { bp: { sys: 0, dia: 0 }, heartRate: 0, spo2: 0, recordedAt: null }
+          };
+          const formattedServerMembers = serverMembers.map(m => ({
+            id: m._id || m.id,
+            _id: m._id || m.id,
+            name: m.name,
+            relation: m.relation,
+            age: m.age,
+            gender: m.gender,
+            bloodGroup: m.bloodGroup,
+            arogyaId: m.arogyaId || m.abhaId || `${selfMember.arogyaId}-01`,
+            medicalHistory: m.medicalHistory || [],
+            vitals: m.vitals || { bp: { sys: 0, dia: 0 }, heartRate: 0, spo2: 0, recordedAt: null }
+          }));
+          setMembers([selfMember, ...formattedServerMembers]);
+        }
+      } catch (err) {
+        console.warn('[FamilyHub] Server members fetch notice:', err.message);
+      }
+    };
+    fetchFamilyMembers();
+  }, [token, currentUser?.arogyaId]);
+
+  const handleAddMember = async (newMemberData) => {
+    if (token) {
+      try {
+        const res = await fetch('http://localhost:5000/api/family', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(newMemberData)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const m = data.member || data.familyMember;
+          const created = {
+            id: m._id,
+            _id: m._id,
+            name: m.name,
+            relation: m.relation,
+            age: m.age,
+            gender: m.gender,
+            bloodGroup: m.bloodGroup,
+            arogyaId: m.arogyaId,
+            medicalHistory: m.medicalHistory || [],
+            vitals: { bp: { sys: 0, dia: 0 }, heartRate: 0, spo2: 0, recordedAt: null }
+          };
+          setMembers(prev => [...prev, created]);
+          setActiveMemberId(created.id);
+          setIsAddModalOpen(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('[FamilyHub] Server add member notice:', err.message);
+      }
+    }
+
+    // Local fallback
     const newId = 'mem_' + Date.now();
+    const selfArogya = currentUser?.arogyaId || 'AR-2026-00001';
+    const nextIdx = String(members.length).padStart(2, '0');
     const createdMember = {
       id: newId,
       ...newMemberData,
-      abhaId: '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
+      arogyaId: `${selfArogya}-${nextIdx}`,
       vitals: {
         bp: { sys: 0, dia: 0 },
         heartRate: 0,
@@ -209,8 +298,65 @@ export default function FamilyHub({
         recordedAt: null,
       }
     };
-    setMembers([...members, createdMember]);
+    setMembers(prev => [...prev, createdMember]);
     setActiveMemberId(newId);
+    setIsAddModalOpen(false);
+  };
+
+  const handleUpdateMember = async (updatedData) => {
+    if (!memberToEdit) return;
+    const targetId = memberToEdit._id || memberToEdit.id;
+
+    if (token && targetId && !targetId.toString().startsWith('mem_') && !targetId.toString().startsWith('self_')) {
+      try {
+        await fetch(`http://localhost:5000/api/family/${targetId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updatedData)
+        });
+      } catch (err) {
+        console.warn('[FamilyHub] Server update member notice:', err.message);
+      }
+    }
+
+    setMembers(prev => prev.map(m => (m.id === targetId || m._id === targetId) ? { ...m, ...updatedData } : m));
+    setIsEditMemberModalOpen(false);
+    setMemberToEdit(null);
+  };
+
+  const handleDeleteMember = async (memberToDelete) => {
+    if (!memberToDelete) return;
+    if (memberToDelete.relation === 'Self') {
+      alert(t('member_cannot_delete_self') || 'Primary citizen profile cannot be deleted.');
+      return;
+    }
+
+    const confirmMsg = lang === 'mr'
+      ? `तुम्हाला '${memberToDelete.name}' हे कुटुंब सदस्य प्रोफाइल नक्की हटवायचे आहे का?`
+      : `Are you sure you want to delete family member profile for '${memberToDelete.name}'?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const targetId = memberToDelete._id || memberToDelete.id;
+    if (token && targetId && !targetId.toString().startsWith('mem_')) {
+      try {
+        await fetch(`http://localhost:5000/api/family/${targetId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.warn('[FamilyHub] Server delete member notice:', err.message);
+      }
+    }
+
+    const remaining = members.filter(m => m.id !== targetId && m._id !== targetId);
+    setMembers(remaining);
+    if (activeMemberId === targetId) {
+      setActiveMemberId(remaining[0]?.id || 'self_1');
+    }
   };
 
   return (
@@ -269,7 +415,7 @@ export default function FamilyHub({
           }`}
         >
           <User className="w-4 h-4" />
-          <span>Health Profile & ABHA</span>
+          <span>{t('hub_tab_overview')}</span>
         </button>
         <button
           id="family-tab-prescriptions"
@@ -281,7 +427,7 @@ export default function FamilyHub({
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Prescription History</span>
+          <span>{t('hub_tab_prescriptions')}</span>
           {prescriptions.length > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-medical-blue text-white">
               {prescriptions.length}
@@ -303,7 +449,7 @@ export default function FamilyHub({
               onClick={() => {
                 setActiveMemberId(member.id);
                 if (onVitalsChange) {
-                  onVitalsChange(member.vitals.heartRate, member.vitals);
+                  onVitalsChange(member.vitals?.heartRate || 0, member.vitals);
                 }
               }}
               className={`flex items-center gap-3 px-4 py-3 rounded-3xl whitespace-nowrap transition-all border ${
@@ -339,7 +485,7 @@ export default function FamilyHub({
               </div>
               <div>
                 <h3 className="font-display font-bold text-lg sm:text-xl text-deep-navy dark:text-clinical-white">
-                  {activeMember.name}'s Prescription Records
+                  {activeMember.name}'s {t('hub_tab_prescriptions')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
                   {prescriptions.length} {prescriptions.length === 1 ? 'prescription record' : 'prescription records'} saved for this profile
@@ -351,7 +497,7 @@ export default function FamilyHub({
               className="btn-medical-blue text-xs py-2.5 px-5 flex items-center gap-2 self-start sm:self-auto"
             >
               <Upload className="w-4 h-4" />
-              <span>Scan Prescription Image</span>
+              <span>{t('hub_btn_rx')}</span>
             </button>
           </div>
 
@@ -366,10 +512,12 @@ export default function FamilyHub({
               <FileText className="w-10 h-10 text-medical-blue/60 mx-auto" />
               <div className="space-y-1">
                 <h4 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white">
-                  No Prescriptions Saved Yet
+                  {lang === 'mr' ? 'कोणतीही प्रिस्क्रिप्शन सापडली नाही' : 'No Prescriptions Saved Yet'}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Prescriptions generated from Symptom Checklist Triage or uploaded via the OCR Scanner will be stored under <strong>{activeMember.name}</strong>.
+                  {lang === 'mr' 
+                    ? `लक्षणे तपासणी किंवा ओसीआर स्कॅनद्वारे तयार केलेली प्रिस्क्रिप्शन ${activeMember.name} यांच्या प्रोफाइलखाली साठवली जातील.`
+                    : `Prescriptions generated from Symptom Checklist Triage or uploaded via the OCR Scanner will be stored under ${activeMember.name}.`}
                 </p>
               </div>
               <button
@@ -377,7 +525,7 @@ export default function FamilyHub({
                 className="btn-medical-blue text-xs py-2 px-5"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>Upload Prescription Slip</span>
+                <span>{t('hub_btn_rx')}</span>
               </button>
             </div>
           ) : (
@@ -513,35 +661,69 @@ export default function FamilyHub({
       ) : activeMember ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Left Column: Active Member Demographics & ABHA Card */}
+          {/* Left Column: Active Member Demographics & ArogyaRakshak Health Card */}
           <div className="lg:col-span-4 space-y-6">
             <div className="glass-card p-6 sm:p-7 space-y-5 border border-white/70 dark:border-white/10 shadow-xl">
               
               <div className="flex items-start justify-between border-b border-deep-navy/10 dark:border-white/10 pb-4">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-health-green/15 text-health-green">
-                    {t('hub_active_profile')}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-health-green/15 text-health-green">
+                      {t('hub_active_profile')}
+                    </span>
+                    {activeMember.relation !== 'Self' && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-medical-blue/15 text-medical-blue">
+                        Family Member
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-display font-bold text-xl text-deep-navy dark:text-clinical-white mt-2">
                     {activeMember.name}
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                    {t('hub_relation')}: <strong>{activeMember.relation}</strong>
+                    {t('hub_relation')}: <strong>{activeMember.relation}</strong> • {activeMember.age ? `${activeMember.age} yrs` : 'Age N/A'}
                   </p>
+
+                  {/* Edit & Delete Action Buttons for Member Profile */}
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => {
+                        setMemberToEdit(activeMember);
+                        setIsEditMemberModalOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-xl border border-medical-blue/40 text-medical-blue hover:bg-medical-blue/10 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                      title="Edit member details"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{t('member_btn_edit')}</span>
+                    </button>
+
+                    {activeMember.relation !== 'Self' && (
+                      <button
+                        onClick={() => handleDeleteMember(activeMember)}
+                        className="px-3 py-1.5 rounded-xl border border-alert-red/40 text-alert-red hover:bg-alert-red/10 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                        title="Delete family member"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{t('member_btn_delete')}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber text-white flex items-center justify-center font-bold text-lg shadow-md">
+
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber text-white flex items-center justify-center font-bold text-lg shadow-md shrink-0">
                   {activeMember.bloodGroup || 'N/A'}
                 </div>
               </div>
 
-              {/* ABHA ID details */}
+              {/* ArogyaRakshak ID details */}
               <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-dark-base/60 border border-deep-navy/10 space-y-1 shadow-sm">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-deep-navy/70 dark:text-dark-muted">
                   <CreditCard className="w-3.5 h-3.5 text-medical-blue" />
-                  <span>{t('hub_abha_title')}</span>
+                  <span>{t('hub_arogya_card_title')}</span>
                 </div>
                 <div className="font-mono text-xs sm:text-sm font-bold tracking-wider text-deep-navy dark:text-clinical-white">
-                  {activeMember.abhaId || 'XX-XXXX-XXXX-XXXX'}
+                  {activeMember.arogyaId || activeMember.abhaId || 'AR-2026-00001'}
                 </div>
               </div>
 
@@ -599,13 +781,13 @@ export default function FamilyHub({
                   </div>
                   <div>
                     <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-medical-blue/20 text-medical-blue border border-medical-blue/30">
-                      Symptom Checklist Triage
+                      {t('home_checklist_badge')}
                     </span>
                     <h4 className="font-display font-bold text-lg sm:text-xl text-deep-navy dark:text-clinical-white mt-1.5">
-                      आरोग्य लक्षणे व २-दिवसांचे प्रिस्क्रिप्शन
+                      {t('home_checklist_title')}
                     </h4>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-lg leading-relaxed">
-                      {activeMember.name} यांच्यासाठी सामान्य ते अतिगंभीर लक्षणे तपासा. तात्काळ २ दिवसांची औषधे, सुरक्षित घरगुती उपाय आणि आणीबाणीत थेट रुग्णालय मार्ग मिळवा.
+                      {t('home_checklist_desc')}
                     </p>
                   </div>
                 </div>
@@ -616,7 +798,7 @@ export default function FamilyHub({
                   className="btn-navy text-xs sm:text-sm py-3 px-5 flex items-center justify-center gap-2 whitespace-nowrap shadow-lg self-start sm:self-center"
                 >
                   <Stethoscope className="w-4 h-4" />
-                  <span>तपासणी सुरू करा →</span>
+                  <span>{t('home_btn_checklist')}</span>
                 </button>
               </div>
             </div>
@@ -629,20 +811,22 @@ export default function FamilyHub({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-deep-navy dark:text-clinical-white font-bold text-sm">
                     <FileText className="w-4 h-4 text-medical-blue" />
-                    <span>प्रिस्क्रिप्शन रेकॉर्ड्स</span>
+                    <span>{t('hub_tab_prescriptions')}</span>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-medical-blue/15 text-medical-blue">
                     {prescriptions.length} {prescriptions.length === 1 ? 'Record' : 'Records'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  {activeMember.name} यांच्यासाठी तयार केलेले २ दिवसांचे प्रिस्क्रिप्शन स्लिप्स व फार्मसी पडताळणी रेकॉर्ड्स.
+                  {lang === 'mr' 
+                    ? `${activeMember.name} यांच्यासाठी तयार केलेले २ दिवसांचे प्रिस्क्रिप्शन स्लिप्स व फार्मसी पडताळणी रेकॉर्ड्स.`
+                    : `Saved 2-day prescription slips and pharmacy dispensing records for ${activeMember.name}.`}
                 </p>
                 <button
                   onClick={() => setHubTab('prescriptions')}
                   className="w-full btn-glass text-xs py-2.5 px-4 flex items-center justify-center gap-1.5 text-medical-blue hover:text-white"
                 >
-                  <span>प्रिस्क्रिप्शन हिस्टरी पहा</span>
+                  <span>{t('hub_tab_prescriptions')}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -651,14 +835,16 @@ export default function FamilyHub({
               <div className="glass-card p-5 sm:p-6 space-y-3.5 border border-white/70 dark:border-white/10 shadow-lg">
                 <div className="flex items-center gap-2 text-deep-navy dark:text-clinical-white font-bold text-sm">
                   <ShieldCheck className="w-4 h-4 text-health-green" />
-                  <span>आपत्कालीन आरोग्य मदत</span>
+                  <span>{lang === 'mr' ? 'आपत्कालीन आरोग्य मदत' : lang === 'hi' ? 'आपातकालीन स्वास्थ्य सहायता' : 'Emergency Health Support'}</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  कोणत्याही गंभीर किंवा आणीबाणीच्या परिस्थितीत स्वतः औषधे न घेता थेट १०८ रुग्णवाहिका किंवा जवळच्या प्राथमिक आरोग्य केंद्राशी संपर्क साधा.
+                  {lang === 'mr'
+                    ? 'कोणत्याही गंभीर किंवा आणीबाणीच्या परिस्थितीत स्वतः औषधे न घेता थेट १०८ रुग्णवाहिका किंवा जवळच्या प्राथमिक आरोग्य केंद्राशी संपर्क साधा.'
+                    : 'In any critical emergency, do not self-medicate; immediately call 108 ambulance or visit the nearest primary health center.'}
                 </p>
                 <div className="p-2.5 rounded-xl bg-alert-red/10 border border-alert-red/20 text-[11px] font-semibold text-alert-red flex items-center justify-between">
-                  <span>राष्ट्रीय आपत्कालीन रुग्णवाहिका:</span>
-                  <strong className="text-xs font-bold">हेल्पलाइन १०८</strong>
+                  <span>{lang === 'mr' ? 'राष्ट्रीय आपत्कालीन रुग्णवाहिका:' : 'Emergency Helpline:'}</span>
+                  <strong className="text-xs font-bold">108</strong>
                 </div>
               </div>
 
@@ -692,7 +878,18 @@ export default function FamilyHub({
         onAddMember={handleAddMember}
       />
 
-      {/* ABDM Health Card Modal with Encrypted QR and PDF download */}
+      {/* Edit Member Modal */}
+      <EditMemberModal
+        isOpen={isEditMemberModalOpen}
+        onClose={() => {
+          setIsEditMemberModalOpen(false);
+          setMemberToEdit(null);
+        }}
+        member={memberToEdit}
+        onUpdateMember={handleUpdateMember}
+      />
+
+      {/* ArogyaRakshak Health Card Modal with Encrypted QR and PDF download */}
       <HealthCardModal
         isOpen={isCardModalOpen}
         onClose={() => setIsCardModalOpen(false)}

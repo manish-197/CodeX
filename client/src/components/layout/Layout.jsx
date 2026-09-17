@@ -14,7 +14,8 @@ export default function Layout({
   currentUser,
   onOpenAuth,
   onLogout,
-  onOpenWhatsApp
+  onOpenWhatsApp,
+  onOpenEditProfile
 }) {
   // Initialize Lenis smooth scroll with support for data-lenis-prevent
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function Layout({
         onOpenAuth={onOpenAuth}
         onLogout={onLogout}
         onOpenWhatsApp={onOpenWhatsApp}
+        onOpenEditProfile={onOpenEditProfile}
       />
 
       {/* Main Page Content */}

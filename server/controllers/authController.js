@@ -6,8 +6,8 @@ import { isDbConnected } from '../config/db.js';
 import { memoryDb, generateMemoryId } from '../services/inMemoryStore.js';
 import { sendPasswordResetEmail } from '../services/emailService.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'arogyarakshak_jwt_secret_dev_2026';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const getJwtSecret = () => process.env.JWT_SECRET || 'arogyarakshak_jwt_secret_dev_2026';
+const getJwtExpiresIn = () => process.env.JWT_EXPIRES_IN || '7d';
 
 // In-memory rate limiter for password reset requests: map of email -> timestamps[]
 const resetRateLimitMap = new Map();
@@ -18,13 +18,47 @@ export function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-// Generate random ABHA ID in XX-XXXX-XXXX-XXXX format if citizen doesn't have one
+// Generate random legacy ABHA ID if needed
 export function formatAbhaId(input) {
   if (input && /^(\d{2})-(\d{4})-(\d{4})-(\d{4})$/.test(input)) {
     return input;
   }
   const digits = Math.floor(10000000000000 + Math.random() * 90000000000000).toString();
   return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}-${digits.slice(10, 14)}`;
+}
+
+// Sequential ArogyaRakshak ID Series Generator (e.g. AR-2026-00001, AR-2026-00002)
+export async function generateArogyaId() {
+  const year = 2026;
+  const prefix = `AR-${year}-`;
+  if (isDbConnected()) {
+    try {
+      const lastUser = await User.findOne({ arogyaId: new RegExp(`^${prefix}\\d{5}$`) })
+        .sort({ arogyaId: -1 })
+        .lean();
+      if (lastUser && lastUser.arogyaId) {
+        const parts = lastUser.arogyaId.split('-');
+        const seq = parseInt(parts[2], 10);
+        if (!isNaN(seq)) {
+          return `${prefix}${String(seq + 1).padStart(5, '0')}`;
+        }
+      }
+      const count = await User.countDocuments();
+      return `${prefix}${String(count + 1).padStart(5, '0')}`;
+    } catch (e) {
+      return `${prefix}00001`;
+    }
+  } else {
+    let maxSeq = 0;
+    for (const [, u] of memoryDb.users) {
+      if (u.arogyaId && u.arogyaId.startsWith(prefix)) {
+        const parts = u.arogyaId.split('-');
+        const seq = parseInt(parts[2], 10);
+        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+      }
+    }
+    return `${prefix}${String(maxSeq + 1).padStart(5, '0')}`;
+  }
 }
 
 /**
@@ -68,10 +102,18 @@ export async function register(req, res) {
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
-    const finalAbhaId = role === 'citizen' ? formatAbhaId(abhaId) : undefined;
+    const finalArogyaId = await generateArogyaId();
+    const finalAbhaId = finalArogyaId;
     const userCoords = Array.isArray(coordinates) && coordinates.length === 2 
       ? coordinates 
       : [73.8567, 18.5204];
+
+    const ageNum = req.body.age ? Number(req.body.age) : undefined;
+    const genderVal = req.body.gender || undefined;
+    const bloodGroupVal = req.body.bloodGroup || 'Unknown';
+    const pincodeVal = req.body.pincode || undefined;
+    const emergencyContactVal = req.body.emergencyContact || { name: '', phone: '', relation: '' };
+    const hasCompleteInfo = Boolean(name && ageNum && genderVal && bloodGroupVal && bloodGroupVal !== 'Unknown');
 
     let createdUser;
 
@@ -94,11 +136,18 @@ export async function register(req, res) {
         phone: cleanPhone,
         passwordHash,
         role,
+        arogyaId: finalArogyaId,
         abhaId: finalAbhaId,
         kioskId: role === 'kiosk_operator' ? kioskId : undefined,
         village,
         district,
         state,
+        pincode: pincodeVal,
+        age: ageNum,
+        gender: genderVal,
+        bloodGroup: bloodGroupVal,
+        emergencyContact: emergencyContactVal,
+        isProfileComplete: hasCompleteInfo,
         preferredLanguage,
         location: {
           type: 'Point',
@@ -125,11 +174,18 @@ export async function register(req, res) {
         phone: cleanPhone,
         passwordHash,
         role,
+        arogyaId: finalArogyaId,
         abhaId: finalAbhaId,
         kioskId: role === 'kiosk_operator' ? kioskId : undefined,
         village: village || '',
         district: district || '',
         state: state || '',
+        pincode: pincodeVal || '',
+        age: ageNum || null,
+        gender: genderVal || null,
+        bloodGroup: bloodGroupVal,
+        emergencyContact: emergencyContactVal,
+        isProfileComplete: hasCompleteInfo,
         preferredLanguage,
         location: {
           type: 'Point',
@@ -149,8 +205,8 @@ export async function register(req, res) {
         phone: createdUser.phone, 
         name: createdUser.name 
       },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      getJwtSecret(),
+      { expiresIn: getJwtExpiresIn() }
     );
 
     const userResponse = {
@@ -159,11 +215,18 @@ export async function register(req, res) {
       email: createdUser.email,
       phone: createdUser.phone,
       role: createdUser.role,
-      abhaId: createdUser.abhaId,
+      arogyaId: createdUser.arogyaId || finalArogyaId,
+      abhaId: createdUser.arogyaId || createdUser.abhaId || finalArogyaId,
       kioskId: createdUser.kioskId,
       village: createdUser.village,
       district: createdUser.district,
       state: createdUser.state,
+      pincode: createdUser.pincode,
+      age: createdUser.age,
+      gender: createdUser.gender,
+      bloodGroup: createdUser.bloodGroup || 'Unknown',
+      emergencyContact: createdUser.emergencyContact,
+      isProfileComplete: Boolean(createdUser.isProfileComplete),
       preferredLanguage: createdUser.preferredLanguage,
       location: createdUser.location,
     };
@@ -239,9 +302,20 @@ export async function login(req, res) {
         phone: foundUser.phone, 
         name: foundUser.name 
       },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      getJwtSecret(),
+      { expiresIn: getJwtExpiresIn() }
     );
+
+    // Auto-assign ArogyaRakshak ID if missing from legacy records
+    if (!foundUser.arogyaId) {
+      foundUser.arogyaId = await generateArogyaId();
+      foundUser.abhaId = foundUser.arogyaId;
+      if (isDbConnected() && foundUser.save) {
+        await foundUser.save();
+      }
+    }
+
+    const hasComplete = Boolean(foundUser.isProfileComplete && foundUser.age && foundUser.gender && foundUser.bloodGroup && foundUser.bloodGroup !== 'Unknown');
 
     const userResponse = {
       id: foundUser._id || foundUser.id,
@@ -249,11 +323,18 @@ export async function login(req, res) {
       email: foundUser.email,
       phone: foundUser.phone,
       role: foundUser.role,
-      abhaId: foundUser.abhaId,
+      arogyaId: foundUser.arogyaId,
+      abhaId: foundUser.arogyaId || foundUser.abhaId,
       kioskId: foundUser.kioskId,
       village: foundUser.village,
       district: foundUser.district,
       state: foundUser.state,
+      pincode: foundUser.pincode,
+      age: foundUser.age,
+      gender: foundUser.gender,
+      bloodGroup: foundUser.bloodGroup || 'Unknown',
+      emergencyContact: foundUser.emergencyContact,
+      isProfileComplete: hasComplete,
       preferredLanguage: foundUser.preferredLanguage,
       location: foundUser.location,
     };
@@ -447,17 +528,34 @@ export async function getMe(req, res) {
       return res.status(404).json({ error: 'User profile not found.' });
     }
 
+    if (!user.arogyaId) {
+      user.arogyaId = await generateArogyaId();
+      user.abhaId = user.arogyaId;
+      if (isDbConnected() && user.save) {
+        await user.save();
+      }
+    }
+
+    const hasComplete = Boolean(user.isProfileComplete && user.age && user.gender && user.bloodGroup && user.bloodGroup !== 'Unknown');
+
     const userResponse = {
       id: user._id || user.id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       role: user.role,
-      abhaId: user.abhaId,
+      arogyaId: user.arogyaId,
+      abhaId: user.arogyaId || user.abhaId,
       kioskId: user.kioskId,
       village: user.village,
       district: user.district,
       state: user.state,
+      pincode: user.pincode,
+      age: user.age,
+      gender: user.gender,
+      bloodGroup: user.bloodGroup || 'Unknown',
+      emergencyContact: user.emergencyContact,
+      isProfileComplete: hasComplete,
       preferredLanguage: user.preferredLanguage,
       location: user.location,
     };
@@ -466,5 +564,109 @@ export async function getMe(req, res) {
   } catch (err) {
     console.error('[GetMe Error]', err);
     res.status(500).json({ error: 'Failed to retrieve profile.' });
+  }
+}
+
+/**
+ * Update Profile & Complete Mandatory Onboarding
+ */
+export async function updateProfile(req, res) {
+  try {
+    const userId = req.user.id;
+    const {
+      name,
+      age,
+      gender,
+      bloodGroup,
+      phone,
+      village,
+      district,
+      state,
+      pincode,
+      emergencyContact,
+      preferredLanguage
+    } = req.body;
+
+    let user;
+    if (isDbConnected()) {
+      user = await User.findById(userId);
+    } else {
+      user = memoryDb.users.get(userId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'User profile not found.' });
+    }
+
+    if (name) user.name = name.trim();
+    if (age !== undefined && age !== '') user.age = Number(age);
+    if (gender) user.gender = gender;
+    if (bloodGroup) user.bloodGroup = bloodGroup;
+    if (phone) user.phone = phone.trim();
+    if (village !== undefined) user.village = village.trim();
+    if (district !== undefined) user.district = district.trim();
+    if (state !== undefined) user.state = state.trim();
+    if (pincode !== undefined) user.pincode = pincode.trim();
+    if (emergencyContact) {
+      if (typeof emergencyContact === 'string') {
+        user.emergencyContact = {
+          name: user.emergencyContact?.name || '',
+          phone: emergencyContact.trim(),
+          relation: user.emergencyContact?.relation || ''
+        };
+      } else if (typeof emergencyContact === 'object') {
+        user.emergencyContact = {
+          name: emergencyContact.name || user.emergencyContact?.name || '',
+          phone: emergencyContact.phone || user.emergencyContact?.phone || '',
+          relation: emergencyContact.relation || user.emergencyContact?.relation || ''
+        };
+      }
+    }
+    if (preferredLanguage) user.preferredLanguage = preferredLanguage;
+
+    if (!user.arogyaId) {
+      user.arogyaId = await generateArogyaId();
+      user.abhaId = user.arogyaId;
+    }
+
+    // Set profile complete flag if required fields exist
+    const hasRequired = Boolean(user.name && user.age && user.gender && user.bloodGroup && user.bloodGroup !== 'Unknown');
+    user.isProfileComplete = hasRequired;
+
+    if (isDbConnected()) {
+      await user.save();
+    } else {
+      memoryDb.users.set(userId, user);
+    }
+
+    const updatedResponse = {
+      id: user._id || user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      arogyaId: user.arogyaId,
+      abhaId: user.arogyaId || user.abhaId,
+      kioskId: user.kioskId,
+      village: user.village,
+      district: user.district,
+      state: user.state,
+      pincode: user.pincode,
+      age: user.age,
+      gender: user.gender,
+      bloodGroup: user.bloodGroup || 'Unknown',
+      emergencyContact: user.emergencyContact || { name: '', phone: '', relation: '' },
+      isProfileComplete: Boolean(user.isProfileComplete),
+      preferredLanguage: user.preferredLanguage,
+      location: user.location,
+    };
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: updatedResponse
+    });
+  } catch (err) {
+    console.error('[UpdateProfile Error]', err);
+    res.status(500).json({ error: 'Failed to update profile.' });
   }
 }

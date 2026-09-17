@@ -133,6 +133,13 @@ export function AuthProvider({ children }) {
     return false;
   };
 
+  const updateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('arogya_user', JSON.stringify(updatedUser));
+    } catch (e) {}
+  };
+
   const value = {
     currentUser,
     token,
@@ -144,6 +151,7 @@ export function AuthProvider({ children }) {
     authToast,
     login,
     logout,
+    updateUser,
     openLogin,
     closeLogin,
     requireAuth,

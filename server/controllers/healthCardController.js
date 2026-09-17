@@ -47,18 +47,18 @@ export async function getCardPreview(req, res) {
   }
 }
 
-// Generate printable ABDM PDF Document
+// Generate printable ArogyaRakshak Health Card PDF Document
 export async function generateHealthCardPdf(req, res) {
   try {
     const member = req.body || {};
-    const abhaId = member.abhaId || '14-2026-9812-4456';
+    const arogyaId = member.arogyaId || member.abhaId || 'AR-2026-00001';
     const name = member.name || 'Primary Citizen';
     const gender = member.gender || 'Not specified';
     const bloodGroup = member.bloodGroup || 'Unknown';
     const relation = member.relation || 'Self';
     const age = member.age || 'N/A';
 
-    const signedToken = generateSignedHealthToken(member);
+    const signedToken = generateSignedHealthToken({ ...member, arogyaId });
     const qrBuffer = await QRCode.toBuffer(signedToken, {
       errorCorrectionLevel: 'H',
       margin: 1,
@@ -75,7 +75,7 @@ export async function generateHealthCardPdf(req, res) {
     });
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="ABDM_Health_Card_${abhaId.replace(/-/g, '_')}.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="ArogyaRakshak_Health_Card_${arogyaId.replace(/-/g, '_')}.pdf"`);
 
     doc.pipe(res);
 
@@ -88,9 +88,9 @@ export async function generateHealthCardPdf(req, res) {
 
     // Header Typography
     doc.fillColor('#F4B942').fontSize(9).font('Helvetica-Bold')
-      .text('AYUSHMAN BHARAT DIGITAL MISSION (ABDM)', 18, 14, { characterSpacing: 0.5 });
+      .text('AROGYARAKSHAK DIGITAL HEALTH CARD', 18, 14, { characterSpacing: 0.5 });
     doc.fillColor('#FFFFFF').fontSize(7).font('Helvetica')
-      .text('National Health Authority • ArogyaRakshak AI Rural Health Hub', 18, 27);
+      .text('Universal Rural Healthcare Network • Digital Health Card', 18, 27);
 
     // Decorative Orange Strip
     doc.rect(5, 53, 350, 3).fill('#E4714E');
@@ -100,8 +100,8 @@ export async function generateHealthCardPdf(req, res) {
     doc.fillColor('#0F5E5E').fontSize(8).font('Helvetica-Bold').text('CITIZEN NAME', 20, 70);
     doc.fillColor('#1A2E2E').fontSize(11).font('Helvetica-Bold').text(cleanName.toUpperCase(), 20, 81);
 
-    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('ABHA ADDRESS / ID', 20, 102);
-    doc.fillColor('#E4714E').fontSize(11).font('Helvetica-Bold').text(abhaId, 20, 112);
+    doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('AROGYARAKSHAK ID', 20, 102);
+    doc.fillColor('#E4714E').fontSize(11).font('Helvetica-Bold').text(arogyaId, 20, 112);
 
     doc.fillColor('#0F5E5E').fontSize(7).font('Helvetica-Bold').text('GENDER', 20, 134);
     doc.fillColor('#1A2E2E').fontSize(9).font('Helvetica').text(gender, 20, 144);
@@ -117,12 +117,12 @@ export async function generateHealthCardPdf(req, res) {
     doc.image(qrBuffer, 225, 68, { width: 110, height: 110 });
 
     doc.fillColor('#666666').fontSize(6).font('Helvetica')
-      .text('Scan for encrypted ABDM verification', 222, 182, { width: 116, align: 'center' });
+      .text('Scan for verified ArogyaRakshak credentials', 222, 182, { width: 116, align: 'center' });
 
     // Footer Security Notice
     doc.rect(5, 202, 350, 33).fill('#F0F7F7');
     doc.fillColor('#0F5E5E').fontSize(6).font('Helvetica')
-      .text('This digital card contains a cryptographically signed ABDM token. No raw PII is exposed.', 15, 208);
+      .text('This digital card contains a cryptographically signed ArogyaRakshak token.', 15, 208);
     doc.fillColor('#D64550').fontSize(6).font('Helvetica-Bold')
       .text('Emergency Medical Ambulance Helpline: Dial 108 | Health Info: 104', 15, 218);
 

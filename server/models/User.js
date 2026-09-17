@@ -38,10 +38,39 @@ const userSchema = new mongoose.Schema({
     enum: ['citizen', 'kiosk_operator'],
     default: 'citizen',
   },
+  arogyaId: {
+    type: String,
+    trim: true,
+    index: true,
+    // Expected sequential series: AR-2026-00001, AR-2026-00002, etc.
+  },
   abhaId: {
     type: String,
     trim: true,
-    // Expected format: XX-XXXX-XXXX-XXXX
+  },
+  age: {
+    type: Number,
+  },
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other'],
+  },
+  bloodGroup: {
+    type: String,
+    default: 'Unknown',
+  },
+  pincode: {
+    type: String,
+    trim: true,
+  },
+  emergencyContact: {
+    name: { type: String, trim: true },
+    phone: { type: String, trim: true },
+    relation: { type: String, trim: true },
+  },
+  isProfileComplete: {
+    type: Boolean,
+    default: false,
   },
   kioskId: {
     type: String,
