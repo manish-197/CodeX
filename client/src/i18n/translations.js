@@ -14,6 +14,10 @@ export const translations = {
     nav_sign_in: 'Sign In',
     nav_logout: 'Log Out',
     nav_subtitle: 'आरोग्यरक्षक • Rural Healthcare Hub',
+    auth_email_label: 'Email Address',
+    auth_email_placeholder: 'name@example.com',
+    auth_mobile_label: 'Mobile Number (for SOS & WhatsApp)',
+    auth_login_title: 'Login with Email',
 
     // State detection
     state_toast_detected: "We detected you're in {state} — switching to {lang}. Change anytime.",
@@ -99,6 +103,10 @@ export const translations = {
     nav_sign_in: 'लॉग इन करा',
     nav_logout: 'लॉग आउट',
     nav_subtitle: 'आरोग्यरक्षक • ग्रामीण आरोग्य केंद्र',
+    auth_email_label: 'ईमेल पत्ता',
+    auth_email_placeholder: 'उदा. ramesh@example.com',
+    auth_mobile_label: 'मोबाईल नंबर (१०८ आपत्कालीन व व्हॉट्सॲपसाठी)',
+    auth_login_title: 'ईमेलने लॉगिन करा',
 
     // State detection
     state_toast_detected: 'आम्ही ओळखले की तुम्ही {state} मध्ये आहात — मराठी भाषा निवडली आहे. कधीही बदला.',
@@ -184,6 +192,10 @@ export const translations = {
     nav_sign_in: 'लॉग इन करें',
     nav_logout: 'लॉग आउट',
     nav_subtitle: 'आरोग्यरक्षक • ग्रामीण स्वास्थ्य केंद्र',
+    auth_email_label: 'ईमेल पता',
+    auth_email_placeholder: 'उदा. ramesh@example.com',
+    auth_mobile_label: 'मोबाइल नंबर (१०८ आपातकालीन और व्हाट्सएप के लिए)',
+    auth_login_title: 'ईमेल से लॉगिन करें',
 
     // State detection
     state_toast_detected: 'हमने पहचाना कि आप {state} में हैं — भाषा हिन्दी चुनी गई है। कभी भी बदलें।',
