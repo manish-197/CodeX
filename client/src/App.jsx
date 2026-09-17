@@ -7,6 +7,7 @@ import HospitalNavigation from './components/navigation/HospitalNavigation';
 import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
 import EmergencySOSBeacon from './components/common/EmergencySOSBeacon';
+import OfflineSyncIndicator from './components/common/OfflineSyncIndicator';
 import { LanguageProvider } from './i18n/LanguageContext';
 
 function AppContent() {
@@ -90,8 +91,6 @@ function AppContent() {
         <FamilyHub 
           currentUser={currentUser}
           onVitalsChange={handleVitalsChange}
-          onNavigateToPrescription={() => alert('Prescription OCR activates in Slice 11')}
-          onOpenBleModal={() => alert('Web Bluetooth BLE sync activates in Slice 12')}
           onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
         />
       )}
@@ -121,6 +120,9 @@ function AppContent() {
         activeVitals={activeVitals}
         currentUser={currentUser}
       />
+
+      {/* Offline PWA Status and Background Sync Queue Indicator */}
+      <OfflineSyncIndicator />
 
       {/* State-Based Auto Language Notification Toast */}
       <StateLanguageToast />
