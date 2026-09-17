@@ -28,30 +28,46 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function FamilyHub({ 
   currentUser, 
   onVitalsChange, 
-  onTriggerDoctorDispatch
+  onTriggerDoctorDispatch,
+  onSelectActiveMember
 }) {
   const { t } = useLanguage();
 
-  const [members, setMembers] = useState([
-    {
-      id: currentUser?.id || 'self_1',
-      name: currentUser?.name || 'Self (Primary Citizen)',
-      relation: 'Self',
-      age: 42,
-      gender: 'Male',
-      bloodGroup: 'B+',
-      abhaId: currentUser?.abhaId || '14-2026-9812-4456',
-      medicalHistory: ['Mild Hypertension'],
-      vitals: {
-        bp: { sys: 0, dia: 0 },
-        heartRate: 0,
-        spo2: 0,
-        recordedAt: null,
+  const [members, setMembers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('arogya_family_members');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    }
-  ]);
+    } catch (e) {}
+    return [
+      {
+        id: currentUser?.id || 'self_1',
+        name: currentUser?.name || 'Self (Primary Citizen)',
+        relation: 'Self',
+        age: 42,
+        gender: 'Male',
+        bloodGroup: 'B+',
+        abhaId: currentUser?.abhaId || '14-2026-9812-4456',
+        medicalHistory: ['Mild Hypertension'],
+        vitals: {
+          bp: { sys: 0, dia: 0 },
+          heartRate: 0,
+          spo2: 0,
+          recordedAt: null,
+        }
+      }
+    ];
+  });
 
-  const [activeMemberId, setActiveMemberId] = useState(members[0]?.id || null);
+  const [activeMemberId, setActiveMemberId] = useState(() => {
+    try {
+      const savedId = localStorage.getItem('arogya_active_member_id');
+      if (savedId) return savedId;
+    } catch (e) {}
+    return currentUser?.id || 'self_1';
+  });
   const [hubTab, setHubTab] = useState('overview'); // 'overview' | 'prescriptions'
   const [prescriptions, setPrescriptions] = useState([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
@@ -73,6 +89,24 @@ export default function FamilyHub({
   const [syncToast, setSyncToast] = useState(null);
 
   const activeMember = members.find(m => m.id === activeMemberId) || members[0];
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('arogya_family_members', JSON.stringify(members));
+    } catch (e) {}
+  }, [members]);
+
+  useEffect(() => {
+    if (activeMember) {
+      try {
+        localStorage.setItem('arogya_active_member_id', activeMember.id);
+        localStorage.setItem('arogya_active_member', JSON.stringify(activeMember));
+      } catch (e) {}
+      if (onSelectActiveMember) {
+        onSelectActiveMember(activeMember);
+      }
+    }
+  }, [activeMemberId, activeMember]);
 
   const loadPrescriptionsForMember = async (memberId) => {
     if (!memberId) return;

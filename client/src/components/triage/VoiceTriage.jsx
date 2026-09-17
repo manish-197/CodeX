@@ -19,7 +19,8 @@ import {
   Pill,
   FileText,
   Download,
-  Globe
+  Globe,
+  Users
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getSpeechLangCode } from '../../i18n/translations';
@@ -38,8 +39,129 @@ function detectSimpleScriptLang(text) {
   return 'en';
 }
 
-export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, activeVitals, currentUser }) {
+function buildComprehensiveSpokenText(data) {
+  if (!data) return '';
+  const lang = data.detectedLanguage || 'en';
+  const parts = [];
+
+  // 1. Diagnosis
+  if (data.likelyDiagnosis) {
+    const diagIntro = lang === 'mr' ? 'प्राथमिक मूल्यांकन:' : lang === 'hi' ? 'प्राथमिक आकलन:' : 'Clinical Assessment:';
+    parts.push(`${diagIntro} ${data.likelyDiagnosis}`);
+  } else if (data.clinicalExplanation) {
+    parts.push(data.clinicalExplanation);
+  }
+
+  // 2. Safe Home Remedies
+  if (Array.isArray(data.homeRemedies) && data.homeRemedies.length > 0) {
+    const remIntro = lang === 'mr' ? 'घरगुती सुरक्षित उपाय:' : lang === 'hi' ? 'सुरक्षित घरेलू उपाय:' : 'Recommended home care:';
+    const remediesSummary = data.homeRemedies.slice(0, 2).join('. ');
+    parts.push(`${remIntro} ${remediesSummary}`);
+  }
+
+  // 3. Medicine suggestions (or emergency alert for critical)
+  if (data.riskLevel === 'CRITICAL') {
+    const critAlert = lang === 'mr' 
+      ? 'ही आणीबाणीची परिस्थिती असू शकते. स्वतः कोणतेही औषध घेऊ नका. त्वरित १०८ रुग्णवाहिका किंवा डॉक्टरांशी संपर्क साधा.'
+      : lang === 'hi'
+      ? 'यह आपातकालीन स्थिति हो सकती है। कोई भी दवा खुद न लें। तुरंत १०८ एम्बुलेंस या डॉक्टर से संपर्क करें।'
+      : 'Critical risk condition detected. Do not take self-medication. Call 108 or seek emergency medical care immediately.';
+    parts.push(critAlert);
+  } else if (Array.isArray(data.suggestedMedicines) && data.suggestedMedicines.length > 0) {
+    const medIntro = lang === 'mr' 
+      ? 'फार्मासिस्टशी चर्चा करण्यासाठी ओटीसी औषध गट:' 
+      : lang === 'hi' 
+      ? 'फार्मासिस्ट से परामर्श हेतु दवा वर्ग:' 
+      : 'Over-the-counter medicine categories to discuss with your pharmacist:';
+    const medList = data.suggestedMedicines.slice(0, 2).map(m => m.name).join(', ');
+    parts.push(`${medIntro} ${medList}`);
+  }
+
+  // 4. Mandatory Disclaimer
+  if (data.disclaimer) {
+    parts.push(data.disclaimer);
+  } else {
+    const defaultDisc = lang === 'mr'
+      ? 'हा कृत्रिम बुद्धिमत्ता सहाय्यित प्राथमिक सल्ला आहे, हे अंतिम निदान नाही. डॉक्टरांचा सल्ला घ्या.'
+      : lang === 'hi'
+      ? 'यह एआई आधारित प्राथमिक सलाह है, अंतिम चिकित्सा निदान नहीं। डॉक्टर से परामर्श लें।'
+      : 'This is an AI-assisted preliminary triage, not a medical diagnosis. Please consult a doctor or pharmacist.';
+    parts.push(defaultDisc);
+  }
+
+  return parts.join('. ');
+}
+
+export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, activeVitals, currentUser, activeMember, onSelectMember }) {
   const { lang, t } = useLanguage();
+
+  // Family Member Context: synchronized with Family Hub Dynamic Profile Switcher
+  const [allMembers, setAllMembers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('arogya_family_members');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [
+      {
+        id: currentUser?.id || 'self_1',
+        name: currentUser?.name || 'Self (Primary Citizen)',
+        relation: 'Self',
+        age: 42,
+        bloodGroup: 'B+',
+        abhaId: currentUser?.abhaId || '14-2026-9812-4456',
+      }
+    ];
+  });
+
+  const [selectedMember, setSelectedMember] = useState(() => {
+    if (activeMember) return activeMember;
+    try {
+      const saved = localStorage.getItem('arogya_active_member');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return allMembers[0] || {
+      id: currentUser?.id || 'self_1',
+      name: currentUser?.name || 'Self (Primary Citizen)',
+      relation: 'Self',
+      age: 42,
+      bloodGroup: 'B+',
+      abhaId: currentUser?.abhaId || '14-2026-9812-4456',
+    };
+  });
+
+  useEffect(() => {
+    if (activeMember) {
+      setSelectedMember(activeMember);
+    }
+  }, [activeMember]);
+
+  useEffect(() => {
+    try {
+      const savedMembers = localStorage.getItem('arogya_family_members');
+      if (savedMembers) {
+        const parsed = JSON.parse(savedMembers);
+        if (Array.isArray(parsed) && parsed.length > 0) setAllMembers(parsed);
+      }
+      const savedActive = localStorage.getItem('arogya_active_member');
+      if (savedActive && !activeMember) {
+        setSelectedMember(JSON.parse(savedActive));
+      }
+    } catch (e) {}
+  }, []);
+
+  const handleSelectPatient = (member) => {
+    setSelectedMember(member);
+    try {
+      localStorage.setItem('arogya_active_member', JSON.stringify(member));
+      localStorage.setItem('arogya_active_member_id', member.id);
+    } catch (e) {}
+    if (onSelectMember) {
+      onSelectMember(member);
+    }
+  };
 
   // Spoken Language Mode: 'auto' | 'mr' | 'hi' | 'en' | 'ta' (Independent from UI language)
   const [spokenLangMode, setSpokenLangMode] = useState('auto');
@@ -343,10 +465,9 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       setTriageResult(data);
       setPipelineStage('complete');
 
-      // Auto-play spoken audio explainer in the detected response language
-      if (data.audioResponseText) {
-        speakResponse(data.audioResponseText, data.detectedLanguage);
-      }
+      // Auto-play spoken audio explainer in the detected response language covering diagnosis, remedies, medicines, disclaimer
+      const spokenSummary = buildComprehensiveSpokenText(data);
+      speakResponse(spokenSummary, data.detectedLanguage);
 
       // Smooth scroll into view
       setTimeout(() => {
@@ -364,9 +485,10 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       const fallbackLang = detectSimpleScriptLang(symptoms);
       const isMr = fallbackLang === 'mr';
       const isHi = fallbackLang === 'hi';
+      const isCritical = (symptoms.toLowerCase().includes('chest') || symptoms.includes('छातीत') || symptoms.includes('सीने'));
 
       const mockDiagnosis = {
-        riskLevel: (symptoms.toLowerCase().includes('chest') || symptoms.includes('छातीत') || symptoms.includes('सीने')) ? 'CRITICAL' : 'MODERATE',
+        riskLevel: isCritical ? 'CRITICAL' : 'MODERATE',
         detectedLanguage: fallbackLang,
         detectedLanguageName: isMr ? 'Marathi' : isHi ? 'Hindi' : 'English',
         likelyDiagnosis: isMr ? 'मोसमी विषाणू ताप / प्राथमिक तपासणी' : isHi ? 'मौसमी वायरल बुखार / प्राथमिक जांच' : 'Clinical Triage Evaluation',
@@ -379,6 +501,22 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
           isMr ? 'ओआरएस (ORS) किंवा कोमट पाणी प्या.' : isHi ? 'ओआरएस या गुनगुना पानी पिएं।' : 'Drink warm water and oral rehydration salts.',
           isMr ? 'कपाळावर कोमट पाण्याच्या पट्ट्या ठेवा.' : isHi ? 'माथे पर ठंडी/गुनगुनी पट्टी रखें।' : 'Cold/lukewarm damp cloth on forehead if feverish.'
         ],
+        suggestedMedicines: isCritical
+          ? []
+          : [
+              {
+                name: isMr ? 'पॅरासिटामॉल सौम्य वेदनाशामक गट' : isHi ? 'पैरासिटामोल हल्का दर्द निवारक वर्ग' : 'Paracetamol-based Mild Pain Reliever Category',
+                category: isMr ? 'ताप व वेदना शामक' : isHi ? 'बुखार व दर्द निवारक' : 'Antipyretic / Analgesic Category',
+                instructions: isMr ? 'औषध घेण्यापूर्वी स्थानिक फार्मासिस्ट किंवा आशा सेविकेशी चर्चा करा.' : isHi ? 'दवा लेने से पहले फार्मासिस्ट या आशा कार्यकर्ता से सलाह लें।' : 'Consult local pharmacist or health worker before taking any medication.',
+                timing: isMr ? 'जेवणानंतर, आवश्यकतेनुसार' : isHi ? 'भोजन के बाद, आवश्यकतानुसार' : 'Post-meals as advised by pharmacist'
+              },
+              {
+                name: isMr ? 'ओआरएस (ORS) द्रावण गट' : isHi ? 'ओआरएस (ORS) घोल वर्ग' : 'Oral Rehydration Salts (ORS) Category',
+                category: isMr ? 'इलेक्ट्रोलाइट संतुलन' : isHi ? 'इलेक्ट्रोलाइट संतुलन' : 'Electrolyte Replenisher Category',
+                instructions: isMr ? 'शरीरातील पाणी टिकवण्यासाठी स्वच्छ पाण्यात मिसळून प्यावे.' : isHi ? 'शरीर में पानी की कमी रोकने के लिए पिएं।' : 'Drink with clean water to maintain hydration.',
+                timing: isMr ? 'दिवसभरात थोडे थोडे' : isHi ? 'दिनभर आवश्यकतानुसार' : 'Throughout the day'
+              }
+            ],
         warningSigns: [
           isMr ? 'श्वास घेण्यास त्रास झाल्यास किंवा तीव्र छातीत दुखल्यास' : isHi ? 'सांस लेने में दिक्कत या सीने में तेज दर्द होने पर' : 'Difficulty breathing, severe chest tightness, or prolonged high fever',
         ],
@@ -394,7 +532,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       };
       setTriageResult(mockDiagnosis);
       setPipelineStage('complete');
-      speakResponse(mockDiagnosis.audioResponseText, fallbackLang);
+      const spokenSummary = buildComprehensiveSpokenText(mockDiagnosis);
+      speakResponse(spokenSummary, fallbackLang);
     } finally {
       setIsAnalyzing(false);
     }
@@ -441,9 +580,11 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
     setIsSavingPrescription(true);
 
     try {
-      const activeFamilyMemberId = currentUser?.activeFamilyMemberId || currentUser?.id || 'self_1';
-      const patientName = currentUser?.name || 'Self (Primary Citizen)';
-      const patientAbha = currentUser?.abhaId || '14-2026-9812-4456';
+      const activeFamilyMemberId = selectedMember?.id || currentUser?.activeFamilyMemberId || currentUser?.id || 'self_1';
+      const patientName = selectedMember?.name || currentUser?.name || 'Self (Primary Citizen)';
+      const patientAge = selectedMember?.age || currentUser?.age || 42;
+      const patientBlood = selectedMember?.bloodGroup || currentUser?.bloodGroup || 'B+';
+      const patientAbha = selectedMember?.abhaId || currentUser?.abhaId || '14-2026-9812-4456';
 
       const res = await fetch('http://localhost:5000/api/prescriptions/save', {
         method: 'POST',
@@ -453,8 +594,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
           userId: currentUser?.id,
           patientDetails: {
             name: patientName,
-            age: currentUser?.age || 42,
-            bloodGroup: currentUser?.bloodGroup || 'B+',
+            age: patientAge,
+            bloodGroup: patientBlood,
             abhaId: patientAbha,
           },
           createdBy: 'ai_triage',
@@ -467,19 +608,29 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
       if (!res.ok) throw new Error('Failed to save prescription to server');
       const data = await res.json();
-      setSavedPrescription(data.prescription || data);
+      const savedDoc = data.prescription || data;
+      setSavedPrescription(savedDoc);
+
+      // Local storage cache under specific family member
+      try {
+        const localKey = `arogya_rx_${activeFamilyMemberId}`;
+        const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+        localStorage.setItem(localKey, JSON.stringify([savedDoc, ...existing]));
+      } catch (e) {}
+
     } catch (err) {
       console.warn('[Prescription Save]', err.message);
       // Fallback local representation
+      const activeFamilyMemberId = selectedMember?.id || currentUser?.activeFamilyMemberId || currentUser?.id || 'self_1';
       const localPrescription = {
         _id: 'presc_' + Date.now(),
         id: 'presc_' + Date.now(),
-        familyMemberId: currentUser?.id || 'self_1',
+        familyMemberId: activeFamilyMemberId,
         patientDetails: {
-          name: currentUser?.name || 'Self (Primary Citizen)',
-          age: currentUser?.age || 42,
-          bloodGroup: currentUser?.bloodGroup || 'B+',
-          abhaId: currentUser?.abhaId || '14-2026-9812-4456',
+          name: selectedMember?.name || currentUser?.name || 'Self (Primary Citizen)',
+          age: selectedMember?.age || currentUser?.age || 42,
+          bloodGroup: selectedMember?.bloodGroup || currentUser?.bloodGroup || 'B+',
+          abhaId: selectedMember?.abhaId || currentUser?.abhaId || '14-2026-9812-4456',
         },
         createdBy: 'ai_triage',
         medicines: triageResult.suggestedMedicines || [],
@@ -489,6 +640,11 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         createdAt: new Date().toISOString(),
       };
       setSavedPrescription(localPrescription);
+      try {
+        const localKey = `arogya_rx_${activeFamilyMemberId}`;
+        const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+        localStorage.setItem(localKey, JSON.stringify([localPrescription, ...existing]));
+      } catch (e) {}
     } finally {
       setIsSavingPrescription(false);
     }
@@ -585,6 +741,41 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         <p className="text-xs sm:text-sm text-deep-navy/70 dark:text-dark-muted max-w-lg mx-auto">
           Speak in your native dialect (Marathi, Hindi, English). The AI assesses risk, recommends non-prescriptive remedies, and speaks back audio guidance.
         </p>
+      </div>
+
+      {/* Patient Profile Selector: Ties Triage Session & Prescriptions to Active Member */}
+      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-deep-navy/10 dark:border-white/10">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-medical-blue" />
+          <span className="text-xs font-bold uppercase tracking-wider text-deep-navy/80 dark:text-clinical-white">
+            Active Patient Profile:
+          </span>
+        </div>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none" data-lenis-prevent="true">
+          {allMembers.map((member) => {
+            const isSelected = selectedMember?.id === member.id;
+            return (
+              <button
+                key={member.id}
+                type="button"
+                id={`patient-select-${member.id}`}
+                onClick={() => handleSelectPatient(member)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
+                  isSelected
+                    ? 'btn-navy text-white shadow-sm'
+                    : 'glass-card text-deep-navy dark:text-clinical-white hover:border-medical-blue/40 border-deep-navy/10'
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                  isSelected ? 'bg-medical-blue text-white' : 'bg-deep-navy/10 text-deep-navy dark:bg-white/10 dark:text-clinical-white'
+                }`}>
+                  {member.name.charAt(0)}
+                </span>
+                <span>{member.name} ({member.relation || `${member.age || 42}y`})</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Voice Capture Hero Interface */}
@@ -763,7 +954,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                   </button>
                 ) : (
                   <button
-                    onClick={() => speakResponse(triageResult.audioResponseText)}
+                    onClick={() => speakResponse(buildComprehensiveSpokenText(triageResult), triageResult.detectedLanguage)}
                     className="btn-navy text-xs py-2 px-4 flex items-center gap-2 dark:bg-clinical-white dark:text-deep-navy"
                   >
                     <Volume2 className="w-4 h-4" />

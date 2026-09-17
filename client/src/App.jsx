@@ -46,6 +46,15 @@ function AppContent() {
     spo2: 0,
   });
 
+  // Active family member selection
+  const [activeMember, setActiveMember] = useState(() => {
+    try {
+      const saved = localStorage.getItem('arogya_active_member');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   // Sync dark class and data-theme on document element and localStorage
@@ -116,6 +125,7 @@ function AppContent() {
               currentUser={currentUser}
               onVitalsChange={handleVitalsChange}
               onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
+              onSelectActiveMember={setActiveMember}
             />
           )}
         </AuthGuard>
@@ -128,6 +138,8 @@ function AppContent() {
             onNavigateToHub={() => setCurrentTab('hub')}
             activeVitals={activeVitals}
             currentUser={currentUser}
+            activeMember={activeMember}
+            onSelectMember={setActiveMember}
           />
         </AuthGuard>
       )}
