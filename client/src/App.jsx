@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
 import FamilyHub from './components/family/FamilyHub';
+import KioskDashboard from './components/kiosk/KioskDashboard';
 import VoiceTriage from './components/triage/VoiceTriage';
 import HospitalNavigation from './components/navigation/HospitalNavigation';
 import AuthModal from './components/auth/AuthModal';
@@ -10,10 +11,11 @@ import EmergencySOSBeacon from './components/common/EmergencySOSBeacon';
 import OfflineSyncIndicator from './components/common/OfflineSyncIndicator';
 import WhatsAppBotModal from './components/common/WhatsAppBotModal';
 import { LanguageProvider } from './i18n/LanguageContext';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import AuthGuard from './auth/AuthGuard';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState('home');
-  const [userRole, setUserRole] = useState('citizen');
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('arogya_theme') === 'dark';
@@ -22,6 +24,20 @@ function AppContent() {
     }
   });
   
+  // Auth state from AuthContext
+  const { 
+    currentUser, 
+    userRole, 
+    authModalOpen, 
+    authToast, 
+    login, 
+    logout, 
+    openLogin, 
+    closeLogin, 
+    requireAuth,
+    isAuthenticated 
+  } = useAuth();
+
   // Latest recorded heart rate (strictly 0 BPM initial per zero dummy data rule)
   const [latestHeartRate, setLatestHeartRate] = useState(0);
   const [activeVitals, setActiveVitals] = useState({
@@ -30,24 +46,7 @@ function AppContent() {
     spo2: 0,
   });
 
-  // Authentication State
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
-
-  // Restore existing session from localStorage if present
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('arogya_user');
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        setCurrentUser(parsed);
-        if (parsed.role) setUserRole(parsed.role === 'kiosk_operator' ? 'kiosk' : 'citizen');
-      }
-    } catch (e) {
-      console.warn('Session restore skipped', e);
-    }
-  }, []);
 
   // Sync dark class and data-theme on document element and localStorage
   useEffect(() => {
@@ -63,76 +62,95 @@ function AppContent() {
     }
   }, [darkMode]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('arogya_token');
-    localStorage.removeItem('arogya_user');
-    setCurrentUser(null);
-  };
-
-  const handleAuthSuccess = (user) => {
-    setCurrentUser(user);
-    if (user.role) {
-      setUserRole(user.role === 'kiosk_operator' ? 'kiosk' : 'citizen');
-    }
-  };
-
   const handleVitalsChange = (bpm, fullVitals) => {
     setLatestHeartRate(bpm || 0);
     if (fullVitals) setActiveVitals(fullVitals);
   };
 
+  const handleTabNavigation = (targetTab) => {
+    if (targetTab === 'home') {
+      setCurrentTab('home');
+      return;
+    }
+
+    // Protected features require auth
+    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Voice Triage' : 'Hospital Navigation'}.`)) {
+      setCurrentTab(targetTab);
+    }
+  };
+
   return (
     <Layout
       currentTab={currentTab}
-      setCurrentTab={setCurrentTab}
+      setCurrentTab={handleTabNavigation}
       userRole={userRole}
-      setUserRole={setUserRole}
+      setUserRole={() => {}}
       darkMode={darkMode}
       setDarkMode={setDarkMode}
       currentUser={currentUser}
-      onOpenAuth={() => setAuthModalOpen(true)}
-      onLogout={handleLogout}
+      onOpenAuth={() => openLogin('Please log in to continue.')}
+      onLogout={() => {
+        logout();
+        setCurrentTab('home');
+      }}
       onOpenWhatsApp={() => setWhatsAppModalOpen(true)}
     >
       {currentTab === 'home' && (
         <HomePage 
-          onNavigate={(tab) => setCurrentTab(tab)} 
+          onNavigate={handleTabNavigation} 
           heartRate={latestHeartRate}
         />
       )}
 
       {currentTab === 'hub' && (
-        <FamilyHub 
-          currentUser={currentUser}
-          onVitalsChange={handleVitalsChange}
-          onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
-        />
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Family Hub & Digital Health Records">
+          {currentUser?.role === 'kiosk_operator' ? (
+            <KioskDashboard 
+              currentUser={currentUser}
+              onVitalsChange={handleVitalsChange}
+              onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
+              onNavigateToTriage={() => setCurrentTab('triage')}
+            />
+          ) : (
+            <FamilyHub 
+              currentUser={currentUser}
+              onVitalsChange={handleVitalsChange}
+              onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
+            />
+          )}
+        </AuthGuard>
       )}
 
       {currentTab === 'triage' && (
-        <VoiceTriage 
-          onNavigateToHospital={() => setCurrentTab('navigation')}
-          activeVitals={activeVitals}
-        />
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Voice AI Clinical Triage">
+          <VoiceTriage 
+            onNavigateToHospital={() => setCurrentTab('navigation')}
+            activeVitals={activeVitals}
+          />
+        </AuthGuard>
       )}
 
       {currentTab === 'navigation' && (
-        <HospitalNavigation />
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Hospital Road Navigation">
+          <HospitalNavigation />
+        </AuthGuard>
       )}
 
       {/* Dual-Role Authentication Modal */}
       <AuthModal 
         isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-        defaultRole={userRole === 'kiosk' ? 'kiosk_operator' : 'citizen'}
+        onClose={closeLogin}
+        onAuthSuccess={(user, token) => login(token, user)}
+        defaultRole={userRole === 'kiosk_operator' ? 'kiosk_operator' : 'citizen'}
+        promptMessage={authToast}
       />
 
       {/* Persistent 1-Tap Emergency SOS Floating Beacon with 3s abort timer */}
       <EmergencySOSBeacon 
-        onNavigateToHospital={() => setCurrentTab('navigation')}
+        onNavigateToHospital={() => handleTabNavigation('navigation')}
         activeVitals={activeVitals}
         currentUser={currentUser}
+        onRequireAuth={(msg) => openLogin(msg || 'Please log in to continue.')}
       />
 
       {/* WhatsApp Voice Bot Simulator for Elderly Citizens */}
@@ -153,7 +171,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </LanguageProvider>
   );
 }

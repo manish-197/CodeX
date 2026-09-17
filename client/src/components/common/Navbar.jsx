@@ -32,6 +32,7 @@ export default function Navbar({
   const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const languages = [
     { code: 'mr', name: 'मराठी', label: 'Marathi' },
@@ -174,28 +175,105 @@ export default function Navbar({
             {darkMode ? <Sun className="w-4 h-4 text-sun-gold" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* User Auth status & Single Clean Logout */}
+          {/* User Auth status & Profile Dropdown */}
           {currentUser ? (
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-block text-xs font-bold text-deep-teal dark:text-sky-mist px-3 py-1 rounded-full bg-deep-teal/10 dark:bg-white/10">
-                {currentUser.name.split(' ')[0]}
-              </span>
+            <div className="relative">
               <button
-                onClick={onLogout}
-                title={t('nav_logout')}
-                className="p-2 rounded-full text-alert-crimson hover:bg-alert-crimson/10 transition-colors"
-                aria-label={t('nav_logout')}
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card border border-deep-teal/20 hover:border-terracotta transition-all shadow-sm group"
+                aria-label="User profile menu"
               >
-                <LogOut className="w-4 h-4" />
+                {/* Avatar with initials */}
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-xs flex items-center justify-center shadow-inner">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+
+                <div className="text-left hidden sm:block">
+                  <div className="text-xs font-bold text-deep-teal dark:text-sky-mist leading-tight">
+                    {currentUser.name ? currentUser.name.split(' ')[0] : 'User'}
+                  </div>
+                  <div className="text-[10px] text-terracotta font-semibold uppercase tracking-wider leading-none">
+                    {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
+                  </div>
+                </div>
+
+                <span className="text-[10px] text-deep-teal/60 dark:text-dark-muted ml-0.5">▼</span>
               </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileMenuOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-72 glass-card shadow-2xl p-4 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 rounded-3xl space-y-3"
+                  data-lenis-prevent="true"
+                >
+                  {/* User Profile Header */}
+                  <div className="flex items-start gap-3 pb-3 border-b border-deep-teal/10 dark:border-white/10">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-base flex items-center justify-center shadow-md shrink-0">
+                      {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="overflow-hidden">
+                      <div className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist truncate">
+                        {currentUser.name}
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono">
+                        {currentUser.phone}
+                      </div>
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                        {currentUser.role === 'kiosk_operator' ? 'GP Kiosk Operator' : 'Citizen Account'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Identification Details */}
+                  <div className="p-2.5 rounded-2xl bg-deep-teal/5 dark:bg-white/5 text-[11px] space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">ABHA / Kiosk ID:</span>
+                      <strong className="font-mono text-terracotta">
+                        {currentUser.abhaId || currentUser.kioskId || '14-2026-9812-4456'}
+                      </strong>
+                    </div>
+                    {currentUser.village && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Village:</span>
+                        <strong className="text-deep-teal dark:text-sky-mist">{currentUser.village}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-1 pt-1">
+                    <button
+                      onClick={() => {
+                        setCurrentTab('hub');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-teal dark:text-sky-mist hover:bg-deep-teal/10 transition-colors flex items-center justify-between"
+                    >
+                      <span>{currentUser.role === 'kiosk_operator' ? 'Kiosk Operator Desk' : 'Switch Family Member'}</span>
+                      <span className="text-terracotta">→</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onLogout();
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-alert-crimson hover:bg-alert-crimson/10 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out / लॉग आउट</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <button
               onClick={onOpenAuth}
-              className="btn-terracotta text-xs py-2 px-4"
+              className="btn-terracotta text-xs py-2 px-4 shadow-md"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('nav_sign_in')}</span>
+              <span>{t('nav_sign_in')}</span>
             </button>
           )}
 

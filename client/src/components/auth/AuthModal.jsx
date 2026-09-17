@@ -16,7 +16,8 @@ export default function AuthModal({
   isOpen, 
   onClose, 
   onAuthSuccess, 
-  defaultRole = 'citizen' 
+  defaultRole = 'citizen',
+  promptMessage
 }) {
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState(defaultRole);
@@ -159,6 +160,14 @@ export default function AuthModal({
             Gram Panchayat Kiosk
           </button>
         </div>
+
+        {/* Prompt notification message */}
+        {promptMessage && (
+          <div className="mb-4 p-3 rounded-2xl bg-terracotta/15 border border-terracotta/30 text-terracotta text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{promptMessage}</span>
+          </div>
+        )}
 
         {/* Error message */}
         {error && (

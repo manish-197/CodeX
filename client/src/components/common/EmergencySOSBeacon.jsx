@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function EmergencySOSBeacon({ onNavigateToHospital, activeVitals, currentUser }) {
+export default function EmergencySOSBeacon({ onNavigateToHospital, activeVitals, currentUser, onRequireAuth }) {
   const { t } = useLanguage();
   const [modalOpen, setModalOpen] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -22,6 +22,10 @@ export default function EmergencySOSBeacon({ onNavigateToHospital, activeVitals,
   const timerRef = useRef(null);
 
   const startSOSFlow = () => {
+    if (!currentUser) {
+      if (onRequireAuth) onRequireAuth("Please log in to continue.");
+      return;
+    }
     setModalOpen(true);
     setCountdown(3);
     setIsCounting(true);
