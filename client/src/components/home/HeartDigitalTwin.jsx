@@ -1,10 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Activity, Sparkles, AlertCircle, Heart } from 'lucide-react';
+import { Activity, AlertCircle, RefreshCw } from 'lucide-react';
 
+/**
+ * Anatomical 3D Cardiac Digital Twin
+ * High-fidelity anatomical Three.js model featuring:
+ * - 4 distinct cardiac chambers (Left/Right Ventricles & Atria) with anatomical asymmetry
+ * - Ascending Aorta, Aortic Arch with 3 supra-aortic branches (Brachiocephalic, Carotid, Subclavian)
+ * - Bifurcating Pulmonary Trunk (Left & Right Pulmonary Arteries) & Superior Vena Cava
+ * - Anterior and Posterior Coronary Artery Sulci (LAD & RCA)
+ * - MeshPhysicalMaterial with realistic subsurface tissue sheen and fibrous bump mapping
+ * - 3-Point Studio Lighting (Key, Fill, Rim) for anatomical depth
+ * - Synced physiological cardiac pulse cycle:
+ *     • 0 BPM = Slow idle breathing rhythm
+ *     • >0 BPM = Real-time heart rate pulse with ventricular systole expansion
+ */
 export default function HeartDigitalTwin({ heartRate = 0 }) {
   const mountRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const currentMount = mountRef.current;
@@ -13,276 +27,321 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
     const width = currentMount.clientWidth || 360;
     const height = currentMount.clientHeight || 360;
 
-    // Scene & Camera
+    // 1. Scene & Camera Setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-    camera.position.set(0, 0.2, 7.5);
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+    camera.position.set(0, 0.15, 7.2);
 
-    // Renderer with true transparency & antialiasing
+    // 2. High-Performance WebGL Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.15;
     currentMount.appendChild(renderer.domElement);
 
-    // Root Group
+    // 3. Root Transformation Hierarchy
     const heartRoot = new THREE.Group();
     scene.add(heartRoot);
 
-    // Procedural Myocardial Muscle Striation Bump Map
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
+    const heartBodyGroup = new THREE.Group();
+    heartRoot.add(heartBodyGroup);
+
+    // 4. Procedural Myocardial Tissue & Vascular Micro-Texture
+    const bumpCanvas = document.createElement('canvas');
+    bumpCanvas.width = 512;
+    bumpCanvas.height = 512;
+    const ctx = bumpCanvas.getContext('2d');
     ctx.fillStyle = '#808080';
     ctx.fillRect(0, 0, 512, 512);
 
-    // Draw muscular fiber lines
-    ctx.strokeStyle = '#a0a0a0';
-    ctx.lineWidth = 1.5;
-    for (let i = 0; i < 500; i++) {
+    // Muscular striations
+    ctx.strokeStyle = '#a8a8a8';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 600; i++) {
       ctx.beginPath();
       const startX = Math.random() * 512;
       const startY = Math.random() * 512;
       ctx.moveTo(startX, startY);
       ctx.bezierCurveTo(
-        startX + Math.random() * 40 - 20, startY + 30,
-        startX + Math.random() * 40 - 20, startY + 60,
-        startX + Math.random() * 30 - 15, startY + 90
+        startX + Math.random() * 30 - 15, startY + 25,
+        startX + Math.random() * 30 - 15, startY + 50,
+        startX + Math.random() * 20 - 10, startY + 75
       );
       ctx.stroke();
     }
-    const bumpTexture = new THREE.CanvasTexture(canvas);
+    const bumpTexture = new THREE.CanvasTexture(bumpCanvas);
     bumpTexture.wrapS = THREE.RepeatWrapping;
     bumpTexture.wrapT = THREE.RepeatWrapping;
     bumpTexture.repeat.set(2, 2);
 
-    // Materials
-    // Deep Teal Myocardium
+    // 5. Anatomical Physical Materials (Subsurface / Soft-Tissue look)
+    // Deep Myocardium (Left & Right Ventricular walls)
     const muscleMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#0F5E5E'),
-      roughness: 0.38,
-      metalness: 0.12,
-      clearcoat: 0.55,
-      clearcoatRoughness: 0.22,
+      color: new THREE.Color('#0B3B5B'),
+      roughness: 0.32,
+      metalness: 0.05,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.18,
+      sheen: 0.75,
+      sheenRoughness: 0.25,
+      sheenColor: new THREE.Color('#38BDF8'),
+      reflectivity: 0.65,
       bumpMap: bumpTexture,
-      bumpScale: 0.04,
-      emissive: new THREE.Color(heartRate > 0 ? '#E4714E' : '#0F5E5E'),
-      emissiveIntensity: heartRate > 0 ? 0.35 : 0.06,
+      bumpScale: 0.035,
+      emissive: new THREE.Color(heartRate > 0 ? '#2563A6' : '#0B2A4A'),
+      emissiveIntensity: heartRate > 0 ? 0.35 : 0.08,
     });
 
-    // Terracotta Vascular Material for Great Arteries
-    const aortaMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#E4714E'),
-      roughness: 0.35,
-      metalness: 0.15,
+    // Ascending Aorta & Major Elastic Arterial Vessel Material
+    const aortaMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color('#2563A6'),
+      roughness: 0.28,
+      metalness: 0.12,
+      clearcoat: 0.9,
+      clearcoatRoughness: 0.15,
+      sheen: 0.6,
+      sheenColor: new THREE.Color('#93C5FD'),
       bumpMap: bumpTexture,
       bumpScale: 0.02,
     });
 
-    // Deep Pulmonary Cyan Material
-    const pulmonaryMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#1F7A7A'),
-      roughness: 0.4,
-      metalness: 0.1,
+    // Pulmonary Arteries & Venous Trunks Material
+    const venousMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color('#164E63'),
+      roughness: 0.35,
+      metalness: 0.08,
+      clearcoat: 0.7,
+      sheen: 0.5,
+      sheenColor: new THREE.Color('#67E8F9'),
     });
 
-    // Gold Coronary Sulcus Material
+    // Coronary Arteries (Left Anterior Descending & Right Coronary Artery)
     const coronaryMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#F4B942'),
-      roughness: 0.3,
-      metalness: 0.25,
+      color: new THREE.Color('#E8A93A'),
+      roughness: 0.25,
+      metalness: 0.35,
     });
 
-    const heartBodyGroup = new THREE.Group();
-    heartRoot.add(heartBodyGroup);
+    // 6. Anatomical Geometry Modeling (4 Chambers + Vascular Tree)
 
-    // 1. Left Ventricle (Dominant muscular apex chamber, tilted infero-laterally)
-    const lvGeo = new THREE.SphereGeometry(1.1, 36, 36);
+    // Chamber 1: Left Ventricle (LV) — Dominant conical apex pointing inferior-anteriorly
+    const lvGeo = new THREE.SphereGeometry(1.08, 36, 36);
     const lvPos = lvGeo.attributes.position;
     for (let i = 0; i < lvPos.count; i++) {
-      let vx = lvPos.getX(i);
-      let vy = lvPos.getY(i);
-      let vz = lvPos.getZ(i);
+      let x = lvPos.getX(i);
+      let y = lvPos.getY(i);
+      let z = lvPos.getZ(i);
 
-      // Elongate downwards into anatomical apex
-      if (vy < 0) {
-        vy *= 1.45;
-        vx *= (1 - Math.abs(vy) * 0.22);
-        vz *= (1 - Math.abs(vy) * 0.22);
+      // Anatomical apex elongation downwards
+      if (y < 0) {
+        y *= 1.48;
+        x *= (1 - Math.abs(y) * 0.24);
+        z *= (1 - Math.abs(y) * 0.24);
       }
-      // Posterior bulge
-      if (vz < 0) {
-        vz *= 1.15;
-      }
-      lvPos.setXYZ(i, vx, vy, vz);
+      // Posterior wall curvature
+      if (z < 0) z *= 1.12;
+
+      lvPos.setXYZ(i, x, y, z);
     }
     lvGeo.computeVertexNormals();
     const leftVentricle = new THREE.Mesh(lvGeo, muscleMaterial);
-    leftVentricle.position.set(-0.25, -0.3, 0);
-    leftVentricle.rotation.z = -0.18; // physiological left axis deviation
+    leftVentricle.position.set(-0.28, -0.35, 0);
+    leftVentricle.rotation.z = -0.2; // Left axis deviation
     heartBodyGroup.add(leftVentricle);
 
-    // 2. Right Ventricle (Anterior crescentic chamber)
-    const rvGeo = new THREE.SphereGeometry(0.95, 32, 32);
+    // Chamber 2: Right Ventricle (RV) — Semilunar anterior chamber wrapping around septum
+    const rvGeo = new THREE.SphereGeometry(0.92, 32, 32);
     const rvPos = rvGeo.attributes.position;
     for (let i = 0; i < rvPos.count; i++) {
-      let vx = rvPos.getX(i);
-      let vy = rvPos.getY(i);
-      let vz = rvPos.getZ(i);
-      if (vy < 0) vy *= 1.25;
-      // Flatten towards the interventricular septum
-      if (vx < 0) vx *= 0.85;
-      rvPos.setXYZ(i, vx, vy, vz);
+      let x = rvPos.getX(i);
+      let y = rvPos.getY(i);
+      let z = rvPos.getZ(i);
+
+      if (y < 0) y *= 1.25;
+      if (x < 0) x *= 0.82; // Flattened towards septum
+      rvPos.setXYZ(i, x, y, z);
     }
     rvGeo.computeVertexNormals();
     const rightVentricle = new THREE.Mesh(rvGeo, muscleMaterial);
-    rightVentricle.position.set(0.45, -0.15, 0.25);
-    rightVentricle.rotation.z = 0.15;
+    rightVentricle.position.set(0.42, -0.18, 0.26);
+    rightVentricle.rotation.z = 0.16;
     heartBodyGroup.add(rightVentricle);
 
-    // 3. Right Atrium & Auricle
-    const raGeo = new THREE.SphereGeometry(0.68, 28, 28);
-    const raMesh = new THREE.Mesh(raGeo, muscleMaterial);
-    raMesh.position.set(0.72, 0.75, 0.1);
-    heartBodyGroup.add(raMesh);
+    // Chamber 3: Right Atrium (RA) & Auricle
+    const raGeo = new THREE.SphereGeometry(0.66, 28, 28);
+    const rightAtrium = new THREE.Mesh(raGeo, venousMaterial);
+    rightAtrium.position.set(0.74, 0.72, 0.08);
+    heartBodyGroup.add(rightAtrium);
 
-    // 4. Left Atrium & Auricle
-    const laGeo = new THREE.SphereGeometry(0.65, 28, 28);
-    const laMesh = new THREE.Mesh(laGeo, muscleMaterial);
-    laMesh.position.set(-0.65, 0.78, -0.2);
-    heartBodyGroup.add(laMesh);
+    // Chamber 4: Left Atrium (LA) & Auricle
+    const laGeo = new THREE.SphereGeometry(0.62, 28, 28);
+    const leftAtrium = new THREE.Mesh(laGeo, muscleMaterial);
+    leftAtrium.position.set(-0.62, 0.76, -0.22);
+    heartBodyGroup.add(leftAtrium);
 
-    // 5. Interventricular Coronary Artery (Anterior Sulcus)
-    const sulcusCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.05, 0.7, 0.65),
-      new THREE.Vector3(0.12, 0.2, 0.72),
-      new THREE.Vector3(0.02, -0.4, 0.62),
-      new THREE.Vector3(-0.15, -1.0, 0.42),
-      new THREE.Vector3(-0.35, -1.45, 0.1),
-    ]);
-    const sulcusGeo = new THREE.TubeGeometry(sulcusCurve, 28, 0.045, 8, false);
-    const sulcusMesh = new THREE.Mesh(sulcusGeo, coronaryMaterial);
-    heartBodyGroup.add(sulcusMesh);
+    // 7. Great Vessels & Arterial Branching
 
-    // 6. Ascending Aorta & Anatomical Aortic Arch with 3 branches
+    // Ascending Aorta & Anatomical Aortic Arch
     const aortaCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.0, 0.6, 0.1),
-      new THREE.Vector3(0.05, 1.1, 0.05),
-      new THREE.Vector3(-0.1, 1.55, -0.05),
-      new THREE.Vector3(-0.45, 1.6, -0.2),
-      new THREE.Vector3(-0.7, 1.25, -0.35),
+      new THREE.Vector3(0.02, 0.58, 0.12),
+      new THREE.Vector3(0.06, 1.12, 0.06),
+      new THREE.Vector3(-0.12, 1.58, -0.06),
+      new THREE.Vector3(-0.46, 1.62, -0.22),
+      new THREE.Vector3(-0.72, 1.26, -0.36),
     ]);
-    const aortaGeo = new THREE.TubeGeometry(aortaCurve, 32, 0.17, 16, false);
+    const aortaGeo = new THREE.TubeGeometry(aortaCurve, 36, 0.16, 16, false);
     const aortaMesh = new THREE.Mesh(aortaGeo, aortaMaterial);
     heartBodyGroup.add(aortaMesh);
 
-    // 3 Arch Branches: Brachiocephalic, Common Carotid, Subclavian
+    // 3 Distinct Supra-Aortic Branches:
+    // 1. Brachiocephalic Artery
     const b1Curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.0, 1.45, 0.0),
-      new THREE.Vector3(0.12, 1.85, 0.05)
+      new THREE.Vector3(0.02, 1.46, 0.02),
+      new THREE.Vector3(0.14, 1.88, 0.06),
     ]);
-    const b1 = new THREE.Mesh(new THREE.TubeGeometry(b1Curve, 8, 0.055, 8, false), aortaMaterial);
+    const b1 = new THREE.Mesh(new THREE.TubeGeometry(b1Curve, 10, 0.052, 10, false), aortaMaterial);
     heartBodyGroup.add(b1);
 
+    // 2. Left Common Carotid Artery
     const b2Curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.18, 1.58, -0.08),
-      new THREE.Vector3(-0.14, 1.92, -0.05)
+      new THREE.Vector3(-0.16, 1.6, -0.08),
+      new THREE.Vector3(-0.12, 1.94, -0.05),
     ]);
-    const b2 = new THREE.Mesh(new THREE.TubeGeometry(b2Curve, 8, 0.045, 8, false), aortaMaterial);
+    const b2 = new THREE.Mesh(new THREE.TubeGeometry(b2Curve, 10, 0.044, 10, false), aortaMaterial);
     heartBodyGroup.add(b2);
 
+    // 3. Left Subclavian Artery
     const b3Curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.35, 1.55, -0.15),
-      new THREE.Vector3(-0.38, 1.88, -0.12)
+      new THREE.Vector3(-0.34, 1.56, -0.16),
+      new THREE.Vector3(-0.36, 1.9, -0.12),
     ]);
-    const b3 = new THREE.Mesh(new THREE.TubeGeometry(b3Curve, 8, 0.045, 8, false), aortaMaterial);
+    const b3 = new THREE.Mesh(new THREE.TubeGeometry(b3Curve, 10, 0.044, 10, false), aortaMaterial);
     heartBodyGroup.add(b3);
 
-    // 7. Pulmonary Trunk (Bifurcating anterior to aorta)
-    const pulmonaryCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.2, 0.6, 0.35),
-      new THREE.Vector3(0.0, 1.0, 0.3),
-      new THREE.Vector3(-0.25, 1.2, 0.15),
+    // Pulmonary Trunk (Emerges anterior to aorta and curves underneath the aortic arch)
+    const ptCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.22, 0.58, 0.36),
+      new THREE.Vector3(0.02, 1.02, 0.32),
+      new THREE.Vector3(-0.24, 1.22, 0.16),
     ]);
-    const pulmonaryGeo = new THREE.TubeGeometry(pulmonaryCurve, 24, 0.15, 14, false);
-    const pulmonaryMesh = new THREE.Mesh(pulmonaryGeo, pulmonaryMaterial);
+    const pulmonaryGeo = new THREE.TubeGeometry(ptCurve, 26, 0.145, 14, false);
+    const pulmonaryMesh = new THREE.Mesh(pulmonaryGeo, venousMaterial);
     heartBodyGroup.add(pulmonaryMesh);
 
-    // 8. Superior Vena Cava (Right superior venous trunk)
-    const svcCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.72, 0.85, 0.0),
-      new THREE.Vector3(0.72, 1.45, -0.05),
+    // Pulmonary Bifurcation: Left and Right Pulmonary Arteries
+    const lpaCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.24, 1.22, 0.16),
+      new THREE.Vector3(-0.65, 1.28, -0.08),
     ]);
-    const svcMesh = new THREE.Mesh(new THREE.TubeGeometry(svcCurve, 12, 0.14, 12, false), pulmonaryMaterial);
+    const lpaMesh = new THREE.Mesh(new THREE.TubeGeometry(lpaCurve, 12, 0.09, 10, false), venousMaterial);
+    heartBodyGroup.add(lpaMesh);
+
+    const rpaCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.24, 1.22, 0.16),
+      new THREE.Vector3(0.45, 1.18, -0.18),
+    ]);
+    const rpaMesh = new THREE.Mesh(new THREE.TubeGeometry(rpaCurve, 12, 0.09, 10, false), venousMaterial);
+    heartBodyGroup.add(rpaMesh);
+
+    // Superior Vena Cava (SVC)
+    const svcCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.74, 0.82, 0.02),
+      new THREE.Vector3(0.74, 1.48, -0.04),
+    ]);
+    const svcMesh = new THREE.Mesh(new THREE.TubeGeometry(svcCurve, 14, 0.13, 12, false), venousMaterial);
     heartBodyGroup.add(svcMesh);
 
-    // Floating Bio-Sensor Particle Ring
-    const particlesCount = 90;
-    const particleGeometry = new THREE.BufferGeometry();
+    // 8. Coronary Sulcus Arteries (Anterior Interventricular Artery / LAD)
+    const ladCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.06, 0.68, 0.64),
+      new THREE.Vector3(0.14, 0.18, 0.72),
+      new THREE.Vector3(0.02, -0.42, 0.62),
+      new THREE.Vector3(-0.16, -1.02, 0.42),
+      new THREE.Vector3(-0.36, -1.48, 0.1),
+    ]);
+    const ladGeo = new THREE.TubeGeometry(ladCurve, 32, 0.042, 8, false);
+    const ladMesh = new THREE.Mesh(ladGeo, coronaryMaterial);
+    heartBodyGroup.add(ladMesh);
+
+    // Right Coronary Artery (RCA in AV groove)
+    const rcaCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.28, 0.45, 0.52),
+      new THREE.Vector3(0.55, 0.22, 0.46),
+      new THREE.Vector3(0.72, -0.15, 0.32),
+      new THREE.Vector3(0.52, -0.48, 0.12),
+    ]);
+    const rcaMesh = new THREE.Mesh(new THREE.TubeGeometry(rcaCurve, 24, 0.038, 8, false), coronaryMaterial);
+    heartBodyGroup.add(rcaMesh);
+
+    // 9. Floating Clinical Bio-Sensor Ring
+    const particlesCount = 80;
+    const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particlesCount * 3);
 
     for (let i = 0; i < particlesCount * 3; i += 3) {
-      const radius = 2.4 + Math.random() * 0.8;
+      const radius = 2.4 + Math.random() * 0.7;
       const angle = Math.random() * Math.PI * 2;
-      const yOffset = (Math.random() - 0.5) * 2.2;
+      const yOffset = (Math.random() - 0.5) * 2.0;
       particlePositions[i] = Math.cos(angle) * radius;
       particlePositions[i + 1] = yOffset;
       particlePositions[i + 2] = Math.sin(angle) * radius;
     }
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    const particleMaterial = new THREE.PointsMaterial({
-      color: new THREE.Color('#F4B942'),
-      size: 0.055,
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: new THREE.Color('#5FB3CE'),
+      size: 0.05,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.7,
     });
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    const particles = new THREE.Points(particleGeo, particleMat);
     heartRoot.add(particles);
 
-    // Professional Multi-Directional Studio & Rim Lighting
-    // 1. Ambient baseline
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-    scene.add(ambientLight);
-
-    // 2. Key Light (Warm top-front)
-    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.8);
-    keyLight.position.set(4, 5, 5);
+    // 10. Clinical 3-Point Studio Lighting (Key, Fill, Rim)
+    // Key Light (Bright frontal surgical focus)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    keyLight.position.set(4.5, 5.5, 5.0);
     scene.add(keyLight);
 
-    // 3. Cool Rim Backlight (Accentuates anatomical contours)
-    const rimLight = new THREE.DirectionalLight(0xeaf4f4, 2.4);
-    rimLight.position.set(-4, -2, -5);
-    scene.add(rimLight);
-
-    // 4. Warm Terracotta Fill Light
-    const fillLight = new THREE.DirectionalLight(0xe4714e, 1.2);
-    fillLight.position.set(-4, 2, 3);
+    // Fill Light (Soft cyan/blue gradient fill)
+    const fillLight = new THREE.DirectionalLight(0x5fb3ce, 1.2);
+    fillLight.position.set(-4.5, -0.5, 3.5);
     scene.add(fillLight);
 
-    // 5. Deep Teal Center Point Light for organic internal glow
-    const innerLight = new THREE.PointLight(0x0f5e5e, 1.5, 6);
-    innerLight.position.set(0, 0, 1);
-    scene.add(innerLight);
+    // Rim Light (Sharp cyan edge contour from behind)
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 3.2);
+    rimLight.position.set(0.0, 2.0, -5.5);
+    scene.add(rimLight);
 
-    // Pointer Drag Physics
+    // Ambient Baseline
+    const ambientLight = new THREE.AmbientLight(0xf4f9fb, 0.85);
+    scene.add(ambientLight);
+
+    // Inner Myocardial Core Point Light
+    const coreLight = new THREE.PointLight(0x2563a6, 1.6, 7);
+    coreLight.position.set(0, 0, 0.8);
+    scene.add(coreLight);
+
+    // 11. Interactive Drag Physics with Smooth Damping
     let isDragging = false;
     let prevMouse = { x: 0, y: 0 };
+    let velocity = { x: 0, y: 0 };
 
     const onPointerDown = (e) => {
       isDragging = true;
       prevMouse = { x: e.clientX, y: e.clientY };
+      velocity = { x: 0, y: 0 };
     };
 
     const onPointerMove = (e) => {
       if (!isDragging) return;
       const dx = e.clientX - prevMouse.x;
       const dy = e.clientY - prevMouse.y;
-      heartRoot.rotation.y += dx * 0.009;
-      heartRoot.rotation.x += dy * 0.009;
+      velocity = { x: dx * 0.008, y: dy * 0.008 };
+      heartRoot.rotation.y += velocity.x;
+      heartRoot.rotation.x += velocity.y;
       prevMouse = { x: e.clientX, y: e.clientY };
     };
 
@@ -294,7 +353,9 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
 
-    // Animation Loop
+    setIsLoading(false);
+
+    // 12. Animation Loop: Real-Time Physiological Cardiac Rhythm
     let animationFrameId;
     const clock = new THREE.Clock();
 
@@ -302,29 +363,36 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
       animationFrameId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      // Gentle ambient floating orientation
+      // Ambient rotation and inertia decay
       if (!isDragging) {
-        heartRoot.rotation.y += 0.005;
-        heartRoot.rotation.x = Math.sin(time * 0.6) * 0.08;
+        heartRoot.rotation.y += 0.004 + velocity.x;
+        heartRoot.rotation.x += velocity.y;
+        velocity.x *= 0.95;
+        velocity.y *= 0.95;
       }
-      particles.rotation.y -= 0.003;
+      particles.rotation.y -= 0.002;
 
-      // Realistic anatomical cardiac cycle
+      // Physiological cardiac cycle
       if (heartRate > 0) {
-        // Frequency proportional to real BPM
+        // Double-peak cardiac wave: Atrial contraction followed by strong Ventricular systole
         const freq = (heartRate / 60) * Math.PI * 2;
         const cycle = (time * freq) % (Math.PI * 2);
         
-        // Ventricular systole contraction curve
-        const beat = Math.pow(Math.sin(cycle), 4);
-        const scaleMod = 1 + beat * 0.08;
-        heartBodyGroup.scale.set(scaleMod, scaleMod * 0.96, scaleMod);
-        muscleMaterial.emissiveIntensity = 0.15 + beat * 0.75;
+        // Ventricular systole peak
+        const systole = Math.pow(Math.sin(cycle), 4);
+        const scaleMod = 1 + systole * 0.09;
+        heartBodyGroup.scale.set(scaleMod, scaleMod * 0.95, scaleMod);
+
+        // Emissive pulse synced with systole
+        muscleMaterial.emissiveIntensity = 0.15 + systole * 0.8;
+        aortaMaterial.emissiveIntensity = 0.1 + systole * 0.5;
+        coreLight.intensity = 1.2 + systole * 1.6;
       } else {
-        // 0 BPM: Slow idle breathing rhythm (NOT a fake fast beating heart!)
-        const idleBreathing = Math.sin(time * 1.4) * 0.015;
+        // 0 BPM: Gentle resting idle breathing rhythm (0.22 Hz)
+        const idleBreathing = Math.sin(time * 1.35) * 0.016;
         heartBodyGroup.scale.set(1 + idleBreathing, 1 + idleBreathing, 1 + idleBreathing);
-        muscleMaterial.emissiveIntensity = 0.06 + Math.sin(time * 1.4) * 0.03;
+        muscleMaterial.emissiveIntensity = 0.06 + Math.sin(time * 1.35) * 0.03;
+        coreLight.intensity = 1.0;
       }
 
       renderer.render(scene, camera);
@@ -343,6 +411,7 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
 
     window.addEventListener('resize', handleResize);
 
+    // Cleanup resources
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
@@ -357,15 +426,15 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
       rvGeo.dispose();
       raGeo.dispose();
       laGeo.dispose();
-      sulcusGeo.dispose();
       aortaGeo.dispose();
       pulmonaryGeo.dispose();
-      particleGeometry.dispose();
+      ladGeo.dispose();
+      particleGeo.dispose();
       muscleMaterial.dispose();
       aortaMaterial.dispose();
-      pulmonaryMaterial.dispose();
+      venousMaterial.dispose();
       coronaryMaterial.dispose();
-      particleMaterial.dispose();
+      particleMat.dispose();
       bumpTexture.dispose();
     };
   }, [heartRate]);
@@ -376,32 +445,39 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Loading Spinner Indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <RefreshCw className="w-8 h-8 text-medical-blue animate-spin" />
+        </div>
+      )}
+
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="w-full h-full" />
 
-      {/* Floating Status Badge */}
+      {/* Floating Cardiac Status Badge */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 flex items-center gap-2.5 text-xs font-semibold shadow-lg whitespace-nowrap border border-white/60 dark:border-white/10">
-        <div className={`w-2.5 h-2.5 rounded-full ${heartRate > 0 ? 'bg-terracotta animate-ping' : 'bg-deep-teal/40 dark:bg-sky-mist/40'}`} />
-        <span className="text-deep-teal dark:text-sky-mist font-bold">
+        <div className={`w-2.5 h-2.5 rounded-full ${heartRate > 0 ? 'bg-medical-blue animate-ping' : 'bg-soft-cyan/60'}`} />
+        <span className="text-deep-navy dark:text-sky-mist font-bold">
           {heartRate > 0 ? (
-            <>Live Cardiac Rhythm: <strong className="text-terracotta">{heartRate} BPM</strong></>
+            <>Live Cardiac Rhythm: <strong className="text-medical-blue">{heartRate} BPM</strong></>
           ) : (
-            <span className="flex items-center gap-1.5 text-deep-teal/80 dark:text-sky-mist/80">
-              <Activity className="w-3.5 h-3.5 text-deep-teal dark:text-sun-gold" />
+            <span className="flex items-center gap-1.5 text-deep-navy/80 dark:text-sky-mist/80">
+              <Activity className="w-3.5 h-3.5 text-soft-cyan" />
               <span>Anatomical Bio-Twin • 0 BPM (Idle)</span>
             </span>
           )}
         </span>
       </div>
 
-      {/* Zero Dummy Data Indicator tooltip on hover */}
+      {/* Zero Dummy Data Guidance Tooltip on Hover */}
       {isHovered && heartRate === 0 && (
-        <div className="absolute top-3 right-3 glass-card p-3 text-[11px] text-deep-teal dark:text-sky-mist max-w-[200px] shadow-xl animate-fadeIn border border-terracotta/30">
-          <p className="flex items-center gap-1.5 font-bold text-terracotta">
+        <div className="absolute top-3 right-3 glass-card p-3 text-[11px] text-deep-navy dark:text-sky-mist max-w-[210px] shadow-xl animate-fadeIn border border-medical-blue/30">
+          <p className="flex items-center gap-1.5 font-bold text-medical-blue">
             <AlertCircle className="w-3.5 h-3.5" /> Zero Dummy Data
           </p>
-          <p className="mt-1 leading-relaxed text-deep-teal/80 dark:text-sky-mist/80">
-            Anatomical model animates with real heart rhythm once logged or synced via Bluetooth.
+          <p className="mt-1 leading-relaxed text-deep-navy/80 dark:text-sky-mist/80">
+            Anatomical 3D model pulses with real heart rate once recorded in Vitals or synced via Bluetooth.
           </p>
         </div>
       )}
