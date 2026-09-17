@@ -6,6 +6,7 @@ import VoiceTriage from './components/triage/VoiceTriage';
 import HospitalNavigation from './components/navigation/HospitalNavigation';
 import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
+import EmergencySOSBeacon from './components/common/EmergencySOSBeacon';
 import { LanguageProvider } from './i18n/LanguageContext';
 
 function AppContent() {
@@ -90,7 +91,6 @@ function AppContent() {
           currentUser={currentUser}
           onVitalsChange={handleVitalsChange}
           onNavigateToPrescription={() => alert('Prescription OCR activates in Slice 11')}
-          onDownloadHealthCard={() => alert('ABDM Health Card PDF download activates in Slice 9')}
           onOpenBleModal={() => alert('Web Bluetooth BLE sync activates in Slice 12')}
           onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
         />
@@ -113,6 +113,13 @@ function AppContent() {
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
         defaultRole={userRole === 'kiosk' ? 'kiosk_operator' : 'citizen'}
+      />
+
+      {/* Persistent 1-Tap Emergency SOS Floating Beacon with 3s abort timer */}
+      <EmergencySOSBeacon 
+        onNavigateToHospital={() => setCurrentTab('navigation')}
+        activeVitals={activeVitals}
+        currentUser={currentUser}
       />
 
       {/* State-Based Auto Language Notification Toast */}

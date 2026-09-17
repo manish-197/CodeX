@@ -7,6 +7,7 @@ import familyRoutes from './routes/familyRoutes.js';
 import triageRoutes from './routes/triageRoutes.js';
 import hospitalRoutes from './routes/hospitalRoutes.js';
 import healthCardRoutes from './routes/healthCardRoutes.js';
+import sosRoutes from './routes/sosRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/family', familyRoutes);
 app.use('/api/triage', triageRoutes);
 app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/health-card', healthCardRoutes);
+app.use('/api/sos', sosRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
