@@ -9,12 +9,29 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
+  },
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true,
   },
   passwordHash: {
     type: String,
     required: true,
+  },
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpires: {
+    type: Date,
+  },
+  resetPasswordAttempts: {
+    type: Number,
+    default: 0,
+  },
+  lastResetRequestAt: {
+    type: Date,
   },
   role: {
     type: String,
