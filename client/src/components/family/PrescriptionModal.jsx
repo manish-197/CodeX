@@ -101,20 +101,20 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-teal/10 text-deep-teal dark:text-sky-mist"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-navy/10 text-deep-navy dark:text-clinical-white"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta/15 text-terracotta text-xs font-bold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-medical-blue/15 text-medical-blue text-xs font-bold uppercase tracking-wider mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Gemini 2.5 Flash Vision OCR</span>
           </div>
-          <h3 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist">
+          <h3 className="font-display font-bold text-2xl text-deep-navy dark:text-clinical-white">
             Prescription Scanner & Audio Explainer
           </h3>
-          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+          <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
             Upload doctor's prescription for {member?.name || 'Patient'}. AI converts handwriting into dosage cards and speaks instructions.
           </p>
         </div>
@@ -122,26 +122,26 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
         {/* Upload Box */}
         {!ocrResult && (
           <div className="space-y-4">
-            <label className="border-2 border-dashed border-deep-teal/20 dark:border-white/20 hover:border-terracotta rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors bg-deep-teal/5 dark:bg-white/5">
+            <label className="border-2 border-dashed border-deep-navy/20 dark:border-white/20 hover:border-medical-blue rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors bg-deep-navy/5 dark:bg-white/5">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="w-12 h-12 rounded-2xl bg-terracotta/15 text-terracotta flex items-center justify-center mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-medical-blue/15 text-medical-blue flex items-center justify-center mb-3">
                 <Camera className="w-6 h-6" />
               </div>
-              <span className="font-bold text-sm text-deep-teal dark:text-sky-mist">
+              <span className="font-bold text-sm text-deep-navy dark:text-clinical-white">
                 {selectedFile ? selectedFile.name : 'Upload Prescription Photo / कॅमेऱ्याने फोटो काढा'}
               </span>
-              <span className="text-xs text-deep-teal/60 dark:text-dark-muted mt-1">
+              <span className="text-xs text-deep-navy/60 dark:text-dark-muted mt-1">
                 PNG, JPG, WEBP up to 8MB
               </span>
             </label>
 
             {previewUrl && (
-              <div className="relative rounded-2xl overflow-hidden max-h-48 border border-deep-teal/10 flex justify-center bg-black/5">
+              <div className="relative rounded-2xl overflow-hidden max-h-48 border border-deep-navy/10 flex justify-center bg-black/5">
                 <img src={previewUrl} alt="Prescription preview" className="object-contain max-h-48" />
               </div>
             )}
@@ -149,7 +149,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
             <button
               onClick={handleRunOCR}
               disabled={analyzing}
-              className="w-full btn-terracotta py-3 text-xs font-bold flex items-center justify-center gap-2"
+              className="w-full btn-medical-blue py-3 text-xs font-bold flex items-center justify-center gap-2"
             >
               {analyzing ? (
                 <>
@@ -171,12 +171,12 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
           <div className="space-y-6 animate-fadeIn">
             
             {/* Header with Spoken Explainer Button */}
-            <div className="p-4 rounded-2xl bg-deep-teal/5 dark:bg-white/5 border border-deep-teal/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-deep-navy/5 dark:bg-white/5 border border-deep-navy/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-terracotta block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-medical-blue block">
                   Prescription Summary
                 </span>
-                <h4 className="font-display font-bold text-base text-deep-teal dark:text-sky-mist">
+                <h4 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white">
                   {ocrResult.extractedSummary}
                 </h4>
               </div>
@@ -186,7 +186,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
                   {isPlayingAudio ? (
                     <button
                       onClick={stopAudio}
-                      className="btn-terracotta bg-alert-crimson text-xs py-2 px-3 flex items-center gap-1.5"
+                      className="btn-medical-blue bg-alert-red text-xs py-2 px-3 flex items-center gap-1.5"
                     >
                       <VolumeX className="w-4 h-4" />
                       <span>Stop Voice</span>
@@ -194,7 +194,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
                   ) : (
                     <button
                       onClick={() => speakAudio(ocrResult.audioExplanationText)}
-                      className="btn-teal text-xs py-2 px-3 flex items-center gap-1.5 dark:bg-sky-mist dark:text-deep-teal"
+                      className="btn-navy text-xs py-2 px-3 flex items-center gap-1.5 dark:bg-clinical-white dark:text-deep-navy"
                     >
                       <Volume2 className="w-4 h-4" />
                       <span>Listen Spoken Schedule</span>
@@ -206,7 +206,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
 
             {/* Structured Dosage Schedule Cards */}
             <div className="space-y-3">
-              <h5 className="font-bold text-xs uppercase tracking-wider text-deep-teal dark:text-sky-mist">
+              <h5 className="font-bold text-xs uppercase tracking-wider text-deep-navy dark:text-clinical-white">
                 Medication Schedule ({ocrResult.medicines?.length || 0} Medicines)
               </h5>
 
@@ -214,14 +214,14 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
                 {ocrResult.medicines?.map((med, idx) => (
                   <div 
                     key={idx}
-                    className="neo-glass-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-deep-teal/10 hover:border-terracotta/40"
+                    className="neo-glass-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-deep-navy/10 hover:border-medical-blue/40"
                   >
                     <div className="space-y-1">
-                      <div className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist">
+                      <div className="font-display font-bold text-sm text-deep-navy dark:text-clinical-white">
                         {med.medicineName}
                       </div>
-                      <div className="text-xs text-deep-teal/70 dark:text-dark-muted flex items-center gap-2">
-                        <span className="font-semibold text-terracotta">{med.dosage}</span>
+                      <div className="text-xs text-deep-navy/70 dark:text-dark-muted flex items-center gap-2">
+                        <span className="font-semibold text-medical-blue">{med.dosage}</span>
                         <span>•</span>
                         <span>{med.timing}</span>
                         <span>•</span>
@@ -233,7 +233,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
                     <div className="flex items-center gap-2 shrink-0">
                       <div className={`flex flex-col items-center px-2.5 py-1 rounded-xl text-[10px] font-bold ${
                         med.schedule?.morning 
-                          ? 'bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold' 
+                          ? 'bg-caution-amber/25 text-deep-navy dark:text-caution-amber border border-caution-amber' 
                           : 'opacity-30 border border-gray-200 dark:border-gray-700'
                       }`}>
                         <Sunrise className="w-3.5 h-3.5 mb-0.5" />
@@ -242,7 +242,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
 
                       <div className={`flex flex-col items-center px-2.5 py-1 rounded-xl text-[10px] font-bold ${
                         med.schedule?.afternoon 
-                          ? 'bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold' 
+                          ? 'bg-caution-amber/25 text-deep-navy dark:text-caution-amber border border-caution-amber' 
                           : 'opacity-30 border border-gray-200 dark:border-gray-700'
                       }`}>
                         <Sun className="w-3.5 h-3.5 mb-0.5" />
@@ -251,7 +251,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
 
                       <div className={`flex flex-col items-center px-2.5 py-1 rounded-xl text-[10px] font-bold ${
                         med.schedule?.night 
-                          ? 'bg-deep-teal text-white dark:bg-sky-mist dark:text-deep-teal' 
+                          ? 'bg-deep-navy text-white dark:bg-clinical-white dark:text-deep-navy' 
                           : 'opacity-30 border border-gray-200 dark:border-gray-700'
                       }`}>
                         <Moon className="w-3.5 h-3.5 mb-0.5" />
@@ -266,7 +266,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
             <div className="pt-2 flex flex-wrap justify-between items-center gap-2 text-xs">
               <button
                 onClick={() => setOcrResult(null)}
-                className="text-terracotta hover:underline font-bold"
+                className="text-medical-blue hover:underline font-bold"
               >
                 Scan Another Prescription
               </button>
@@ -277,7 +277,7 @@ export default function PrescriptionModal({ isOpen, onClose, member, onPrescript
                     href={`http://localhost:5000/api/prescriptions/${ocrResult.prescription._id || ocrResult.prescription.id}/pdf`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-terracotta text-xs py-2 px-3.5 flex items-center gap-1.5"
+                    className="btn-medical-blue text-xs py-2 px-3.5 flex items-center gap-1.5"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download PDF Slip</span>

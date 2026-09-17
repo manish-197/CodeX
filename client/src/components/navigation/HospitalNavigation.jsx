@@ -230,13 +230,13 @@ export default function HospitalNavigation() {
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-terracotta">
+          <span className="text-xs font-bold uppercase tracking-wider text-medical-blue">
             Street-Level Emergency Routing
           </span>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl text-deep-teal dark:text-sky-mist">
+          <h2 className="font-display font-bold text-2xl sm:text-3xl text-deep-navy dark:text-clinical-white">
             Real Road-to-Road Navigation
           </h2>
-          <p className="text-xs sm:text-sm text-deep-teal/70 dark:text-dark-muted mt-0.5">
+          <p className="text-xs sm:text-sm text-deep-navy/70 dark:text-dark-muted mt-0.5">
             Calculated over actual drivable rural roads via OSRM, never deceptive straight lines.
           </p>
         </div>
@@ -245,9 +245,9 @@ export default function HospitalNavigation() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={acquireGPS}
-            className="glass-card px-3.5 py-1.5 text-xs font-semibold flex items-center gap-2 text-deep-teal dark:text-sky-mist hover:border-terracotta transition-colors"
+            className="glass-card px-3.5 py-1.5 text-xs font-semibold flex items-center gap-2 text-deep-navy dark:text-clinical-white hover:border-medical-blue transition-colors"
           >
-            <LocateFixed className="w-3.5 h-3.5 text-terracotta" />
+            <LocateFixed className="w-3.5 h-3.5 text-medical-blue" />
             <span>{locationSource}</span>
             <RefreshCw className="w-3 h-3 opacity-60 ml-1" />
           </button>
@@ -263,13 +263,13 @@ export default function HospitalNavigation() {
 
           {/* Floating Route Overview Pill */}
           {routeData && (
-            <div className="absolute top-5 left-5 z-10 glass-card px-4 py-2.5 shadow-xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex items-center gap-4 text-xs font-bold">
-              <div className="flex items-center gap-1.5 text-terracotta">
+            <div className="absolute top-5 left-5 z-10 glass-card px-4 py-2.5 shadow-xl bg-white/95 dark:bg-dark-card/95 border border-deep-navy/15 flex items-center gap-4 text-xs font-bold">
+              <div className="flex items-center gap-1.5 text-medical-blue">
                 <Compass className="w-4 h-4" />
                 <span className="text-sm">{routeData.distanceKm} km</span>
               </div>
-              <div className="w-px h-4 bg-deep-teal/20" />
-              <div className="flex items-center gap-1.5 text-deep-teal dark:text-sky-mist">
+              <div className="w-px h-4 bg-deep-navy/20" />
+              <div className="flex items-center gap-1.5 text-deep-navy dark:text-clinical-white">
                 <Clock className="w-4 h-4" />
                 <span className="text-sm">~{routeData.durationMin} mins driving</span>
               </div>
@@ -277,10 +277,10 @@ export default function HospitalNavigation() {
           )}
 
           {/* Bottom Controls Bar on Map */}
-          <div className="absolute bottom-5 left-5 right-5 z-10 glass-card p-3 shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="absolute bottom-5 left-5 right-5 z-10 glass-card p-3 shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-navy/15 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-xs flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-600 shadow-sm" />
-              <span className="font-semibold text-deep-teal dark:text-sky-mist">
+              <span className="font-semibold text-deep-navy dark:text-clinical-white">
                 Glowing Blue Polyline: Actual Drivable Road Route
               </span>
             </div>
@@ -290,7 +290,7 @@ export default function HospitalNavigation() {
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-terracotta text-xs py-2 px-4 flex items-center gap-2 w-full sm:w-auto justify-center"
+              className="btn-medical-blue text-xs py-2 px-4 flex items-center gap-2 w-full sm:w-auto justify-center"
             >
               <span>Open Google Maps Voice Nav</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -303,12 +303,12 @@ export default function HospitalNavigation() {
         <div className="lg:col-span-4 space-y-4">
           
           <div className="glass-card p-5 space-y-3">
-            <h4 className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist uppercase tracking-wide">
+            <h4 className="font-display font-bold text-sm text-deep-navy dark:text-clinical-white uppercase tracking-wide">
               Nearest Rural Health Centers
             </h4>
 
             {loadingHospitals ? (
-              <div className="py-6 text-center text-xs text-deep-teal/60">
+              <div className="py-6 text-center text-xs text-deep-navy/60">
                 Scanning 2dsphere geo-index...
               </div>
             ) : (
@@ -324,19 +324,19 @@ export default function HospitalNavigation() {
                       onClick={() => setSelectedHospital(hosp)}
                       className={`p-3 rounded-2xl cursor-pointer transition-all border ${
                         isSelected
-                          ? 'bg-deep-teal text-white border-deep-teal shadow-md dark:bg-sky-mist dark:text-deep-teal'
-                          : 'bg-white/60 dark:bg-dark-base/60 border-deep-teal/10 hover:border-terracotta text-deep-teal dark:text-sky-mist'
+                          ? 'bg-deep-navy text-white border-deep-navy shadow-md dark:bg-clinical-white dark:text-deep-navy'
+                          : 'bg-white/60 dark:bg-dark-base/60 border-deep-navy/10 hover:border-medical-blue text-deep-navy dark:text-clinical-white'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="font-bold text-xs leading-snug">{hosp.name}</div>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                          isSelected ? 'bg-terracotta text-white' : 'bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist'
+                          isSelected ? 'bg-medical-blue text-white' : 'bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white'
                         }`}>
                           {hosp.distanceKm} km
                         </span>
                       </div>
-                      <p className={`text-[11px] mt-1 ${isSelected ? 'opacity-85' : 'text-deep-teal/70 dark:text-dark-muted'}`}>
+                      <p className={`text-[11px] mt-1 ${isSelected ? 'opacity-85' : 'text-deep-navy/70 dark:text-dark-muted'}`}>
                         {hosp.address}
                       </p>
                       <div className="mt-2 flex items-center justify-between text-[10px]">
@@ -344,7 +344,7 @@ export default function HospitalNavigation() {
                         <a 
                           href={`tel:${hosp.phone}`} 
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 font-bold text-terracotta hover:underline"
+                          className="flex items-center gap-1 font-bold text-medical-blue hover:underline"
                         >
                           <Phone className="w-3 h-3" /> {hosp.phone}
                         </a>
@@ -358,9 +358,9 @@ export default function HospitalNavigation() {
 
           {/* Turn-by-Turn Navigation Steps Card */}
           <div className="glass-card p-5 space-y-3">
-            <h4 className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist uppercase tracking-wide flex items-center justify-between">
+            <h4 className="font-display font-bold text-sm text-deep-navy dark:text-clinical-white uppercase tracking-wide flex items-center justify-between">
               <span>Turn-by-Turn Route</span>
-              <span className="text-[10px] text-terracotta font-mono">OSRM Engine</span>
+              <span className="text-[10px] text-medical-blue font-mono">OSRM Engine</span>
             </h4>
 
             <div 
@@ -369,22 +369,22 @@ export default function HospitalNavigation() {
             >
               {routeData?.steps && routeData.steps.length > 0 ? (
                 routeData.steps.map((step, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 pb-2 border-b border-deep-teal/5 dark:border-white/5 last:border-none">
-                    <span className="w-5 h-5 rounded-full bg-deep-teal/10 dark:bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5 text-deep-teal dark:text-sky-mist">
+                  <div key={idx} className="flex items-start gap-2.5 pb-2 border-b border-deep-navy/5 dark:border-white/5 last:border-none">
+                    <span className="w-5 h-5 rounded-full bg-deep-navy/10 dark:bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5 text-deep-navy dark:text-clinical-white">
                       {idx + 1}
                     </span>
                     <div>
-                      <div className="font-medium text-deep-teal dark:text-sky-mist">
+                      <div className="font-medium text-deep-navy dark:text-clinical-white">
                         {step.maneuver.type} {step.name ? `onto ${step.name}` : ''}
                       </div>
-                      <div className="text-[10px] text-deep-teal/60 dark:text-dark-muted">
+                      <div className="text-[10px] text-deep-navy/60 dark:text-dark-muted">
                         {(step.distance / 1000).toFixed(2)} km
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="py-4 text-center text-xs text-deep-teal/60">
+                <div className="py-4 text-center text-xs text-deep-navy/60">
                   Select a hospital to calculate turn-by-turn maneuvers.
                 </div>
               )}

@@ -57,25 +57,25 @@ export default function OfflineSyncIndicator() {
   return (
     <div className="fixed top-20 right-6 z-40 animate-fadeIn">
       {!isOnline ? (
-        <div className="glass-card px-3.5 py-2 flex items-center gap-2 shadow-lg bg-sun-gold/20 border border-sun-gold text-xs font-bold text-deep-teal">
-          <WifiOff className="w-4 h-4 text-alert-crimson animate-pulse" />
+        <div className="glass-card px-3.5 py-2 flex items-center gap-2 shadow-lg bg-caution-amber/20 border border-caution-amber text-xs font-bold text-deep-navy">
+          <WifiOff className="w-4 h-4 text-alert-red animate-pulse" />
           <span>Offline PWA Mode {pendingCount > 0 && `(${pendingCount} Queued)`}</span>
         </div>
       ) : justSynced ? (
-        <div className="glass-card px-3.5 py-2 flex items-center gap-2 shadow-lg bg-leaf-green/20 border border-leaf-green text-xs font-bold text-leaf-green">
+        <div className="glass-card px-3.5 py-2 flex items-center gap-2 shadow-lg bg-health-green/20 border border-health-green text-xs font-bold text-health-green">
           <CheckCircle2 className="w-4 h-4" />
           <span>All Records Synced to Atlas</span>
         </div>
       ) : (
-        <div className="glass-card px-3.5 py-2 flex items-center gap-2.5 shadow-lg bg-white/95 dark:bg-dark-card/95 border border-terracotta/40 text-xs font-semibold">
-          <span className="w-2 h-2 rounded-full bg-sun-gold animate-ping" />
-          <span className="text-deep-teal dark:text-sky-mist">
+        <div className="glass-card px-3.5 py-2 flex items-center gap-2.5 shadow-lg bg-white/95 dark:bg-dark-card/95 border border-medical-blue/40 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-caution-amber animate-ping" />
+          <span className="text-deep-navy dark:text-clinical-white">
             {pendingCount} Pending Sync
           </span>
           <button
             onClick={handleSyncNow}
             disabled={syncing}
-            className="p-1 rounded-full hover:bg-deep-teal/10 text-terracotta"
+            className="p-1 rounded-full hover:bg-deep-navy/10 text-medical-blue"
             title="Sync to MongoDB Atlas now"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />

@@ -77,108 +77,108 @@ export default function HealthCardModal({ isOpen, onClose, member }) {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-teal/10 text-deep-teal dark:text-sky-mist"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-navy/10 text-deep-navy dark:text-clinical-white"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist text-xs font-bold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-4 h-4 text-leaf-green" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white text-xs font-bold uppercase tracking-wider mb-2">
+            <ShieldCheck className="w-4 h-4 text-health-green" />
             <span>Ayushman Bharat Digital Mission (ABDM)</span>
           </div>
-          <h3 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist">
+          <h3 className="font-display font-bold text-2xl text-deep-navy dark:text-clinical-white">
             Digital Health Card
           </h3>
-          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+          <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
             National Health Authority compliant ID with cryptographically signed QR
           </p>
         </div>
 
         {/* Realistic ABDM Wallet Card Graphic */}
-        <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-deep-teal/30 bg-white text-deep-teal my-6 relative">
+        <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-deep-navy/30 bg-white text-deep-navy my-6 relative">
           
           {/* Card Header Band */}
-          <div className="bg-deep-teal px-5 py-3 text-white flex items-center justify-between">
+          <div className="bg-deep-navy px-5 py-3 text-white flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-sun-gold">
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-caution-amber">
                 Government of India • ABDM
               </div>
               <div className="font-display font-bold text-sm tracking-tight">
                 Ayushman Bharat Health Account
               </div>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-terracotta flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-xl bg-medical-blue flex items-center justify-center text-white">
               <Heart className="w-4 h-4 fill-white" />
             </div>
           </div>
 
-          <div className="h-1 bg-terracotta" />
+          <div className="h-1 bg-medical-blue" />
 
           {/* Card Body */}
-          <div className="p-5 flex flex-col sm:flex-row items-center justify-between gap-5 bg-gradient-to-br from-white to-sky-mist/30">
+          <div className="p-5 flex flex-col sm:flex-row items-center justify-between gap-5 bg-gradient-to-br from-white to-clinical-white/30">
             
             {/* Demographics Column */}
             <div className="space-y-3 flex-1 text-left">
               <div>
-                <span className="text-[9px] uppercase font-bold text-deep-teal/60 block">Full Name / नाव</span>
-                <span className="font-display font-bold text-base text-deep-teal tracking-tight block">
+                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">Full Name / नाव</span>
+                <span className="font-display font-bold text-base text-deep-navy tracking-tight block">
                   {member.name}
                 </span>
               </div>
 
               <div>
-                <span className="text-[9px] uppercase font-bold text-deep-teal/60 block">ABHA Number / आभा क्रमांक</span>
-                <span className="font-mono font-black text-sm text-terracotta tracking-wider block">
+                <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">ABHA Number / आभा क्रमांक</span>
+                <span className="font-mono font-black text-sm text-medical-blue tracking-wider block">
                   {member.abhaId || '14-2026-9812-4456'}
                 </span>
               </div>
 
               <div className="flex items-center gap-6 text-xs">
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-deep-teal/60 block">Gender</span>
-                  <span className="font-bold text-deep-teal">{member.gender || 'Male'}</span>
+                  <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">Gender</span>
+                  <span className="font-bold text-deep-navy">{member.gender || 'Male'}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-deep-teal/60 block">Blood Group</span>
-                  <span className="font-black text-alert-crimson">{member.bloodGroup || 'O+'}</span>
+                  <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">Blood Group</span>
+                  <span className="font-black text-alert-red">{member.bloodGroup || 'O+'}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] uppercase font-bold text-deep-teal/60 block">Age</span>
-                  <span className="font-bold text-deep-teal">{member.age ? `${member.age} yrs` : 'N/A'}</span>
+                  <span className="text-[9px] uppercase font-bold text-deep-navy/60 block">Age</span>
+                  <span className="font-bold text-deep-navy">{member.age ? `${member.age} yrs` : 'N/A'}</span>
                 </div>
               </div>
             </div>
 
             {/* Signed Encrypted QR Code */}
             <div className="flex flex-col items-center shrink-0">
-              <div className="p-2 bg-white rounded-2xl border-2 border-deep-teal/15 shadow-md">
+              <div className="p-2 bg-white rounded-2xl border-2 border-deep-navy/15 shadow-md">
                 {qrUrl ? (
                   <img src={qrUrl} alt="Encrypted Health QR" className="w-28 h-28 object-contain" />
                 ) : (
-                  <div className="w-28 h-28 flex items-center justify-center bg-deep-teal/5 text-deep-teal text-xs font-mono">
+                  <div className="w-28 h-28 flex items-center justify-center bg-deep-navy/5 text-deep-navy text-xs font-mono">
                     Generating QR...
                   </div>
                 )}
               </div>
-              <span className="text-[9px] font-semibold text-deep-teal/60 mt-1 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-leaf-green" /> Signed Token
+              <span className="text-[9px] font-semibold text-deep-navy/60 mt-1 flex items-center gap-1">
+                <Lock className="w-3 h-3 text-health-green" /> Signed Token
               </span>
             </div>
 
           </div>
 
           {/* Security Notice Footer */}
-          <div className="bg-deep-teal/5 px-5 py-2 border-t border-deep-teal/10 flex items-center justify-between text-[10px] text-deep-teal/80 font-medium">
+          <div className="bg-deep-navy/5 px-5 py-2 border-t border-deep-navy/10 flex items-center justify-between text-[10px] text-deep-navy/80 font-medium">
             <span>Verified by ArogyaRakshak AI</span>
-            <span className="font-bold text-terracotta">Helpline: 108</span>
+            <span className="font-bold text-medical-blue">Helpline: 108</span>
           </div>
 
         </div>
 
         {/* Security Rule Explanation */}
-        <div className="p-3.5 rounded-2xl bg-leaf-green/10 border border-leaf-green/20 flex items-start gap-2.5 text-xs text-deep-teal dark:text-sky-mist mb-6">
-          <ShieldCheck className="w-4 h-4 text-leaf-green shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-2xl bg-health-green/10 border border-health-green/20 flex items-start gap-2.5 text-xs text-deep-navy dark:text-clinical-white mb-6">
+          <ShieldCheck className="w-4 h-4 text-health-green shrink-0 mt-0.5" />
           <p className="leading-tight text-[11px]">
             <strong>PII Protection Active:</strong> This QR code encodes a signed cryptographic JWT token, preventing unauthorized public scanning from leaking raw citizen data.
           </p>
@@ -188,7 +188,7 @@ export default function HealthCardModal({ isOpen, onClose, member }) {
         <button
           onClick={handleDownloadPdf}
           disabled={downloading}
-          className="w-full btn-terracotta py-3 text-xs font-bold flex items-center justify-center gap-2"
+          className="w-full btn-medical-blue py-3 text-xs font-bold flex items-center justify-center gap-2"
         >
           {downloading ? (
             <>

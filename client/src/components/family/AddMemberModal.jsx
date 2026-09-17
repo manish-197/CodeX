@@ -34,26 +34,26 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-teal/10 text-deep-teal dark:text-sky-mist"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-navy/10 text-deep-navy dark:text-clinical-white"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-leaf-green text-white flex items-center justify-center mx-auto mb-2 shadow-md">
+          <div className="w-10 h-10 rounded-2xl bg-health-green text-white flex items-center justify-center mx-auto mb-2 shadow-md">
             <UserPlus className="w-5 h-5" />
           </div>
-          <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist">
+          <h3 className="font-display font-bold text-xl text-deep-navy dark:text-clinical-white">
             Add Family Member
           </h3>
-          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+          <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
             Registers under your household ABHA digital health hub
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+            <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
               Full Name
             </label>
             <input
@@ -62,19 +62,19 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Shakuntala Patil"
-              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none focus:border-terracotta"
+              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none focus:border-medical-blue"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Relation
               </label>
               <select
                 value={relation}
                 onChange={(e) => setRelation(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
               >
                 <option value="Father">Father / वडील</option>
                 <option value="Mother">Mother / आई</option>
@@ -86,7 +86,7 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Age
               </label>
               <input
@@ -94,20 +94,20 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 placeholder="Years"
-                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Gender
               </label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -115,13 +115,13 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Blood Group
               </label>
               <select
                 value={bloodGroup}
                 onChange={(e) => setBloodGroup(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
               >
                 <option value="Unknown">Unknown</option>
                 <option value="A+">A+</option>
@@ -137,7 +137,7 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+            <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
               Known Medical Conditions (comma separated)
             </label>
             <input
@@ -145,13 +145,13 @@ export default function AddMemberModal({ isOpen, onClose, onAddMember }) {
               value={medicalHistory}
               onChange={(e) => setMedicalHistory(e.target.value)}
               placeholder="e.g. Hypertension, Type 2 Diabetes"
-              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full btn-terracotta py-2.5 text-xs font-bold mt-2"
+            className="w-full btn-medical-blue py-2.5 text-xs font-bold mt-2"
           >
             Add Member
           </button>

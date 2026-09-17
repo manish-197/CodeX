@@ -397,14 +397,14 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
   const getRiskBadgeStyles = (level) => {
     switch (level) {
       case 'CRITICAL':
-        return 'bg-alert-crimson text-white border-alert-crimson animate-pulse';
+        return 'bg-alert-red text-white border-alert-red animate-pulse';
       case 'HIGH':
-        return 'bg-alert-crimson/20 text-alert-crimson border-alert-crimson';
+        return 'bg-alert-red/20 text-alert-red border-alert-red';
       case 'MODERATE':
-        return 'bg-sun-gold/25 text-deep-teal dark:text-sun-gold border-sun-gold';
+        return 'bg-caution-amber/25 text-deep-navy dark:text-caution-amber border-caution-amber';
       case 'LOW':
       default:
-        return 'bg-leaf-green/20 text-leaf-green border-leaf-green';
+        return 'bg-health-green/20 text-health-green border-health-green';
     }
   };
 
@@ -412,49 +412,49 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
     switch (pipelineStage) {
       case 'listening':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green/30 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-health-green/20 text-health-green border border-health-green/30 text-xs font-semibold animate-pulse">
             <Radio className="w-3.5 h-3.5" />
             <span>Listening continuously... Speak symptoms now</span>
           </div>
         );
       case 'speech-detected':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-mist/30 dark:bg-dark-base text-deep-teal dark:text-sky-mist border border-deep-teal/20 text-xs font-semibold">
-            <Activity className="w-3.5 h-3.5 animate-pulse text-terracotta" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-clinical-white/30 dark:bg-dark-base text-deep-navy dark:text-clinical-white border border-deep-navy/20 text-xs font-semibold">
+            <Activity className="w-3.5 h-3.5 animate-pulse text-medical-blue" />
             <span>Voice detected & transcribing symptoms...</span>
           </div>
         );
       case 'silence-counting':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold/40 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-caution-amber/25 text-deep-navy dark:text-caution-amber border border-caution-amber/40 text-xs font-semibold animate-pulse">
             <Clock className="w-3.5 h-3.5" />
             <span>Pause detected: Auto-submitting in 1.3s (keep speaking to continue)...</span>
           </div>
         );
       case 'processing-symptoms':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-xs font-semibold">
             <Activity className="w-3.5 h-3.5 animate-spin" />
             <span>Processing your symptoms...</span>
           </div>
         );
       case 'getting-ai-response':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-xs font-semibold animate-pulse">
             <Sparkles className="w-3.5 h-3.5 animate-spin" />
             <span>Getting AI response from Gemini 3.6 Flash...</span>
           </div>
         );
       case 'complete':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-health-green/20 text-health-green border border-health-green/30 text-xs font-semibold">
             <CheckCircle className="w-3.5 h-3.5" />
             <span>Triage evaluation complete</span>
           </div>
         );
       case 'error':
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-alert-crimson/20 text-alert-crimson border border-alert-crimson/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-alert-red/20 text-alert-red border border-alert-red/30 text-xs font-semibold">
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>{pipelineErrorMessage || 'Microphone issue'}</span>
           </div>
@@ -462,8 +462,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       case 'idle':
       default:
         return (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-xs font-medium text-deep-teal/70 dark:text-dark-muted">
-            <span className="w-2 h-2 rounded-full bg-leaf-green" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-xs font-medium text-deep-navy/70 dark:text-dark-muted">
+            <span className="w-2 h-2 rounded-full bg-health-green" />
             <span>Ready for voice or text input</span>
           </div>
         );
@@ -475,14 +475,14 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-bold text-terracotta uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-bold text-medical-blue uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Gemini 3.6 Flash Clinical Triage</span>
         </div>
-        <h2 className="font-display font-bold text-3xl sm:text-4xl text-deep-teal dark:text-sky-mist">
+        <h2 className="font-display font-bold text-3xl sm:text-4xl text-deep-navy dark:text-clinical-white">
           {t('feat_triage_title')}
         </h2>
-        <p className="text-xs sm:text-sm text-deep-teal/70 dark:text-dark-muted max-w-lg mx-auto">
+        <p className="text-xs sm:text-sm text-deep-navy/70 dark:text-dark-muted max-w-lg mx-auto">
           Speak in your native dialect (Marathi, Hindi, English). The AI assesses risk, recommends non-prescriptive remedies, and speaks back audio guidance.
         </p>
       </div>
@@ -497,7 +497,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
         {/* Visible Error Banner if stage failed */}
         {pipelineErrorMessage && (
-          <div className="p-3.5 rounded-xl bg-alert-crimson/15 border border-alert-crimson/30 flex items-center justify-between text-xs text-alert-crimson text-left max-w-xl mx-auto">
+          <div className="p-3.5 rounded-xl bg-alert-red/15 border border-alert-red/30 flex items-center justify-between text-xs text-alert-red text-left max-w-xl mx-auto">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{pipelineErrorMessage}</span>
@@ -514,15 +514,15 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         {/* Pulsing Mic Button */}
         <div className="relative inline-block">
           {isListening && (
-            <div className="absolute inset-0 rounded-full bg-terracotta/30 animate-ping pointer-events-none" />
+            <div className="absolute inset-0 rounded-full bg-medical-blue/30 animate-ping pointer-events-none" />
           )}
           <button
             id="voice-mic-trigger-btn"
             onClick={toggleListening}
             className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 ${
               isListening 
-                ? 'bg-alert-crimson scale-105 shadow-alert-crimson/30 ring-4 ring-alert-crimson/30' 
-                : 'bg-gradient-to-tr from-terracotta to-sun-gold hover:scale-105 shadow-terracotta/30'
+                ? 'bg-alert-red scale-105 shadow-alert-red/30 ring-4 ring-alert-red/30' 
+                : 'bg-gradient-to-tr from-medical-blue to-caution-amber hover:scale-105 shadow-medical-blue/30'
             }`}
             aria-label="Voice input toggle"
           >
@@ -536,12 +536,12 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
         {/* Status helper text */}
         <div className="space-y-1">
-          <p className="text-xs sm:text-sm font-semibold text-deep-teal dark:text-sky-mist">
+          <p className="text-xs sm:text-sm font-semibold text-deep-navy dark:text-clinical-white">
             {isListening 
               ? 'Mic is LIVE & continuously listening. Speak naturally across pauses.'
               : 'Click the mic button to start voice recognition.'}
           </p>
-          <p className="text-xs text-deep-teal/60 dark:text-dark-muted">
+          <p className="text-xs text-deep-navy/60 dark:text-dark-muted">
             Language model set to: <strong>{speechLang}</strong>
           </p>
         </div>
@@ -557,7 +557,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
             }}
             placeholder="Spoken symptoms appear here automatically in real time... You can also edit or type directly (e.g., 'Fever of 101°F with body ache for 2 days')."
             rows={3}
-            className="w-full p-4 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-teal/15 dark:border-white/10 text-xs sm:text-sm text-deep-teal dark:text-sky-mist focus:outline-none focus:border-terracotta resize-none"
+            className="w-full p-4 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-navy/15 dark:border-white/10 text-xs sm:text-sm text-deep-navy dark:text-clinical-white focus:outline-none focus:border-medical-blue resize-none"
           />
 
           {transcript && (
@@ -566,7 +566,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                 setTranscript('');
                 latestTranscriptRef.current = '';
               }}
-              className="absolute right-3 top-3 p-1 rounded-full text-deep-teal/40 hover:text-deep-teal dark:text-dark-muted dark:hover:text-white"
+              className="absolute right-3 top-3 p-1 rounded-full text-deep-navy/40 hover:text-deep-navy dark:text-dark-muted dark:hover:text-white"
               title="Clear text"
             >
               <RotateCcw className="w-4 h-4" />
@@ -580,7 +580,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
             id="send-to-ai-btn"
             onClick={() => handleSendToAI()}
             disabled={isAnalyzing || !transcript.trim()}
-            className="btn-terracotta py-3 px-8 text-xs sm:text-sm disabled:opacity-50 flex items-center gap-2"
+            className="btn-medical-blue py-3 px-8 text-xs sm:text-sm disabled:opacity-50 flex items-center gap-2"
           >
             {isAnalyzing ? (
               <>
@@ -600,15 +600,15 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
       {/* Triage Assessment Results Card */}
       {triageResult && (
-        <div id="triage-result-container" className="glass-card p-6 sm:p-8 space-y-6 animate-fadeIn border-2 border-deep-teal/20">
+        <div id="triage-result-container" className="glass-card p-6 sm:p-8 space-y-6 animate-fadeIn border-2 border-deep-navy/20">
           
           {/* Top banner: Risk level + Audio Player */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-deep-teal/10 dark:border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-deep-navy/10 dark:border-white/10">
             <div className="flex items-center gap-3">
               <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${getRiskBadgeStyles(triageResult.riskLevel)}`}>
                 {triageResult.riskLevel} Risk
               </span>
-              <h3 className="font-display font-bold text-xl sm:text-2xl text-deep-teal dark:text-sky-mist">
+              <h3 className="font-display font-bold text-xl sm:text-2xl text-deep-navy dark:text-clinical-white">
                 {triageResult.likelyDiagnosis}
               </h3>
             </div>
@@ -619,7 +619,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                 {isPlayingAudio ? (
                   <button
                     onClick={stopAudio}
-                    className="btn-terracotta bg-alert-crimson text-xs py-2 px-4 flex items-center gap-2"
+                    className="btn-medical-blue bg-alert-red text-xs py-2 px-4 flex items-center gap-2"
                   >
                     <VolumeX className="w-4 h-4" />
                     <span>Stop Voice</span>
@@ -627,7 +627,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                 ) : (
                   <button
                     onClick={() => speakResponse(triageResult.audioResponseText)}
-                    className="btn-teal text-xs py-2 px-4 flex items-center gap-2 dark:bg-sky-mist dark:text-deep-teal"
+                    className="btn-navy text-xs py-2 px-4 flex items-center gap-2 dark:bg-clinical-white dark:text-deep-navy"
                   >
                     <Volume2 className="w-4 h-4" />
                     <span>Listen Spoken Audio</span>
@@ -639,10 +639,10 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
           {/* Clinical Explanation */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-deep-teal/70 dark:text-dark-muted">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-deep-navy/70 dark:text-dark-muted">
               Clinical Assessment
             </h4>
-            <p className="text-sm sm:text-base text-deep-teal dark:text-sky-mist leading-relaxed">
+            <p className="text-sm sm:text-base text-deep-navy dark:text-clinical-white leading-relaxed">
               {triageResult.clinicalExplanation}
             </p>
           </div>
@@ -651,15 +651,15 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Safe Home Remedies */}
-            <div className="p-5 rounded-2xl bg-leaf-green/10 border border-leaf-green/20 space-y-3">
-              <h5 className="font-bold text-xs uppercase tracking-wider text-leaf-green flex items-center gap-1.5">
+            <div className="p-5 rounded-2xl bg-health-green/10 border border-health-green/20 space-y-3">
+              <h5 className="font-bold text-xs uppercase tracking-wider text-health-green flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4" />
                 <span>Safe Home Actions (Non-Prescriptive)</span>
               </h5>
-              <ul className="space-y-2 text-xs text-deep-teal dark:text-sky-mist">
+              <ul className="space-y-2 text-xs text-deep-navy dark:text-clinical-white">
                 {triageResult.homeRemedies?.map((remedy, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-leaf-green mt-1.5 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-health-green mt-1.5 shrink-0" />
                     <span>{remedy}</span>
                   </li>
                 ))}
@@ -667,15 +667,15 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
             </div>
 
             {/* Red-Flag Warning Signs */}
-            <div className="p-5 rounded-2xl bg-alert-crimson/10 border border-alert-crimson/20 space-y-3">
-              <h5 className="font-bold text-xs uppercase tracking-wider text-alert-crimson flex items-center gap-1.5">
+            <div className="p-5 rounded-2xl bg-alert-red/10 border border-alert-red/20 space-y-3">
+              <h5 className="font-bold text-xs uppercase tracking-wider text-alert-red flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" />
                 <span>Emergency Red Flags & Escalation</span>
               </h5>
-              <ul className="space-y-2 text-xs text-deep-teal dark:text-sky-mist">
+              <ul className="space-y-2 text-xs text-deep-navy dark:text-clinical-white">
                 {triageResult.warningSigns?.map((sign, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-alert-crimson mt-1.5 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-alert-red mt-1.5 shrink-0" />
                     <span>{sign}</span>
                   </li>
                 ))}
@@ -686,17 +686,17 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
           {/* Section 3: AI Medicine Suggestion Card */}
           {triageResult.suggestedMedicines && triageResult.suggestedMedicines.length > 0 && (
-            <div id="ai-medicine-suggestion-card" className="p-6 rounded-2xl bg-gradient-to-br from-sun-gold/10 via-sky-mist/10 to-leaf-green/10 border-2 border-sun-gold/30 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-deep-teal/10 dark:border-white/10">
+            <div id="ai-medicine-suggestion-card" className="p-6 rounded-2xl bg-gradient-to-br from-caution-amber/10 via-clinical-white/10 to-health-green/10 border-2 border-caution-amber/30 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-deep-navy/10 dark:border-white/10">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 rounded-xl bg-sun-gold/25 text-deep-teal dark:text-sun-gold">
+                  <div className="p-2.5 rounded-xl bg-caution-amber/25 text-deep-navy dark:text-caution-amber">
                     <Pill className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-display font-bold text-base text-deep-teal dark:text-sky-mist">
+                    <h4 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white">
                       AI-Suggested Medicine Categories (Over-the-Counter)
                     </h4>
-                    <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+                    <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
                       Safe generic categories only — consult a pharmacist or medical officer before taking
                     </p>
                   </div>
@@ -705,7 +705,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                   id="get-verified-prescription-btn"
                   onClick={handleGetVerifiedPrescription}
                   disabled={isSavingPrescription}
-                  className="btn-teal text-xs py-2.5 px-4 flex items-center gap-2 shadow-sm whitespace-nowrap self-start sm:self-auto disabled:opacity-50"
+                  className="btn-navy text-xs py-2.5 px-4 flex items-center gap-2 shadow-sm whitespace-nowrap self-start sm:self-auto disabled:opacity-50"
                 >
                   <FileText className="w-4 h-4" />
                   <span>{savedPrescription ? 'Prescription Generated ✓' : isSavingPrescription ? 'Saving Record...' : 'Get Verified Prescription'}</span>
@@ -715,20 +715,20 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
               {/* Medicine Categories List */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {triageResult.suggestedMedicines.map((med, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-white/80 dark:bg-dark-base/80 border border-deep-teal/15 dark:border-white/10 space-y-2 text-left">
+                  <div key={idx} className="p-4 rounded-xl bg-white/80 dark:bg-dark-base/80 border border-deep-navy/15 dark:border-white/10 space-y-2 text-left">
                     <div className="flex items-center justify-between gap-2">
-                      <h5 className="font-bold text-xs sm:text-sm text-deep-teal dark:text-sky-mist">
+                      <h5 className="font-bold text-xs sm:text-sm text-deep-navy dark:text-clinical-white">
                         {med.name}
                       </h5>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white">
                         {med.category}
                       </span>
                     </div>
-                    <p className="text-xs text-deep-teal/80 dark:text-dark-muted leading-relaxed">
+                    <p className="text-xs text-deep-navy/80 dark:text-dark-muted leading-relaxed">
                       <strong>Pharmacist Guidance:</strong> {med.instructions}
                     </p>
                     {med.timing && (
-                      <p className="text-[11px] text-terracotta font-medium">
+                      <p className="text-[11px] text-medical-blue font-medium">
                         ⏰ {med.timing}
                       </p>
                     )}
@@ -737,8 +737,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
               </div>
 
               {/* Mandatory Medical Safety Disclaimer */}
-              <div className="p-3 rounded-xl bg-sun-gold/20 border border-sun-gold/40 flex items-start gap-2.5 text-xs text-deep-teal dark:text-sun-gold">
-                <AlertTriangle className="w-4 h-4 text-sun-gold shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-caution-amber/20 border border-caution-amber/40 flex items-start gap-2.5 text-xs text-deep-navy dark:text-caution-amber">
+                <AlertTriangle className="w-4 h-4 text-caution-amber shrink-0 mt-0.5" />
                 <span className="font-medium">
                   <strong>Mandatory Medical Disclaimer:</strong> This is an AI-generated suggestion, not a prescription. Please verify with a doctor or pharmacist before taking any medicine.
                 </span>
@@ -746,9 +746,9 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
               {/* Instant PDF Download & History Routing Callout */}
               {savedPrescription && (
-                <div className="p-3.5 rounded-xl bg-leaf-green/15 border border-leaf-green/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-leaf-green">
+                <div className="p-3.5 rounded-xl bg-health-green/15 border border-health-green/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-health-green">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-leaf-green shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-health-green shrink-0" />
                     <span>Verifiable prescription record generated and linked to your family profile!</span>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -757,7 +757,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                       href={`http://localhost:5000/api/prescriptions/${savedPrescription._id || savedPrescription.id}/pdf`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-terracotta text-xs py-1.5 px-3 flex items-center gap-1.5"
+                      className="btn-medical-blue text-xs py-1.5 px-3 flex items-center gap-1.5"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Download PDF</span>
@@ -765,7 +765,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
                     {onNavigateToHub && (
                       <button
                         onClick={onNavigateToHub}
-                        className="text-xs text-deep-teal dark:text-sky-mist underline hover:text-terracotta font-semibold"
+                        className="text-xs text-deep-navy dark:text-clinical-white underline hover:text-medical-blue font-semibold"
                       >
                         Prescription History →
                       </button>
@@ -778,7 +778,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
           {/* Critical Risk Emergency Notice (No OTC Medicines) */}
           {triageResult.riskLevel === 'CRITICAL' && (
-            <div className="p-4 rounded-xl bg-alert-crimson/15 border border-alert-crimson/30 flex items-center gap-3 text-xs text-alert-crimson">
+            <div className="p-4 rounded-xl bg-alert-red/15 border border-alert-red/30 flex items-center gap-3 text-xs text-alert-red">
               <ShieldAlert className="w-5 h-5 shrink-0" />
               <div>
                 <strong>No OTC Medication Permitted:</strong> For critical emergencies, do not take oral medicines. Immediate emergency care via 108 ambulance is required.
@@ -786,16 +786,16 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
             </div>
           )}
           {(triageResult.riskLevel === 'CRITICAL' || triageResult.riskLevel === 'HIGH') && (
-            <div className="p-4 rounded-2xl bg-alert-crimson/15 border-2 border-alert-crimson flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-alert-red/15 border-2 border-alert-red flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <ShieldAlert className="w-6 h-6 text-alert-crimson shrink-0" />
-                <div className="text-xs text-alert-crimson">
+                <ShieldAlert className="w-6 h-6 text-alert-red shrink-0" />
+                <div className="text-xs text-alert-red">
                   <strong>Emergency Hospital Route Required:</strong> Immediate transportation to nearest rural health centre or secondary hospital advised.
                 </div>
               </div>
               <button
                 onClick={onNavigateToHospital}
-                className="btn-terracotta bg-alert-crimson hover:bg-alert-crimson/90 text-xs py-2 px-5 whitespace-nowrap"
+                className="btn-medical-blue bg-alert-red hover:bg-alert-red/90 text-xs py-2 px-5 whitespace-nowrap"
               >
                 <Navigation className="w-4 h-4" />
                 <span>Navigate to Nearest Hospital</span>
@@ -804,8 +804,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
           )}
 
           {/* Persistent Mandatory Clinical Disclaimer */}
-          <div className="p-3.5 rounded-xl bg-deep-teal/5 dark:bg-white/5 border border-deep-teal/10 dark:border-white/10 flex items-start gap-2 text-xs text-deep-teal/80 dark:text-dark-muted">
-            <Info className="w-4 h-4 text-terracotta shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-deep-navy/5 dark:bg-white/5 border border-deep-navy/10 dark:border-white/10 flex items-start gap-2 text-xs text-deep-navy/80 dark:text-dark-muted">
+            <Info className="w-4 h-4 text-medical-blue shrink-0 mt-0.5" />
             <span>
               <strong>Clinical Notice:</strong> This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.
             </span>
@@ -815,7 +815,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       )}
 
       {/* Static Footer Clinical Disclaimer */}
-      <div className="text-center p-3 rounded-xl bg-deep-teal/5 dark:bg-white/5 border border-deep-teal/10 dark:border-white/10 text-xs text-deep-teal/70 dark:text-dark-muted">
+      <div className="text-center p-3 rounded-xl bg-deep-navy/5 dark:bg-white/5 border border-deep-navy/10 dark:border-white/10 text-xs text-deep-navy/70 dark:text-dark-muted">
         <p>
           🩺 <strong>ArogyaRakshak AI Triage Guard:</strong> Designed for rural first-line assessment. Never provides unsupervised prescription drug dosages. In life-threatening emergencies, tap the floating <strong>Emergency SOS 108</strong> button.
         </p>

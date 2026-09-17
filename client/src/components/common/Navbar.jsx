@@ -87,19 +87,19 @@ export default function Navbar({
           onClick={() => setCurrentTab('home')} 
           className="flex items-center gap-3 cursor-pointer select-none group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-200">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-200">
             <Heart className="w-5 h-5 fill-white" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-deep-teal dark:text-sky-mist">
+              <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-deep-navy dark:text-clinical-white">
                 ArogyaRakshak
               </span>
-              <span className="bg-sun-gold/25 text-deep-teal dark:text-sun-gold text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="bg-caution-amber/25 text-deep-navy dark:text-caution-amber text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
                 AI
               </span>
             </div>
-            <p className="text-[11px] text-deep-teal/70 dark:text-dark-muted hidden sm:block font-medium">
+            <p className="text-[11px] text-deep-navy/70 dark:text-dark-muted hidden sm:block font-medium">
               {t('nav_subtitle')}
             </p>
           </div>
@@ -116,8 +116,8 @@ export default function Navbar({
                 onClick={() => setCurrentTab(item.id)}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
                   isActive 
-                    ? 'btn-teal shadow-md' 
-                    : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/8 dark:hover:bg-white/10'
+                    ? 'btn-navy shadow-md' 
+                    : 'text-deep-navy dark:text-clinical-white hover:bg-deep-navy/8 dark:hover:bg-white/10'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -135,7 +135,7 @@ export default function Navbar({
             <button
               onClick={onOpenWhatsApp}
               title="Launch WhatsApp Voice Bot for Senior Citizens"
-              className="px-3 py-1.5 rounded-full hover:bg-leaf-green/15 text-leaf-green transition-colors border border-leaf-green/30 flex items-center gap-1.5 bg-leaf-green/10"
+              className="px-3 py-1.5 rounded-full hover:bg-health-green/15 text-health-green transition-colors border border-health-green/30 flex items-center gap-1.5 bg-health-green/10"
               aria-label="WhatsApp Elder Voice Bot"
             >
               <MessageCircle className="w-4 h-4" />
@@ -147,19 +147,19 @@ export default function Navbar({
           <div className="relative">
             <button
               onClick={() => setLangMenuOpen(!langMenuOpen)}
-              className="p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors flex items-center gap-1.5 border border-deep-teal/15 glass-card"
+              className="p-2 rounded-full hover:bg-deep-navy/10 dark:hover:bg-white/10 text-deep-navy dark:text-clinical-white transition-colors flex items-center gap-1.5 border border-deep-navy/15 glass-card"
               aria-label="Language selector"
             >
-              <Globe className="w-4 h-4 text-terracotta" />
+              <Globe className="w-4 h-4 text-medical-blue" />
               <span className="text-xs font-bold uppercase tracking-wider">{lang}</span>
             </button>
 
             {langMenuOpen && (
               <div 
-                className="absolute right-0 mt-2 w-48 glass-card shadow-2xl py-2 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 rounded-3xl"
+                className="absolute right-0 mt-2 w-48 glass-card shadow-2xl py-2 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-navy/15 rounded-3xl"
                 data-lenis-prevent="true"
               >
-                <div className="px-3 py-1 text-[10px] font-bold text-deep-teal/60 dark:text-dark-muted uppercase tracking-wider">
+                <div className="px-3 py-1 text-[10px] font-bold text-deep-navy/60 dark:text-dark-muted uppercase tracking-wider">
                   Select Language / भाषा निवडा
                 </div>
                 {languages.map((l) => (
@@ -169,15 +169,15 @@ export default function Navbar({
                       setLang(l.code);
                       setLangMenuOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-deep-teal/10 dark:hover:bg-white/10 transition-colors ${
-                      lang === l.code ? 'font-bold text-terracotta bg-terracotta/10' : 'text-deep-teal dark:text-sky-mist'
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-deep-navy/10 dark:hover:bg-white/10 transition-colors ${
+                      lang === l.code ? 'font-bold text-medical-blue bg-medical-blue/10' : 'text-deep-navy dark:text-clinical-white'
                     }`}
                   >
                     <div className="flex flex-col">
                       <span className="font-semibold text-xs">{l.name}</span>
                       <span className="text-[10px] opacity-60">{l.label}</span>
                     </div>
-                    {lang === l.code && <Check className="w-3.5 h-3.5 text-terracotta" />}
+                    {lang === l.code && <Check className="w-3.5 h-3.5 text-medical-blue" />}
                   </button>
                 ))}
               </div>
@@ -187,10 +187,10 @@ export default function Navbar({
           {/* Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors glass-card border border-deep-teal/15"
+            className="p-2 rounded-full hover:bg-deep-navy/10 dark:hover:bg-white/10 text-deep-navy dark:text-clinical-white transition-colors glass-card border border-deep-navy/15"
             aria-label="Toggle dark mode"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-sun-gold" /> : <Moon className="w-4 h-4" />}
+            {darkMode ? <Sun className="w-4 h-4 text-caution-amber" /> : <Moon className="w-4 h-4" />}
           </button>
 
           {/* User Auth Status & Profile Dropdown */}
@@ -198,62 +198,62 @@ export default function Navbar({
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card border border-deep-teal/20 hover:border-terracotta transition-all shadow-sm group"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card border border-deep-navy/20 hover:border-medical-blue transition-all shadow-sm group"
                 aria-label="User profile menu"
               >
                 {/* Avatar with initials */}
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-xs flex items-center justify-center shadow-inner">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-medical-blue to-caution-amber text-white font-bold text-xs flex items-center justify-center shadow-inner">
                   {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                 </div>
 
                 <div className="text-left hidden sm:block">
-                  <div className="text-xs font-bold text-deep-teal dark:text-sky-mist leading-tight">
+                  <div className="text-xs font-bold text-deep-navy dark:text-clinical-white leading-tight">
                     {currentUser.name ? currentUser.name.split(' ')[0] : 'User'}
                   </div>
-                  <div className="text-[10px] text-terracotta font-semibold uppercase tracking-wider leading-none">
+                  <div className="text-[10px] text-medical-blue font-semibold uppercase tracking-wider leading-none">
                     {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
                   </div>
                 </div>
 
-                <span className="text-[10px] text-deep-teal/60 dark:text-dark-muted ml-0.5">▼</span>
+                <span className="text-[10px] text-deep-navy/60 dark:text-dark-muted ml-0.5">▼</span>
               </button>
 
               {/* Profile Dropdown Menu */}
               {profileMenuOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-72 glass-card shadow-2xl p-4 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 rounded-3xl space-y-3"
+                  className="absolute right-0 mt-2 w-72 glass-card shadow-2xl p-4 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-navy/15 rounded-3xl space-y-3"
                   data-lenis-prevent="true"
                 >
                   {/* User Profile Header with Role Tag */}
-                  <div className="flex items-start gap-3 pb-3 border-b border-deep-teal/10 dark:border-white/10">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-base flex items-center justify-center shadow-md shrink-0">
+                  <div className="flex items-start gap-3 pb-3 border-b border-deep-navy/10 dark:border-white/10">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber text-white font-bold text-base flex items-center justify-center shadow-md shrink-0">
                       {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div className="overflow-hidden">
-                      <div className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist truncate">
+                      <div className="font-display font-bold text-sm text-deep-navy dark:text-clinical-white truncate">
                         {currentUser.name}
                       </div>
                       <div className="text-xs text-slate-500 font-mono">
                         {currentUser.phone}
                       </div>
-                      <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist border border-deep-teal/15 dark:border-white/15">
+                      <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white border border-deep-navy/15 dark:border-white/15">
                         {currentUser.role === 'kiosk_operator' ? 'Gram Panchayat Kiosk Operator' : 'Citizen Account'}
                       </span>
                     </div>
                   </div>
 
                   {/* Identification Details */}
-                  <div className="p-2.5 rounded-2xl bg-deep-teal/5 dark:bg-white/5 text-[11px] space-y-1">
+                  <div className="p-2.5 rounded-2xl bg-deep-navy/5 dark:bg-white/5 text-[11px] space-y-1">
                     <div className="flex justify-between">
                       <span className="text-slate-500">ABHA / Kiosk ID:</span>
-                      <strong className="font-mono text-terracotta">
+                      <strong className="font-mono text-medical-blue">
                         {currentUser.abhaId || currentUser.kioskId || '14-2026-9812-4456'}
                       </strong>
                     </div>
                     {currentUser.village && (
                       <div className="flex justify-between">
                         <span className="text-slate-500">Village:</span>
-                        <strong className="text-deep-teal dark:text-sky-mist">{currentUser.village}</strong>
+                        <strong className="text-deep-navy dark:text-clinical-white">{currentUser.village}</strong>
                       </div>
                     )}
                   </div>
@@ -265,15 +265,15 @@ export default function Navbar({
                         setCurrentTab('hub');
                         setProfileMenuOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-teal dark:text-sky-mist hover:bg-deep-teal/10 transition-colors flex items-center justify-between"
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-deep-navy/10 transition-colors flex items-center justify-between"
                     >
                       <span>{currentUser.role === 'kiosk_operator' ? 'Kiosk Operator Desk' : 'Switch Family Member'}</span>
-                      <span className="text-terracotta">→</span>
+                      <span className="text-medical-blue">→</span>
                     </button>
 
                     <button
                       onClick={handleLogoutAction}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-alert-crimson hover:bg-alert-crimson/10 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-alert-red hover:bg-alert-red/10 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Sign Out / लॉग आउट</span>
@@ -285,7 +285,7 @@ export default function Navbar({
           ) : (
             <button
               onClick={handleOpenLogin}
-              className="btn-terracotta text-xs py-2 px-4 shadow-md flex items-center gap-1.5"
+              className="btn-medical-blue text-xs py-2 px-4 shadow-md flex items-center gap-1.5"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>{t('nav_sign_in')}</span>
@@ -295,7 +295,7 @@ export default function Navbar({
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full hover:bg-deep-teal/5 dark:hover:bg-white/5 text-deep-teal dark:text-sky-mist"
+            className="md:hidden p-2 rounded-full hover:bg-deep-navy/5 dark:hover:bg-white/5 text-deep-navy dark:text-clinical-white"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -321,8 +321,8 @@ export default function Navbar({
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors ${
                     isActive 
-                      ? 'btn-teal text-white w-full' 
-                      : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/5'
+                      ? 'btn-navy text-white w-full' 
+                      : 'text-deep-navy dark:text-clinical-white hover:bg-deep-navy/5'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function Navbar({
                 if (onOpenWhatsApp) onOpenWhatsApp();
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/15"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-health-green bg-health-green/15"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Launch WhatsApp Elder Bot</span>
@@ -347,25 +347,25 @@ export default function Navbar({
           )}
 
           {/* Mobile Auth Bar: Sign In button if logged out; Profile & Sign Out if logged in */}
-          <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10">
+          <div className="pt-2 border-t border-deep-navy/10 dark:border-white/10">
             {isAuthenticated && currentUser ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-xs flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-medical-blue to-caution-amber text-white font-bold text-xs flex items-center justify-center">
                       {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                     </div>
-                    <div className="text-xs font-bold text-deep-teal dark:text-sky-mist truncate max-w-[150px]">
+                    <div className="text-xs font-bold text-deep-navy dark:text-clinical-white truncate max-w-[150px]">
                       {currentUser.name}
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white">
                     {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
                   </span>
                 </div>
                 <button
                   onClick={handleLogoutAction}
-                  className="w-full py-2 px-4 rounded-xl text-xs font-bold text-alert-crimson bg-alert-crimson/10 flex items-center justify-center gap-2"
+                  className="w-full py-2 px-4 rounded-xl text-xs font-bold text-alert-red bg-alert-red/10 flex items-center justify-center gap-2"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out / लॉग आउट</span>
@@ -374,7 +374,7 @@ export default function Navbar({
             ) : (
               <button
                 onClick={handleOpenLogin}
-                className="w-full btn-terracotta py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-2"
+                className="w-full btn-medical-blue py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-2"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>{t('nav_sign_in')}</span>

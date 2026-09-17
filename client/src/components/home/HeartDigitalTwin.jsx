@@ -458,11 +458,11 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
       {/* Floating Cardiac Status Badge */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 flex items-center gap-2.5 text-xs font-semibold shadow-lg whitespace-nowrap border border-white/60 dark:border-white/10">
         <div className={`w-2.5 h-2.5 rounded-full ${heartRate > 0 ? 'bg-medical-blue animate-ping' : 'bg-soft-cyan/60'}`} />
-        <span className="text-deep-navy dark:text-sky-mist font-bold">
+        <span className="text-deep-navy dark:text-clinical-white font-bold">
           {heartRate > 0 ? (
             <>Live Cardiac Rhythm: <strong className="text-medical-blue">{heartRate} BPM</strong></>
           ) : (
-            <span className="flex items-center gap-1.5 text-deep-navy/80 dark:text-sky-mist/80">
+            <span className="flex items-center gap-1.5 text-deep-navy/80 dark:text-clinical-white/80">
               <Activity className="w-3.5 h-3.5 text-soft-cyan" />
               <span>Anatomical Bio-Twin • 0 BPM (Idle)</span>
             </span>
@@ -472,11 +472,11 @@ export default function HeartDigitalTwin({ heartRate = 0 }) {
 
       {/* Zero Dummy Data Guidance Tooltip on Hover */}
       {isHovered && heartRate === 0 && (
-        <div className="absolute top-3 right-3 glass-card p-3 text-[11px] text-deep-navy dark:text-sky-mist max-w-[210px] shadow-xl animate-fadeIn border border-medical-blue/30">
+        <div className="absolute top-3 right-3 glass-card p-3 text-[11px] text-deep-navy dark:text-clinical-white max-w-[210px] shadow-xl animate-fadeIn border border-medical-blue/30">
           <p className="flex items-center gap-1.5 font-bold text-medical-blue">
             <AlertCircle className="w-3.5 h-3.5" /> Zero Dummy Data
           </p>
-          <p className="mt-1 leading-relaxed text-deep-navy/80 dark:text-sky-mist/80">
+          <p className="mt-1 leading-relaxed text-deep-navy/80 dark:text-clinical-white/80">
             Anatomical 3D model pulses with real heart rate once recorded in Vitals or synced via Bluetooth.
           </p>
         </div>

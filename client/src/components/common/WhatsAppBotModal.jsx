@@ -119,19 +119,19 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
       <div 
-        className="w-full max-w-md bg-[#ECE5DD] dark:bg-[#121B22] rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[600px] border border-deep-teal/20"
+        className="w-full max-w-md bg-[#ECE5DD] dark:bg-[#121B22] rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[600px] border border-deep-navy/20"
         data-lenis-prevent="true"
       >
         {/* WhatsApp Header */}
         <div className="bg-[#075E54] dark:bg-[#1F2C34] text-white px-4 py-3 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-leaf-green flex items-center justify-center text-white font-bold text-sm shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-health-green flex items-center justify-center text-white font-bold text-sm shadow-inner">
               AR
             </div>
             <div>
               <div className="font-bold text-sm flex items-center gap-1.5">
                 <span>ArogyaRakshak AI</span>
-                <ShieldCheck className="w-3.5 h-3.5 text-sun-gold" />
+                <ShieldCheck className="w-3.5 h-3.5 text-caution-amber" />
               </div>
               <p className="text-[10px] text-white/80">
                 Official Rural Health Bot • 24/7 Voice Support
@@ -143,7 +143,7 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
             {isPlayingAudio ? (
               <button
                 onClick={stopAudio}
-                className="p-1.5 rounded-full bg-alert-crimson text-white text-xs"
+                className="p-1.5 rounded-full bg-alert-red text-white text-xs"
                 title="Stop voice"
               >
                 <VolumeX className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
         {/* Chat Thread */}
         <div className="flex-1 p-4 overflow-y-auto space-y-3">
           <div className="text-center my-2">
-            <span className="bg-[#D1EBE7] dark:bg-[#182229] text-deep-teal dark:text-sky-mist text-[10px] font-semibold px-3 py-1 rounded-lg shadow-sm">
+            <span className="bg-[#D1EBE7] dark:bg-[#182229] text-deep-navy dark:text-clinical-white text-[10px] font-semibold px-3 py-1 rounded-lg shadow-sm">
               Elder Care Mode • No Login Required
             </span>
           </div>
@@ -174,8 +174,8 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
               <div
                 className={`max-w-[85%] p-3 rounded-2xl text-xs shadow-sm leading-relaxed ${
                   msg.sender === 'user'
-                    ? 'bg-[#E7FFDB] dark:bg-[#005C4B] text-deep-teal dark:text-[#E9EDEF] rounded-tr-none'
-                    : 'bg-white dark:bg-[#202C33] text-deep-teal dark:text-[#D1D7DB] rounded-tl-none whitespace-pre-wrap'
+                    ? 'bg-[#E7FFDB] dark:bg-[#005C4B] text-deep-navy dark:text-[#E9EDEF] rounded-tr-none'
+                    : 'bg-white dark:bg-[#202C33] text-deep-navy dark:text-[#D1D7DB] rounded-tl-none whitespace-pre-wrap'
                 }`}
               >
                 {msg.text}
@@ -188,8 +188,8 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
           ))}
 
           {loading && (
-            <div className="flex items-center gap-2 p-3 bg-white dark:bg-[#202C33] rounded-2xl w-32 text-xs text-deep-teal/60">
-              <Activity className="w-3.5 h-3.5 animate-spin text-leaf-green" />
+            <div className="flex items-center gap-2 p-3 bg-white dark:bg-[#202C33] rounded-2xl w-32 text-xs text-deep-navy/60">
+              <Activity className="w-3.5 h-3.5 animate-spin text-health-green" />
               <span>Typing advice...</span>
             </div>
           )}
@@ -198,16 +198,16 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
         </div>
 
         {/* Sample Quick Questions for Elders */}
-        <div className="px-3 py-1.5 bg-[#F0F2F5] dark:bg-[#202C33] border-t border-deep-teal/10 flex gap-2 overflow-x-auto text-[11px] scrollbar-none">
+        <div className="px-3 py-1.5 bg-[#F0F2F5] dark:bg-[#202C33] border-t border-deep-navy/10 flex gap-2 overflow-x-auto text-[11px] scrollbar-none">
           <button
             onClick={() => setInputText('मला २ दिवसांपासून ताप आणि खोकला आहे')}
-            className="px-2.5 py-1 rounded-full bg-white dark:bg-dark-base text-deep-teal dark:text-sky-mist border border-deep-teal/10 whitespace-nowrap hover:border-leaf-green"
+            className="px-2.5 py-1 rounded-full bg-white dark:bg-dark-base text-deep-navy dark:text-clinical-white border border-deep-navy/10 whitespace-nowrap hover:border-health-green"
           >
             ताप आणि खोकला (Fever & Cough)
           </button>
           <button
             onClick={() => setInputText('छातीत दुखत आहे आणि धाप लागत आहे')}
-            className="px-2.5 py-1 rounded-full bg-alert-crimson/10 text-alert-crimson border border-alert-crimson/20 whitespace-nowrap"
+            className="px-2.5 py-1 rounded-full bg-alert-red/10 text-alert-red border border-alert-red/20 whitespace-nowrap"
           >
             छातीत दुखणे (Chest Pain SOS)
           </button>
@@ -220,7 +220,7 @@ export default function WhatsAppBotModal({ isOpen, onClose }) {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type or send message..."
-            className="flex-1 px-4 py-2.5 rounded-full bg-white dark:bg-[#2A3942] text-xs text-deep-teal dark:text-white focus:outline-none"
+            className="flex-1 px-4 py-2.5 rounded-full bg-white dark:bg-[#2A3942] text-xs text-deep-navy dark:text-white focus:outline-none"
           />
           <button
             type="submit"

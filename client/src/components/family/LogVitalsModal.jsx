@@ -55,25 +55,25 @@ export default function LogVitalsModal({
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-navy/10 dark:hover:bg-white/10 text-deep-navy dark:text-clinical-white"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-terracotta text-white flex items-center justify-center mx-auto mb-2 shadow-md">
+          <div className="w-10 h-10 rounded-2xl bg-medical-blue text-white flex items-center justify-center mx-auto mb-2 shadow-md">
             <Activity className="w-5 h-5" />
           </div>
-          <h3 className="font-display font-bold text-xl text-deep-teal dark:text-sky-mist">
+          <h3 className="font-display font-bold text-xl text-deep-navy dark:text-clinical-white">
             Log Vitals for {memberName}
           </h3>
-          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+          <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
             All fields replace zero-default meters with live measurements
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-alert-crimson/10 text-alert-crimson text-xs">
+          <div className="mb-4 p-3 rounded-xl bg-alert-red/10 text-alert-red text-xs">
             {error}
           </div>
         )}
@@ -81,7 +81,7 @@ export default function LogVitalsModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Systolic (mmHg)
               </label>
               <input
@@ -90,11 +90,11 @@ export default function LogVitalsModal({
                 value={sys}
                 onChange={(e) => setSys(e.target.value)}
                 placeholder="e.g. 120"
-                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none focus:border-terracotta"
+                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none focus:border-medical-blue"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Diastolic (mmHg)
               </label>
               <input
@@ -103,14 +103,14 @@ export default function LogVitalsModal({
                 value={dia}
                 onChange={(e) => setDia(e.target.value)}
                 placeholder="e.g. 80"
-                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none focus:border-terracotta"
+                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none focus:border-medical-blue"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 Heart Rate (BPM)
               </label>
               <input
@@ -119,11 +119,11 @@ export default function LogVitalsModal({
                 value={heartRate}
                 onChange={(e) => setHeartRate(e.target.value)}
                 placeholder="e.g. 74"
-                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none focus:border-terracotta"
+                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none focus:border-medical-blue"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+              <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                 SpO2 (%)
               </label>
               <input
@@ -132,14 +132,14 @@ export default function LogVitalsModal({
                 value={spo2}
                 onChange={(e) => setSpo2(e.target.value)}
                 placeholder="e.g. 98"
-                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none focus:border-terracotta"
+                className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none focus:border-medical-blue"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full btn-terracotta py-2.5 text-xs font-bold mt-2"
+            className="w-full btn-medical-blue py-2.5 text-xs font-bold mt-2"
           >
             Save Vitals
           </button>

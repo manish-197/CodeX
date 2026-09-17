@@ -26,10 +26,10 @@ function evaluatePasswordStrength(password) {
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
 
-  if (score <= 1) return { score: 1, label: 'Weak', barClass: 'bg-alert-crimson', textClass: 'text-alert-crimson' };
-  if (score === 2) return { score: 2, label: 'Fair', barClass: 'bg-sun-gold', textClass: 'text-sun-gold' };
-  if (score === 3) return { score: 3, label: 'Good', barClass: 'bg-sky-mist', textClass: 'text-deep-teal dark:text-sky-mist' };
-  return { score: 4, label: 'Strong', barClass: 'bg-leaf-green', textClass: 'text-leaf-green' };
+  if (score <= 1) return { score: 1, label: 'Weak', barClass: 'bg-alert-red', textClass: 'text-alert-red' };
+  if (score === 2) return { score: 2, label: 'Fair', barClass: 'bg-caution-amber', textClass: 'text-caution-amber' };
+  if (score === 3) return { score: 3, label: 'Good', barClass: 'bg-clinical-white', textClass: 'text-deep-navy dark:text-clinical-white' };
+  return { score: 4, label: 'Strong', barClass: 'bg-health-green', textClass: 'text-health-green' };
 }
 
 export default function AuthModal({ 
@@ -275,13 +275,13 @@ export default function AuthModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-md max-h-[90vh] flex flex-col glass-card rounded-3xl relative shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 dark:border-white/10 overflow-hidden"
+        className="w-full max-w-md max-h-[90vh] flex flex-col glass-card rounded-3xl relative shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-navy/15 dark:border-white/10 overflow-hidden"
         data-lenis-prevent="true"
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors"
+          className="absolute top-4 right-4 z-20 p-2 rounded-full hover:bg-deep-navy/10 dark:hover:bg-white/10 text-deep-navy dark:text-clinical-white transition-colors"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
@@ -292,7 +292,7 @@ export default function AuthModal({
 
           {/* Header */}
           <div className="text-center space-y-2 mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold text-white shadow-md mx-auto">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber text-white shadow-md mx-auto">
               {authMode === 'forgot' || authMode === 'reset' ? (
                 <KeyRound className="w-6 h-6" />
               ) : role === 'citizen' ? (
@@ -302,14 +302,14 @@ export default function AuthModal({
               )}
             </div>
 
-            <h3 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist">
+            <h3 className="font-display font-bold text-2xl text-deep-navy dark:text-clinical-white">
               {authMode === 'login' && 'Access ArogyaRakshak'}
               {authMode === 'register' && 'Create Rural Health Account'}
               {authMode === 'forgot' && 'Reset Your Password'}
               {authMode === 'reset' && 'Set New Password'}
             </h3>
 
-            <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+            <p className="text-xs text-deep-navy/70 dark:text-dark-muted">
               {authMode === 'login' && 'Enter your registered email address to log in'}
               {authMode === 'register' && 'Provide email, mobile for SOS, and health details'}
               {authMode === 'forgot' && 'We will send a single-use verification code to your email'}
@@ -319,14 +319,14 @@ export default function AuthModal({
 
           {/* Role Selector Tabs (Only on Register) */}
           {authMode === 'register' && (
-            <div className="grid grid-cols-2 p-1 rounded-2xl bg-deep-teal/5 dark:bg-white/5 mb-5 text-xs font-semibold">
+            <div className="grid grid-cols-2 p-1 rounded-2xl bg-deep-navy/5 dark:bg-white/5 mb-5 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setRole('citizen')}
                 className={`py-2 rounded-xl transition-all ${
                   role === 'citizen'
-                    ? 'bg-deep-teal text-white shadow-sm dark:bg-sky-mist dark:text-deep-teal'
-                    : 'text-deep-teal dark:text-sky-mist opacity-70'
+                    ? 'bg-deep-navy text-white shadow-sm dark:bg-clinical-white dark:text-deep-navy'
+                    : 'text-deep-navy dark:text-clinical-white opacity-70'
                 }`}
               >
                 Citizen Account
@@ -336,8 +336,8 @@ export default function AuthModal({
                 onClick={() => setRole('kiosk_operator')}
                 className={`py-2 rounded-xl transition-all ${
                   role === 'kiosk_operator'
-                    ? 'bg-deep-teal text-white shadow-sm dark:bg-sky-mist dark:text-deep-teal'
-                    : 'text-deep-teal dark:text-sky-mist opacity-70'
+                    ? 'bg-deep-navy text-white shadow-sm dark:bg-clinical-white dark:text-deep-navy'
+                    : 'text-deep-navy dark:text-clinical-white opacity-70'
                 }`}
               >
                 Gram Panchayat Kiosk
@@ -347,7 +347,7 @@ export default function AuthModal({
 
           {/* Prompt Notification Banner */}
           {promptMessage && (
-            <div className="mb-4 p-3 rounded-2xl bg-terracotta/15 border border-terracotta/30 text-terracotta text-xs font-bold flex items-center gap-2">
+            <div className="mb-4 p-3 rounded-2xl bg-medical-blue/15 border border-medical-blue/30 text-medical-blue text-xs font-bold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{promptMessage}</span>
             </div>
@@ -355,7 +355,7 @@ export default function AuthModal({
 
           {/* Success Banner */}
           {successMessage && (
-            <div className="mb-4 p-3 rounded-xl bg-leaf-green/15 border border-leaf-green/30 text-leaf-green text-xs font-bold flex items-center gap-2 animate-fadeIn">
+            <div className="mb-4 p-3 rounded-xl bg-health-green/15 border border-health-green/30 text-health-green text-xs font-bold flex items-center gap-2 animate-fadeIn">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
@@ -363,9 +363,9 @@ export default function AuthModal({
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-alert-crimson/10 border border-alert-crimson/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-alert-crimson animate-fadeIn">
+            <div className="mb-4 p-3 rounded-xl bg-alert-red/10 border border-alert-red/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-alert-red animate-fadeIn">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-alert-crimson" />
+                <AlertCircle className="w-4 h-4 shrink-0 text-alert-red" />
                 <span className="font-semibold">{error}</span>
               </div>
               {authMode === 'login' && error.toLowerCase().includes('sign up') && (
@@ -375,7 +375,7 @@ export default function AuthModal({
                     setAuthMode('register');
                     resetFormState();
                   }}
-                  className="font-bold underline text-terracotta hover:text-terracotta-hover shrink-0 self-end sm:self-auto"
+                  className="font-bold underline text-medical-blue hover:text-medical-blue-hover shrink-0 self-end sm:self-auto"
                 >
                   Sign Up Now →
                 </button>
@@ -387,25 +387,25 @@ export default function AuthModal({
           {authMode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Email Address / ईमेल
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. citizen@arogyarakshak.org"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist">
+                  <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white">
                     Password / पासवर्ड
                   </label>
                   <button
@@ -414,25 +414,25 @@ export default function AuthModal({
                       setAuthMode('forgot');
                       resetFormState();
                     }}
-                    className="text-[11px] font-semibold text-terracotta hover:underline"
+                    className="text-[11px] font-semibold text-medical-blue hover:underline"
                   >
                     Forgot Password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-deep-teal/40 hover:text-deep-teal dark:text-dark-muted"
+                    className="absolute right-3.5 top-3 text-deep-navy/40 hover:text-deep-navy dark:text-dark-muted"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -442,7 +442,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-terracotta py-3 text-xs font-bold mt-2 disabled:opacity-50"
+                className="w-full btn-medical-blue py-3 text-xs font-bold mt-2 disabled:opacity-50"
               >
                 {loading ? 'Verifying Credentials...' : 'Login with Email'}
               </button>
@@ -453,45 +453,45 @@ export default function AuthModal({
           {authMode === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Full Name / पूर्ण नाव
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <User className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Ramesh Patil"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Email Address / ईमेल पत्ता
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. ramesh.patil@arogyarakshak.org"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Mobile Number / मोबाईल नंबर (For 108 SOS & WhatsApp)
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Phone className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="tel"
                     required
@@ -499,29 +499,29 @@ export default function AuthModal({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     placeholder="10-digit emergency contact number"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Password / पासवर्ड
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimum 6 characters"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-deep-teal/40 hover:text-deep-teal dark:text-dark-muted"
+                    className="absolute right-3.5 top-3 text-deep-navy/40 hover:text-deep-navy dark:text-dark-muted"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -530,17 +530,17 @@ export default function AuthModal({
 
               {role === 'citizen' && (
                 <div>
-                  <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                  <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                     ABHA ID (Optional — Auto-Generated if left blank)
                   </label>
                   <div className="relative">
-                    <CreditCard className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                    <CreditCard className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                     <input
                       type="text"
                       value={abhaId}
                       onChange={(e) => setAbhaId(e.target.value)}
                       placeholder="XX-XXXX-XXXX-XXXX"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                     />
                   </div>
                 </div>
@@ -549,7 +549,7 @@ export default function AuthModal({
               {role === 'kiosk_operator' && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                    <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                       Kiosk Terminal ID
                     </label>
                     <input
@@ -558,11 +558,11 @@ export default function AuthModal({
                       value={kioskId}
                       onChange={(e) => setKioskId(e.target.value)}
                       placeholder="GP-KIOSK-01"
-                      className="w-full px-3 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                    <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                       Village / गाव
                     </label>
                     <input
@@ -571,7 +571,7 @@ export default function AuthModal({
                       value={village}
                       onChange={(e) => setVillage(e.target.value)}
                       placeholder="Village name"
-                      className="w-full px-3 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 text-xs focus:outline-none"
+                      className="w-full px-3 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 text-xs focus:outline-none"
                     />
                   </div>
                 </div>
@@ -580,7 +580,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-terracotta py-3 text-xs font-bold mt-2 disabled:opacity-50"
+                className="w-full btn-medical-blue py-3 text-xs font-bold mt-2 disabled:opacity-50"
               >
                 {loading ? 'Registering...' : 'Create Account & Get ABHA Card'}
               </button>
@@ -591,21 +591,21 @@ export default function AuthModal({
           {authMode === 'forgot' && (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Registered Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
-                <p className="text-[11px] text-deep-teal/60 dark:text-dark-muted mt-1.5">
+                <p className="text-[11px] text-deep-navy/60 dark:text-dark-muted mt-1.5">
                   We'll generate a single-use verification code valid for 20 minutes. (Rate limit: max 3 per hour).
                 </p>
               </div>
@@ -613,7 +613,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-terracotta py-3 text-xs font-bold mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full btn-medical-blue py-3 text-xs font-bold mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>{loading ? 'Generating Code...' : 'Send Reset Code'}</span>
@@ -625,7 +625,7 @@ export default function AuthModal({
                   setAuthMode('login');
                   resetFormState();
                 }}
-                className="w-full py-2.5 text-xs font-semibold text-deep-teal dark:text-sky-mist hover:text-terracotta flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-2.5 text-xs font-semibold text-deep-navy dark:text-clinical-white hover:text-medical-blue flex items-center justify-center gap-1.5 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Login</span>
@@ -637,28 +637,28 @@ export default function AuthModal({
           {authMode === 'reset' && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Single-Use Verification Code
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type="text"
                     required
@@ -666,29 +666,29 @@ export default function AuthModal({
                     value={resetToken}
                     onChange={(e) => setResetToken(e.target.value.toUpperCase())}
                     placeholder="6-character code"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs tracking-widest uppercase font-bold focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs tracking-widest uppercase font-bold focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   New Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 6 characters"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-deep-teal/40 hover:text-deep-teal dark:text-dark-muted"
+                    className="absolute right-3.5 top-3 text-deep-navy/40 hover:text-deep-navy dark:text-dark-muted"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -698,12 +698,12 @@ export default function AuthModal({
                 {password && (
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-deep-teal/70 dark:text-dark-muted">Strength:</span>
+                      <span className="text-deep-navy/70 dark:text-dark-muted">Strength:</span>
                       <span className={`font-bold ${passwordStrength.textClass}`}>
                         {passwordStrength.label}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-deep-teal/10 dark:bg-white/10 rounded-full overflow-hidden flex gap-1">
+                    <div className="h-1.5 w-full bg-deep-navy/10 dark:bg-white/10 rounded-full overflow-hidden flex gap-1">
                       <div className={`h-full transition-all ${passwordStrength.score >= 1 ? passwordStrength.barClass : 'bg-transparent'} w-1/4 rounded-full`} />
                       <div className={`h-full transition-all ${passwordStrength.score >= 2 ? passwordStrength.barClass : 'bg-transparent'} w-1/4 rounded-full`} />
                       <div className={`h-full transition-all ${passwordStrength.score >= 3 ? passwordStrength.barClass : 'bg-transparent'} w-1/4 rounded-full`} />
@@ -714,18 +714,18 @@ export default function AuthModal({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-deep-teal dark:text-sky-mist mb-1">
+                <label className="block text-xs font-bold text-deep-navy dark:text-clinical-white mb-1">
                   Confirm New Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-teal/40 dark:text-dark-muted" />
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-deep-navy/40 dark:text-dark-muted" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repeat new password"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-teal/15 dark:border-white/10 text-xs focus:outline-none focus:border-terracotta"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-dark-base border border-deep-navy/15 dark:border-white/10 text-xs focus:outline-none focus:border-medical-blue"
                   />
                 </div>
               </div>
@@ -733,7 +733,7 @@ export default function AuthModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-terracotta py-3 text-xs font-bold mt-2 disabled:opacity-50"
+                className="w-full btn-medical-blue py-3 text-xs font-bold mt-2 disabled:opacity-50"
               >
                 {loading ? 'Updating Password...' : 'Save New Password'}
               </button>
@@ -744,7 +744,7 @@ export default function AuthModal({
                   setAuthMode('login');
                   resetFormState();
                 }}
-                className="w-full py-2.5 text-xs font-semibold text-deep-teal dark:text-sky-mist hover:text-terracotta flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-2.5 text-xs font-semibold text-deep-navy dark:text-clinical-white hover:text-medical-blue flex items-center justify-center gap-1.5 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Login</span>
@@ -754,8 +754,8 @@ export default function AuthModal({
 
           {/* 1-Click Demo Profiles for Rapid Evaluation */}
           {authMode === 'login' && (
-            <div className="mt-5 pt-4 border-t border-deep-teal/10 dark:border-white/10 space-y-2">
-              <p className="text-[11px] font-bold text-deep-teal/60 dark:text-dark-muted text-center uppercase tracking-wider">
+            <div className="mt-5 pt-4 border-t border-deep-navy/10 dark:border-white/10 space-y-2">
+              <p className="text-[11px] font-bold text-deep-navy/60 dark:text-dark-muted text-center uppercase tracking-wider">
                 1-Click Demo Evaluation Profiles
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -780,9 +780,9 @@ export default function AuthModal({
                     if (onAuthSuccess) onAuthSuccess(demoCitizen, demoToken);
                     onClose();
                   }}
-                  className="px-2.5 py-2 rounded-xl bg-deep-teal/5 hover:bg-deep-teal/10 dark:bg-white/5 dark:hover:bg-white/10 border border-deep-teal/15 dark:border-white/10 text-[11px] font-semibold text-deep-teal dark:text-sky-mist text-left flex items-center gap-2"
+                  className="px-2.5 py-2 rounded-xl bg-deep-navy/5 hover:bg-deep-navy/10 dark:bg-white/5 dark:hover:bg-white/10 border border-deep-navy/15 dark:border-white/10 text-[11px] font-semibold text-deep-navy dark:text-clinical-white text-left flex items-center gap-2"
                 >
-                  <span className="w-2 h-2 rounded-full bg-leaf-green shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-health-green shrink-0" />
                   <span className="truncate">Ramesh (Citizen)</span>
                 </button>
                 <button
@@ -806,9 +806,9 @@ export default function AuthModal({
                     if (onAuthSuccess) onAuthSuccess(demoKiosk, demoToken);
                     onClose();
                   }}
-                  className="px-2.5 py-2 rounded-xl bg-terracotta/10 hover:bg-terracotta/15 border border-terracotta/20 text-[11px] font-semibold text-terracotta text-left flex items-center gap-2"
+                  className="px-2.5 py-2 rounded-xl bg-medical-blue/10 hover:bg-medical-blue/15 border border-medical-blue/20 text-[11px] font-semibold text-medical-blue text-left flex items-center gap-2"
                 >
-                  <span className="w-2 h-2 rounded-full bg-terracotta shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-medical-blue shrink-0" />
                   <span className="truncate">Sunita (Kiosk)</span>
                 </button>
               </div>
@@ -816,7 +816,7 @@ export default function AuthModal({
           )}
 
           {/* Toggle Login vs Register */}
-          <div className="mt-4 text-center text-xs text-deep-teal/70 dark:text-dark-muted">
+          <div className="mt-4 text-center text-xs text-deep-navy/70 dark:text-dark-muted">
             {authMode === 'login' ? (
               <p>
                 Don't have an account yet?{' '}
@@ -826,7 +826,7 @@ export default function AuthModal({
                     setAuthMode('register');
                     resetFormState();
                   }}
-                  className="font-bold text-terracotta hover:underline"
+                  className="font-bold text-medical-blue hover:underline"
                 >
                   Create Account
                 </button>
@@ -840,7 +840,7 @@ export default function AuthModal({
                     setAuthMode('login');
                     resetFormState();
                   }}
-                  className="font-bold text-terracotta hover:underline"
+                  className="font-bold text-medical-blue hover:underline"
                 >
                   Log In
                 </button>

@@ -139,22 +139,22 @@ export default function KioskDashboard({
     <div className="space-y-8 py-4 animate-fadeIn">
       
       {/* Kiosk Operator Header Banner */}
-      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-2 border-sun-gold/40 shadow-xl">
+      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-2 border-caution-amber/40 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-deep-teal to-leaf-green text-white flex items-center justify-center shadow-lg shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-deep-navy to-health-green text-white flex items-center justify-center shadow-lg shrink-0">
               <Building2 className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sun-gold/30 text-deep-teal dark:text-sun-gold">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-caution-amber/30 text-deep-navy dark:text-caution-amber">
                   Gram Panchayat Kiosk Operator
                 </span>
                 <span className="font-mono text-xs font-bold text-slate-500">
                   ID: {currentUser?.kioskId || 'GP-KIOSK-042'}
                 </span>
               </div>
-              <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-deep-teal dark:text-sky-mist tracking-tight mt-1">
+              <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-deep-navy dark:text-clinical-white tracking-tight mt-1">
                 Village Digital Health Desk
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
@@ -165,7 +165,7 @@ export default function KioskDashboard({
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="btn-terracotta py-3 px-6 text-xs sm:text-sm font-bold flex items-center gap-2 self-start sm:self-auto shadow-md"
+            className="btn-medical-blue py-3 px-6 text-xs sm:text-sm font-bold flex items-center gap-2 self-start sm:self-auto shadow-md"
           >
             <UserPlus className="w-4 h-4" />
             <span>Register Walking Villager (नागरिक नोंदणी)</span>
@@ -180,11 +180,11 @@ export default function KioskDashboard({
         <div className="lg:col-span-5 space-y-4">
           <div className="glass-card p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-deep-teal dark:text-sky-mist flex items-center gap-2">
-                <Users className="w-4 h-4 text-terracotta" />
+              <h3 className="font-display font-bold text-base text-deep-navy dark:text-clinical-white flex items-center gap-2">
+                <Users className="w-4 h-4 text-medical-blue" />
                 <span>Village Citizen Registry</span>
               </h3>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white">
                 {citizens.length} Citizens
               </span>
             </div>
@@ -197,7 +197,7 @@ export default function KioskDashboard({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search citizen by name, phone, or ABHA..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-teal/15 text-xs text-deep-teal dark:text-sky-mist focus:outline-none focus:border-terracotta"
+                className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-navy/15 text-xs text-deep-navy dark:text-clinical-white focus:outline-none focus:border-medical-blue"
               />
             </div>
 
@@ -218,8 +218,8 @@ export default function KioskDashboard({
                     }}
                     className={`p-3.5 rounded-2xl cursor-pointer transition-all border ${
                       isSelected
-                        ? 'bg-deep-teal text-white border-deep-teal shadow-md dark:bg-sky-mist dark:text-deep-teal'
-                        : 'bg-white/60 dark:bg-dark-base/60 border-deep-teal/10 hover:border-terracotta text-deep-teal dark:text-sky-mist'
+                        ? 'bg-deep-navy text-white border-deep-navy shadow-md dark:bg-clinical-white dark:text-deep-navy'
+                        : 'bg-white/60 dark:bg-dark-base/60 border-deep-navy/10 hover:border-medical-blue text-deep-navy dark:text-clinical-white'
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -232,7 +232,7 @@ export default function KioskDashboard({
                         </div>
                       </div>
                       {isHighBp && (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-alert-crimson text-white animate-pulse">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-alert-red text-white animate-pulse">
                           BP Alert
                         </span>
                       )}
@@ -260,12 +260,12 @@ export default function KioskDashboard({
           
           {/* Active Citizen Profile Card */}
           <div className="glass-card p-6 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-deep-teal/10 dark:border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-deep-navy/10 dark:border-white/10">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-terracotta block">
+                <span className="text-[10px] font-black uppercase tracking-wider text-medical-blue block">
                   Active Consultation Profile
                 </span>
-                <h3 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist">
+                <h3 className="font-display font-bold text-2xl text-deep-navy dark:text-clinical-white">
                   {selectedCitizen.name}
                 </h3>
                 <p className="text-xs text-slate-500 font-mono mt-0.5">
@@ -276,7 +276,7 @@ export default function KioskDashboard({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsCardModalOpen(true)}
-                  className="btn-teal text-xs py-2 px-4 flex items-center gap-1.5"
+                  className="btn-navy text-xs py-2 px-4 flex items-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Print ABDM Card</span>
@@ -284,7 +284,7 @@ export default function KioskDashboard({
 
                 <button
                   onClick={() => onNavigateToTriage && onNavigateToTriage()}
-                  className="btn-terracotta text-xs py-2 px-4 flex items-center gap-1.5"
+                  className="btn-medical-blue text-xs py-2 px-4 flex items-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Voice Triage</span>
@@ -295,22 +295,22 @@ export default function KioskDashboard({
             {/* Vitals Station for this Citizen */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-display font-bold text-sm text-deep-teal dark:text-sky-mist flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-leaf-green" />
+                <h4 className="font-display font-bold text-sm text-deep-navy dark:text-clinical-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-health-green" />
                   <span>Kiosk Quick Vitals Station (0-Default Protocol)</span>
                 </h4>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsBleModalOpen(true)}
-                    className="text-xs font-semibold text-terracotta hover:underline"
+                    className="text-xs font-semibold text-medical-blue hover:underline"
                   >
                     Pair Bluetooth Cuff
                   </button>
                   <span>•</span>
                   <button
                     onClick={() => setIsLogModalOpen(true)}
-                    className="text-xs font-bold text-deep-teal dark:text-sky-mist hover:underline"
+                    className="text-xs font-bold text-deep-navy dark:text-clinical-white hover:underline"
                   >
                     + Record Vitals
                   </button>
@@ -326,13 +326,13 @@ export default function KioskDashboard({
             </div>
 
             {/* Medical History & Chronic Conditions */}
-            <div className="p-4 rounded-2xl bg-deep-teal/5 dark:bg-white/5 border border-deep-teal/10 text-xs space-y-2">
-              <div className="font-bold text-deep-teal dark:text-sky-mist">
+            <div className="p-4 rounded-2xl bg-deep-navy/5 dark:bg-white/5 border border-deep-navy/10 text-xs space-y-2">
+              <div className="font-bold text-deep-navy dark:text-clinical-white">
                 Recorded Village Medical History:
               </div>
               <div className="flex flex-wrap gap-2">
                 {selectedCitizen.medicalHistory?.map((h, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-full bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist font-medium text-[11px]">
+                  <span key={i} className="px-2.5 py-1 rounded-full bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white font-medium text-[11px]">
                     {h}
                   </span>
                 ))}
