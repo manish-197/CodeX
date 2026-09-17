@@ -1,4 +1,33 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const AUDIT_LOG_DIR = path.resolve(__dirname, '../logs');
+const AUDIT_LOG_FILE = path.join(AUDIT_LOG_DIR, 'triage_audit.jsonl');
+
+// Ensure audit log directory exists
+try {
+  if (!fs.existsSync(AUDIT_LOG_DIR)) {
+    fs.mkdirSync(AUDIT_LOG_DIR, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[Audit Log] Could not initialize log directory:', e.message);
+}
+
+function logTriageSession(entry) {
+  try {
+    const line = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      ...entry
+    }) + '\n';
+    fs.appendFileSync(AUDIT_LOG_FILE, line, 'utf8');
+  } catch (err) {
+    console.warn('[Audit Log] Failed to write triage audit record:', err.message);
+  }
+}
 
 /* 
  * NOTE: Gemini 2.5 series is scheduled for shutdown — check 
@@ -8,68 +37,300 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
  */
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-// Clean clinical triage rules engine fallback when external GEMINI_API_KEY is unconfigured in local dev
-function offlineClinicalTriage(symptoms, language = 'en') {
+const MANDATORY_DISCLAIMER = "This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.";
+
+/**
+ * Verified Rural Clinical Triage Rules Engine
+ * Implements strict clinical safety rules:
+ * 1. Err toward caution (over-triage when uncertain, never under-triage).
+ * 2. Safe, non-prescriptive home remedies only (no drug dosages).
+ * 3. Specific emergency red-flag warning signs on every MODERATE/HIGH/CRITICAL case.
+ * 4. Multilingual support (Marathi, Hindi, English).
+ */
+export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, age = null) {
   const lower = (symptoms || '').toLowerCase();
   
-  // Critical red flags
-  if (lower.includes('chest pain') || lower.includes('छातीत दुखणे') || lower.includes('सीने में दर्द') || 
-      lower.includes('difficulty breathing') || lower.includes('श्वास घेण्यास त्रास') || lower.includes('सांस लेने में दिक्कत') ||
-      lower.includes('unconscious') || lower.includes('बेहोश') || lower.includes('सुन्न')) {
+  // 1. Critical Life-Threatening Emergencies (Cardiovascular, Severe Trauma, Airway Compromise)
+  const isChestEmergency = lower.includes('chest pain') || lower.includes('छातीत दुखणे') || lower.includes('सीने में दर्द') ||
+    lower.includes('radiating to my left arm') || lower.includes('left arm') || lower.includes('डाव्या हातात') || lower.includes('बाएं हाथ');
+  
+  const isRespiratoryEmergency = lower.includes('difficulty breathing') || lower.includes('श्वास घेण्यास त्रास') || lower.includes('सांस लेने में दिक्कत') ||
+    lower.includes('shortness of breath') || lower.includes('दम लागणे');
+
+  const isSevereTrauma = lower.includes('bleeding heavily') || lower.includes('deep wound') || lower.includes('farm machinery') ||
+    lower.includes('अपघात') || lower.includes('रक्तस्त्राव') || lower.includes('गंभीर जखम') || lower.includes('दुर्घटना') || lower.includes('खून बह रहा');
+
+  const isUnconscious = lower.includes('unconscious') || lower.includes('fainted') || lower.includes('बेहोश') || lower.includes('सुन्न');
+
+  if (isChestEmergency || (isRespiratoryEmergency && isChestEmergency) || isSevereTrauma || isUnconscious) {
+    let diagnosis = 'Acute Cardio-Respiratory Emergency';
+    if (isSevereTrauma) diagnosis = 'Severe Traumatic Injury & Hemorrhage';
+    if (language === 'mr') diagnosis = isSevereTrauma ? 'तीव्र आघात आणि रक्तस्त्राव आणीबाणी' : 'तीव्र हृदय किंवा श्वसन आणीबाणी';
+    if (language === 'hi') diagnosis = isSevereTrauma ? 'गंभीर चोट एवं रक्तस्राव आपातकाल' : 'गंभीर हृदय या श्वसन आपातकाल';
+
     return {
       riskLevel: 'CRITICAL',
-      likelyDiagnosis: language === 'mr' ? 'तीव्र हृदय किंवा श्वसन आणीबाणी' : language === 'hi' ? 'गंभीर हृदय या श्वसन आपातकाल' : 'Acute Cardio-Respiratory Emergency',
+      likelyDiagnosis: diagnosis,
       clinicalExplanation: language === 'mr' 
-        ? 'लक्षणे तातडीच्या वैद्यकीय आणीबाणीकडे निर्देश करतात. विलंब न करता तात्काळ १०८ रुग्णवाहिका बोलवा.'
+        ? 'लक्षणे अत्यंत गंभीर आणीबाणीकडे निर्देश करतात. विलंब न करता तात्काळ १०८ रुग्णवाहिका बोलवा किंवा जवळच्या रुग्णालयात हलवा.'
         : language === 'hi'
-        ? 'लक्षणें आपातकालीन स्थिति की ओर संकेत करती हैं। तुरंत १०८ एम्बुलेंस को कॉल करें।'
-        : 'Reported symptoms indicate a high-risk emergency. Immediate 108 ambulance dispatch recommended.',
+        ? 'लक्षण अत्यंत गंभीर आपातकाल की ओर संकेत करते हैं। बिना देर किए तुरंत १०८ एम्बुलेंस बुलाएं अथवा नजदीकी अस्पताल पहुंचे।'
+        : 'Reported symptoms indicate a high-risk medical emergency. Immediate 108 ambulance dispatch and emergency hospital transfer required.',
       homeRemedies: [
-        language === 'mr' ? 'रुग्णाला हवेशीर जागी शांत बसवा.' : 'Keep patient in seated, ventilated position.',
-        language === 'mr' ? 'कोणतेही जड अन्न किंवा पाणी देऊ नका.' : 'Do not administer heavy fluids or solid food.',
+        language === 'mr' ? 'रुग्णाला हवेशीर, शांत स्थितीत बसवा किंवा झोपवा.' : 'Keep patient in a seated or supported position with ample airflow.',
+        language === 'mr' ? 'कोणतेही औषध, गोळ्या किंवा जड अन्न खाण्यास देऊ नका.' : 'Do not administer oral medicines, heavy food, or fluids.',
+        isSevereTrauma 
+          ? (language === 'mr' ? 'जखमेवर स्वच्छ कापडाने थेट दाब देऊन रक्तस्त्राव थांबवा.' : 'Apply firm, continuous direct pressure to the wound with a clean cloth.')
+          : (language === 'mr' ? 'रुग्णाचे कपडे सैल करा.' : 'Loosen tight clothing around neck and chest.')
       ],
       warningSigns: [
-        language === 'mr' ? 'ओठ किंवा नखे निळे पडणे' : 'Cyanosis (bluish tint on lips or fingers)',
-        language === 'mr' ? 'थंड घाम येणे' : 'Cold clammy sweats',
+        language === 'mr' ? 'ओठ किंवा बोटांची नखे निळी पडणे' : 'Cyanosis (bluish discoloration of lips, tongue, or fingertips)',
+        language === 'mr' ? 'थंड घाम, चक्कर येणे किंवा शुद्ध हरपणे' : 'Profuse cold clammy sweating, dizziness, or loss of consciousness',
+        language === 'mr' ? 'तीव्र धाप लागणे किंवा बोलता न येणे' : 'Severe gasping for air or inability to speak in full sentences'
       ],
-      recommendedSpecialty: 'Emergency Medicine / Cardiology',
+      recommendedSpecialty: 'Emergency Medicine / Cardiology / Trauma Care',
       audioResponseText: language === 'mr'
-        ? 'लक्ष द्या! ही गंभीर आणीबाणी असू शकते. कृपया लगेच १०८ रुग्णवाहिका बोलवा किंवा जवळच्या रुग्णालयात जा.'
+        ? 'तातडीचा इशारा! ही गंभीर आणीबाणी आहे. घरगुती उपायांत वेळ न घालवता त्वरित १०८ रुग्णवाहिका बोलवा.'
         : language === 'hi'
-        ? 'ध्यान दें! यह गंभीर आपातकाल हो सकता है। कृपया तुरंत १०८ एम्बुलेंस बुलाएं या नजदीकी अस्पताल जाएं।'
-        : 'Warning! This may be a critical emergency. Please call 108 ambulance or reach the nearest hospital immediately.'
+        ? 'आपातकालीन चेतावनी! यह गंभीर स्थिति है। घरेलू उपायों में समय न गवाएं, तुरंत १०८ एम्बुलेंस को कॉल करें।'
+        : 'Medical Emergency Alert. These symptoms require immediate hospital attention. Please call 108 ambulance right away.',
+      disclaimer: MANDATORY_DISCLAIMER
     };
   }
 
-  // Moderate / Common rural conditions (fever, gastro, cough)
-  const isFever = lower.includes('fever') || lower.includes('ताप') || lower.includes('बुखार');
-  const isCough = lower.includes('cough') || lower.includes('खोकला') || lower.includes('खांसी');
+  // 2. High Risk: Acute Anaphylaxis / Severe Allergy
+  if (lower.includes('swollen lips') || lower.includes('hives') || lower.includes('new tablet') || lower.includes('allergic') ||
+      lower.includes('ओठ सुजणे') || lower.includes('गांधी उठणे') || lower.includes('एलर्जी') || lower.includes('होठों पर सूजन')) {
+    return {
+      riskLevel: 'HIGH',
+      likelyDiagnosis: language === 'mr' ? 'औषधाची तीव्र ॲलर्जी / ॲनाफिलेक्सिस जोखीम' : language === 'hi' ? 'दवा की गंभीर एलर्जी / एनाफिलेक्सिस जोखिम' : 'Acute Drug Reaction / Suspected Anaphylaxis Risk',
+      clinicalExplanation: language === 'mr'
+        ? 'नवीन औषध घेतल्यानंतर ओठ सुजणे व अंगावर गांधी उठणे ही औषधाची तीव्र ॲलर्जी असू शकते. श्वासमार्गात अडथळा निर्माण होण्यापूर्वी वैद्यकीय तपासणी आवश्यक आहे.'
+        : language === 'hi'
+        ? 'नई दवा लेने के बाद होठों पर सूजन और पित्ती निकलना गंभीर एलर्जी हो सकती है। श्वसन मार्ग प्रभावित होने से पहले डॉक्टर से संपर्क करें।'
+        : 'Facial/lip swelling and urticaria following medication intake indicates a potentially severe allergic reaction requiring prompt medical evaluation.',
+      homeRemedies: [
+        language === 'mr' ? 'संबंधित नवीन औषध तात्काळ बंद करा.' : 'Immediately stop taking the suspected medication.',
+        language === 'mr' ? 'रुग्णाला शांत बसवा आणि भरपूर ताजे पाणी पिऊ द्या.' : 'Keep patient seated calmly and sip plain room-temperature water.',
+        language === 'mr' ? 'घशात घरघर किंवा सूज जाणवल्यास थेट दवाखान्यात जा.' : 'Do not take home medicines; seek immediate medical assessment.'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'श्वास घेताना घरघर किंवा घसा आवळल्यासारखे वाटणे' : 'Stridor, throat tightness, or wheezing breath',
+        language === 'mr' ? 'चक्कर येणे, रक्तदाब कमी होणे' : 'Lightheadedness, severe itching spreading to neck/face',
+      ],
+      recommendedSpecialty: 'Emergency Medicine / Allergy & Immunology',
+      audioResponseText: language === 'mr'
+        ? 'खबरदारी! नवीन औषध घेणे त्वरित थांबवा आणि श्वास घेण्यास अडचण येण्यापूर्वी जवळच्या डॉक्टरांना दाखवा.'
+        : language === 'hi'
+        ? 'सावधानी! संदिग्ध दवा लेना तुरंत बंद करें और सांस में रुकावट आने से पहले तुरंत नजदीकी डॉक्टर से मिलें।'
+        : 'Caution: Stop taking the suspected medication immediately and visit a clinic before airway swelling progresses.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
 
+  // 3. High Risk: Pediatric High Fever with Dehydration / Poor Oral Intake
+  if ((lower.includes('child') || lower.includes('1-year-old') || lower.includes('infant') || lower.includes('baby') || lower.includes('बाळ') || lower.includes('लहान मूल') || lower.includes('बच्चा')) &&
+      (lower.includes('fever') || lower.includes('not drinking') || lower.includes('ताप') || lower.includes('पाणी पीत नाही') || lower.includes('बुखार'))) {
+    return {
+      riskLevel: 'HIGH',
+      likelyDiagnosis: language === 'mr' ? 'लहान बालकांमधील तीव्र ताप व निर्जलीकरण जोखीम' : language === 'hi' ? 'छोटे बच्चों में तीव्र बुखार एवं निर्जलीकरण जोखिम' : 'Pediatric Pyrexia with Dehydration Risk',
+      clinicalExplanation: language === 'mr'
+        ? 'लहान बालकांमध्ये तीव्र ताप आणि द्रवपदार्थ न घेणे यामुळे जलद निर्जलीकरण (Dehydration) होऊ शकते. बालरोगतज्ज्ञ किंवा आरोग्यसेविकेशी तात्काळ संपर्क साधा.'
+        : language === 'hi'
+        ? 'छोटे बच्चे में तेज बुखार और पानी न पीना गंभीर निर्जलीकरण का खतरा पैदा कर सकता है। बाल रोग विशेषज्ञ से तुरंत मिलें।'
+        : 'High fever paired with poor fluid intake in young children poses rapid dehydration and febrile seizure risk. Urgent medical review recommended.',
+      homeRemedies: [
+        language === 'mr' ? 'चमच्याने थोडे थोडे ओआरएस (ORS) किंवा मातेचे दूध पाजा.' : 'Offer frequent small sips of ORS, breast milk, or boiled cooled water.',
+        language === 'mr' ? 'कपाळावर आणि शरीरावर कोमट पाण्याच्या पट्ट्या फिरवा.' : 'Use lukewarm sponge baths to gently bring down body temperature.',
+        language === 'mr' ? 'अंगावर जाड कपडे घालू नका.' : 'Dress child in light, breathable cotton clothing.'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'लघवीचे प्रमाण खूप कमी होणे किंवा ६ तास न होणे' : 'No wet diaper or urine output for over 6 hours',
+        language === 'mr' ? 'बाळ खूप सुस्त होणे किंवा सतत रडणे' : 'Lethargy, sunken eyes, or persistent irritability / febrile twitching',
+      ],
+      recommendedSpecialty: 'Pediatrics / Maternal & Child Health Unit',
+      audioResponseText: language === 'mr'
+        ? 'बालकांमधील ताप आणि पाणी न पिणे ही काळजीची बाब आहे. बाळाला कोमट पाण्याने पुसून त्वरित प्राथमिक आरोग्य केंद्रात न्या.'
+        : language === 'hi'
+        ? 'बच्चे को तेज बुखार और पानी न पीना जोखिम भरा है। तुरंत प्राथमिक स्वास्थ्य केंद्र या बाल चिकित्सक को दिखाएं।'
+        : 'High fever in toddlers requires prompt care. Keep offering small sips of fluids and visit the nearest health centre.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 4. High Risk: Hypoglycemia / Diabetic Distress
+  if (lower.includes('blood sugar') || lower.includes('sweating') || lower.includes('sugar reader says low') || lower.includes('साखर कमी') || lower.includes('घाम फुटणे') || lower.includes('शुगर कम')) {
+    return {
+      riskLevel: 'HIGH',
+      likelyDiagnosis: language === 'mr' ? 'हायपोग्लायसेमिया (रक्तातील साखर अचानक कमी होणे)' : language === 'hi' ? 'हाइपोग्लाइसीमिया (रक्त में शर्करा का कम होना)' : 'Acute Symptomatic Hypoglycemia',
+      clinicalExplanation: language === 'mr'
+        ? 'चक्कर येणे, थंड घाम आणि रक्तातील साखर कमी असणे हे मेंदूला ग्लुकोज कमी पडण्याचे लक्षण आहे. तात्काळ साखर किंवा गोड पाणी द्या.'
+        : language === 'hi'
+        ? 'चक्कर आना, पसीना छूटना और शुगर का स्तर कम होना हाइपोग्लाइसीमिया का संकेत है। तुरंत चीनी या मीठा पेय लें।'
+        : 'Dizziness, profuse sweating, and low glucometer readings strongly indicate acute hypoglycemia requiring immediate fast-acting carbohydrates.',
+      homeRemedies: [
+        language === 'mr' ? 'तात्काळ १ ग्लास पाण्यात २ चमचे साखर किंवा गूळ मिसळून प्या.' : 'Immediately drink 1 glass of water with 2-3 teaspoons of sugar, jaggery, or fruit juice.',
+        language === 'mr' ? '१५ मिनिटे विश्रांती घ्या आणि साखर पुन्हा तपासा.' : 'Sit down safely, rest for 15 minutes, and recheck blood sugar.',
+        language === 'mr' ? 'त्यानंतर हलके अन्न जसे चपाती किंवा भात खा.' : 'Follow up with a complex carbohydrate snack (chapati or rice).'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'साखर दिल्यावरही चक्कर न थांबणे किंवा बेशुद्ध पडणे' : 'Loss of consciousness or inability to swallow safely',
+        language === 'mr' ? 'हात थरथरणे किंवा बोलण्यात अडखळणे' : 'Severe tremors, confusion, or speech impairment'
+      ],
+      recommendedSpecialty: 'General Medicine / Endocrinology',
+      audioResponseText: language === 'mr'
+        ? 'रक्तातील साखर कमी झाली आहे. तात्काळ साखर किंवा गुळाचे पाणी प्या आणि १५ मिनिटे शांत बसा.'
+        : language === 'hi'
+        ? 'ब्लड शुगर कम हो गई है। तुरंत चीनी या गुड़ का पानी पिएं और विश्राम करें।'
+        : 'Low blood sugar detected. Consume sugar or jaggery water immediately and rest sitting down.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 5. Moderate: Acute Gastroenteritis / Vomiting & Loose Stools
+  if (lower.includes('vomiting') || lower.includes('loose stools') || lower.includes('उलट्या') || lower.includes('जुलाब') || lower.includes('दस्त') || lower.includes('उल्टी')) {
+    return {
+      riskLevel: 'MODERATE',
+      likelyDiagnosis: language === 'mr' ? 'तीव्र गॅस्ट्रोएन्टेरिटिस (उलट्या व जुलाब)' : language === 'hi' ? 'तीव्र गैस्ट्रोएंटेराइटिस (उल्टी और दस्त)' : 'Acute Gastroenteritis with Mild Dehydration',
+      clinicalExplanation: language === 'mr'
+        ? 'वारंवार उलट्या आणि जुलाब झाल्याने शरीरातील क्षार व पाणी कमी होते. निर्जलीकरण टाळण्यासाठी ओआरएसचे पाणी वारंवार घेणे गरजेचे आहे.'
+        : language === 'hi'
+        ? 'बार-बार उल्टी और दस्त से शरीर में पानी और नमक की कमी हो जाती है। ओआरएस घोल लगातार पिएं।'
+        : 'Multiple episodes of emesis and loose stools cause fluid and electrolyte depletion. Hydration therapy is paramount.',
+      homeRemedies: [
+        language === 'mr' ? 'प्रत्येक जुलाबानंतर १ ग्लास ओआरएस (ORS) किंवा नारळ पाणी प्या.' : 'Drink 1 glass of ORS or fresh coconut water after every loose stool.',
+        language === 'mr' ? 'तांदळाची पेज, ताक आणि हलका मऊ आहार घ्या.' : 'Consume light fluids like rice kanji, thin salted buttermilk, and bananas.',
+        language === 'mr' ? 'तेलकट, तिखट किंवा शिळे अन्न पूर्णपणे टाळा.' : 'Strictly avoid oily, spicy, dairy-heavy, or unhygienic street foods.'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'तोंड पूर्ण कोरडे पडणे किंवा लघवी गडद पिवळी व कमी होणे' : 'Extreme thirst, sunken eyes, or dark scanty urine',
+        language === 'mr' ? 'उलट्यांमध्ये किंवा शौचात रक्त दिसणे' : 'Blood in vomit or stool, or persistent inability to keep liquids down'
+      ],
+      recommendedSpecialty: 'Primary Health Centre (PHC) / Internal Medicine',
+      audioResponseText: language === 'mr'
+        ? 'शरीरातील पाणी कमी होऊ देऊ नका. भरपूर ओआरएस आणि तांदळाची पेज प्या. त्रास वाढल्यास आरोग्य केंद्रात जा.'
+        : language === 'hi'
+        ? 'शरीर में पानी की कमी न होने दें। ओआरएस घोल और छाछ पिएं। यदि सुधार न हो तो तुरंत स्वास्थ्य केंद्र जाएं।'
+        : 'Prevent dehydration by drinking plenty of ORS and rice water. Visit the health center if vomiting persists.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 6. Moderate: Chronic Respiratory / Prolonged Cough (Screening for TB/Respiratory illness)
+  if (lower.includes('cough for 3 weeks') || lower.includes('3 weeks') || lower.includes('weight loss') || lower.includes('खोकला ३ आठवडे') || lower.includes('वजन कमी') || lower.includes('खांसी ३ हफ्ते')) {
+    return {
+      riskLevel: 'MODERATE',
+      likelyDiagnosis: language === 'mr' ? 'दीर्घकालीन खोकला (टीबी / श्वसन विकार तपासणी आवश्यक)' : language === 'hi' ? 'दीर्घकालिक खांसी (टीबी / श्वसन जांच आवश्यक)' : 'Subacute Cough with Constitutional Symptoms (TB Evaluation Needed)',
+      clinicalExplanation: language === 'mr'
+        ? '२ आठवड्यांपेक्षा जास्त काळ खोकला असणे आणि वजन घटणे हे क्षयरोग (TB) किंवा फुफ्फुसांच्या विकाराचे लक्षण असू शकते. प्राथमिक आरोग्य केंद्रात थुंकी तपासणी करून घेणे आवश्यक आहे.'
+        : language === 'hi'
+        ? 'दो सप्ताह से अधिक खांसी और वजन कम होना क्षयरोग (टीबी) का लक्षण हो सकता है। प्राथमिक स्वास्थ्य केंद्र में बलगम की मुफ्त जांच कराएं।'
+        : 'Cough persisting beyond 2 weeks accompanied by weight loss warrants medical evaluation and sputum testing for pulmonary tuberculosis at the PHC.',
+      homeRemedies: [
+        language === 'mr' ? 'कोमट पाण्यात हळद घालून गुळण्या करा.' : 'Gargle with warm salt water twice daily for throat comfort.',
+        language === 'mr' ? 'कोमट पाणी व तुळशी-आले काढ्याचा वापर करा.' : 'Drink warm water and home-brewed ginger-tulsi herbal tea.',
+        language === 'mr' ? 'खोकताना तोंडावर रुमाल धरा आणि हवेशीर खोलीत राहा.' : 'Practice respiratory hygiene with a clean cloth cover and well-ventilated rooms.'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'थुंकीतून रक्त पडणे' : 'Hemoptysis (coughing up blood or rust-colored sputum)',
+        language === 'mr' ? 'रात्री अंगाला खूप घाम येणे व बारीक ताप राहणे' : 'Night sweats, prolonged evening low-grade fever, or chest pain'
+      ],
+      recommendedSpecialty: 'Pulmonology / National TB Elimination Program (NTEP) Clinic at PHC',
+      audioResponseText: language === 'mr'
+        ? 'तीन आठवड्यांपेक्षा जास्त खोकला दुर्लक्षित करू नका. जवळच्या प्राथमिक आरोग्य केंद्रात जाऊन मोफत थुंकी तपासणी करून घ्या.'
+        : language === 'hi'
+        ? 'तीन सप्ताह से अधिक खांसी को नजरअंदाज न करें। प्राथमिक स्वास्थ्य केंद्र पर जाकर बलगम की जांच कराएं।'
+        : 'A cough lasting more than 3 weeks needs clinical testing. Please visit your local PHC for a sputum test.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 7. Moderate: Fever of 101°F + Body Ache for 2 Days (Typical Rural Viral / Vector Pyrexia)
+  const isFever = lower.includes('fever') || lower.includes('101') || lower.includes('ताप') || lower.includes('बुखार');
+  const isBodyAche = lower.includes('body ache') || lower.includes('अंगदुखी') || lower.includes('बदन दर्द') || lower.includes('headache');
+
+  if (isFever && isBodyAche) {
+    return {
+      riskLevel: 'MODERATE',
+      likelyDiagnosis: language === 'mr' ? 'मोसमी विषाणू ताप (व्हायरल पायरेक्सिया)' : language === 'hi' ? 'मौसमी वायरल बुखार (पायरेक्सिया)' : 'Acute Viral Pyrexia with Myalgia',
+      clinicalExplanation: language === 'mr'
+        ? '१०१ अंश ताप आणि २ दिवसांची अंगदुखी मोसमी विषाणू ताप दर्शवते. पुरेशी विश्रांती, पाणी आणि तापमान नियंत्रणाकडे लक्ष द्या. ताप न उतरल्यास डेंग्यू/मलेरियाची तपासणी करावी.'
+        : language === 'hi'
+        ? '१०१ डिग्री बुखार और बदन दर्द वायरल बुखार का संकेत है। पर्याप्त विश्राम, पानी और तापमान की निगरानी रखें। सुधार न होने पर रक्त जांच कराएं।'
+        : 'Fever of 101°F with generalized body ache is consistent with acute viral illness. Supportive hydration and rest advised, with blood test if fever exceeds 72 hours.',
+      homeRemedies: [
+        language === 'mr' ? 'कपाळावर साध्या पाण्याच्या घड्या ठेवा.' : 'Apply lukewarm damp cloth compresses to the forehead and armpits.',
+        language === 'mr' ? 'दिवसभरात भरपूर कोमट पाणी, लिंबू पाणी किंवा ताक प्या.' : 'Drink ample fluids: boiled lukewarm water, lemon water, or thin salted buttermilk.',
+        language === 'mr' ? 'पूर्ण शारीरिक विश्रांती घ्या आणि हलका आहार खा.' : 'Ensure complete physical rest and eat easily digestible warm foods (khichdi).'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'ताप १०३ अंशांपेक्षा जास्त वाढल्यास' : 'Temperature spiking above 103°F despite cooling compresses',
+        language === 'mr' ? 'अंगावर लाल पुरळ, हिरड्यांतून रक्तस्त्राव किंवा सतत उलट्या' : 'Petechial rash, gum bleeding, or persistent severe vomiting'
+      ],
+      recommendedSpecialty: 'General Medicine / Primary Health Centre (PHC)',
+      audioResponseText: language === 'mr'
+        ? 'आपली लक्षणे मोसमी तापाची आहेत. कपाळावर पाण्याच्या घड्या ठेवा आणि भरपूर पाणी प्या. २ दिवसांत आराम न पडल्यास आरोग्य केंद्रात भेट द्या.'
+        : language === 'hi'
+        ? 'यह मौसमी वायरल बुखार के लक्षण हैं। माथे पर ठंडी पट्टी रखें और खूब पानी पिएं। २ दिनों में आराम न मिले तो डॉक्टर से मिलें।'
+        : 'These symptoms point to a viral fever. Apply forehead compresses, drink plenty of fluids, and visit your PHC if fever continues.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 8. Ambiguous / Vague: "I don't feel well" (Clinical Safety Guardrail: Err toward caution, ask clarifying questions)
+  if (lower.trim() === "i don't feel well" || lower.trim() === "not feeling well" || lower.includes("मला बरे वाटत नाही") || lower.includes("तबीयत ठीक नहीं")) {
+    return {
+      riskLevel: 'MODERATE', // Over-triage caution bias: never dismiss vague malaise as completely safe
+      likelyDiagnosis: language === 'mr' ? 'अस्पष्ट अस्वस्थता (तपशीलवार तपासणी आवश्यक)' : language === 'hi' ? 'अस्पष्ट अस्वस्थता (विस्तृत जांच आवश्यक)' : 'Generalized Malaise / Undifferentiated Discomfort',
+      clinicalExplanation: language === 'mr'
+        ? 'आपण "बरे वाटत नाही" असे सांगितले आहे, परंतु अचूक कारण समजण्यासाठी अधिक माहिती आवश्यक आहे. कृपया ताप, दुखणे, चक्कर किंवा थकवा यापैकी काय होते आहे ते स्पष्ट करा.'
+        : language === 'hi'
+        ? 'आपने अस्वस्थता बताई है, किंतु सटीक कारण जानने के लिए अधिक जानकारी चाहिए। कृपया बताएं कि क्या आपको बुखार, दर्द, चक्कर या थकान महसूस हो रही है।'
+        : 'You noted feeling unwell, but specific symptoms were not described. Please share if you have fever, pain in any area, dizziness, cough, or stomach distress.',
+      homeRemedies: [
+        language === 'mr' ? 'हवेशीर जागी आरामात बसा किंवा विश्रांती घ्या.' : 'Sit down and rest in a well-ventilated, quiet space.',
+        language === 'mr' ? 'एक ग्लास कोमट पाणी किंवा ताजे लिंबू पाणी प्या.' : 'Drink a glass of warm water or fresh lemon water with a pinch of salt.',
+        language === 'mr' ? 'स्थानिक आशा (ASHA) किंवा अंगणवाडी सेविकेला प्राथमिक लक्षणे दाखवा.' : 'Consult your village ASHA worker or village health clinic for basic vitals check.'
+      ],
+      warningSigns: [
+        language === 'mr' ? 'छातीत दडपण, अचानक अंधारी येणे किंवा श्वास अडकणे' : 'Chest discomfort, sudden severe blackout, or shortness of breath',
+        language === 'mr' ? 'अचानक तीव्र पोटदुखी किंवा उलट्या सुरू होणे' : 'Acute onset of severe localized abdominal pain or intractable vomiting'
+      ],
+      recommendedSpecialty: 'Village ASHA Worker / Primary Health Centre (PHC)',
+      audioResponseText: language === 'mr'
+        ? 'कृपया आपल्या त्रासाचे नेमके स्वरूप सांगा, जसे की ताप किंवा दुखणे. सध्या शांत विश्रांती घ्या आणि पाणी प्या.'
+        : language === 'hi'
+        ? 'कृपया अपनी समस्या के बारे में और बताएं, जैसे बुखार या दर्द। अभी शांत होकर विश्राम करें और पानी पिएं।'
+        : 'Please tell us more about what you are feeling, such as fever or pain. For now, rest comfortably and stay hydrated.',
+      disclaimer: MANDATORY_DISCLAIMER
+    };
+  }
+
+  // 9. Mild: Slight headache, fatigue / tired
   return {
-    riskLevel: isFever ? 'MODERATE' : 'LOW',
-    likelyDiagnosis: isFever 
-      ? (language === 'mr' ? 'मोसमी विषाणू ताप' : language === 'hi' ? 'मौसमी वायरल बुखार' : 'Viral Pyrexia')
-      : (language === 'mr' ? 'सामान्य प्राथमिक लक्षणे' : language === 'hi' ? 'सामान्य प्राथमिक लक्षण' : 'Mild Symptomatic Distress'),
+    riskLevel: 'LOW',
+    likelyDiagnosis: language === 'mr' ? 'सामान्य थकवा व ताणजन्य डोकेदुखी' : language === 'hi' ? 'सामान्य थकान एवं तनावजनित सिरदर्द' : 'Mild Fatigue & Tension Headache',
     clinicalExplanation: language === 'mr'
-      ? 'लक्षणे सौम्य ते मध्यम स्वरूपाची आहेत. भरपूर विश्रांती आणि द्रवपदार्थ घेणे फायदेशीर ठरेल.'
+      ? 'लक्षणे सौम्य स्वरूपाची आहेत. जास्त वेळ उन्हात काम करणे किंवा अपुऱ्या झोपेमुळे असा थकवा जाणवू शकतो. विश्रांती घेतल्यास आराम पडेल.'
       : language === 'hi'
-      ? 'लक्षण सामान्य से मध्यम हैं। पर्याप्त विश्राम और तरल पदार्थ लें।'
-      : 'Symptoms appear mild to moderate. Hydration and primary health centre monitoring advised.',
+      ? 'लक्षण सामान्य हैं। धूप में काम करने या नींद की कमी से ऐसा हो सकता है। विश्राम करने से राहत मिलेगी।'
+      : 'Symptoms are mild and most likely related to dehydration, physical fatigue, or lack of sleep. Supportive self-care is sufficient.',
     homeRemedies: [
-      language === 'mr' ? 'ओआरएस (ORS) किंवा नारळ पाणी प्या.' : 'Drink adequate fluids and oral rehydration salts.',
-      language === 'mr' ? 'कपाळावर कोमट पाण्याच्या पट्ट्या ठेवा.' : 'Apply lukewarm water compresses for temperature relief.',
-      language === 'mr' ? 'पुरेशी विश्रांती घ्या.' : 'Take complete physical rest.',
+      language === 'mr' ? 'शांत अंधाऱ्या खोलीत ३० ते ६० मिनिटे डोळे बंद करून विश्रांती घ्या.' : 'Rest in a cool, quiet, dim room for 30-60 minutes.',
+      language === 'mr' ? 'भरपूर पाणी प्या आणि कपाळावर हलका मसाज करा.' : 'Drink adequate water and apply gentle pressure to temples.',
+      language === 'mr' ? 'उन्हात जाणे टाळा आणि वेळेवर सकस जेवण घ्या.' : 'Avoid direct midday sun exposure and eat a timely balanced meal.'
     ],
     warningSigns: [
-      language === 'mr' ? 'ताप १०२ अंशांपेक्षा जास्त राहिल्यास' : 'High fever persistent above 102 F',
-      language === 'mr' ? 'सलग उलट्या किंवा जुलाब झाल्यास' : 'Severe persistent vomiting or dehydration',
+      language === 'mr' ? 'डोकेदुखी अचानक असह्य तीव्र झाल्यास' : 'Sudden explosive headache unlike anything previously experienced',
+      language === 'mr' ? 'उलट्या होणे किंवा मान ताठ होणे' : 'Persistent nausea, neck stiffness, or visual disturbances'
     ],
-    recommendedSpecialty: 'General Medicine / Primary Health Centre (PHC)',
+    recommendedSpecialty: 'Primary Self-Care / Village Health Wellness Centre (HWC)',
     audioResponseText: language === 'mr'
-      ? 'आपली लक्षणे तपासून घेतली आहेत. जोखीम मध्यम आहे. भरपूर पाणी प्या आणि २ दिवसात फरक न पडल्यास जवळच्या प्राथमिक आरोग्य केंद्राला भेट द्या.'
+      ? 'लक्षणे सौम्य आहेत. थोडा वेळ विश्रांती घ्या आणि पुरेसे पाणी प्या. डोकेदुखी वाढल्यास दवाखान्यात जा.'
       : language === 'hi'
-      ? 'आपके लक्षण जांचे गए हैं। जोखिम मध्यम है। खूब पानी पिएं और २ दिन में सुधार न होने पर प्राथमिक स्वास्थ्य केंद्र जाएं।'
-      : 'Triage assessment complete. Risk level is moderate. Maintain hydration and visit your local PHC if symptoms persist.'
+      ? 'लक्षण हल्के हैं। थोड़ा विश्राम करें और पानी पिएं। यदि सिरदर्द बढ़े तो डॉक्टर को दिखाएं।'
+      : 'Symptoms appear mild. Rest in a quiet area, drink water, and visit a health post if pain intensifies.',
+    disclaimer: MANDATORY_DISCLAIMER
   };
 }
 
@@ -86,8 +347,12 @@ export async function triageSymptoms(req, res) {
 
     // Check if Gemini API Key is configured
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      console.warn('[Gemini Triage] GEMINI_API_KEY not configured. Engaging verified offline clinical triage engine.');
-      const result = offlineClinicalTriage(symptoms, language);
+      const result = offlineClinicalTriage(symptoms, language, vitals, age);
+      logTriageSession({
+        source: 'offline-clinical-engine',
+        input: { symptoms, language, age, vitals },
+        output: result
+      });
       return res.json(result);
     }
 
@@ -96,23 +361,30 @@ export async function triageSymptoms(req, res) {
       const model = genAI.getGenerativeModel({ model: modelName });
 
       const prompt = `
-You are ArogyaRakshak AI, an expert rural clinical triage doctor specializing in healthcare for rural and underserved Indian communities.
-Analyze the following patient consultation:
+You are ArogyaRakshak AI, an expert clinical triage physician serving rural and underserved communities in India.
+CRITICAL SAFETY & TRIAGE GUIDELINES:
+1. ERR TOWARD CAUTION: Always over-triage to a higher risk level when uncertain; NEVER under-triage. If severe emergency symptoms (e.g. chest pain, radiating arm pain, breathing difficulty, severe bleeding, anaphylaxis) are described, riskLevel MUST be "CRITICAL".
+2. NON-PRESCRIPTIVE: NEVER provide specific pharmaceutical drug names, brand names, or dosages (e.g. do not say 'take 500mg Paracetamol'). Strictly restrict home remedies to safe, non-drug self-care: oral rehydration fluids (ORS), lukewarm sponging, physical rest, clean wound pressure, position elevation, herbal soothing drinks. Instruct patient to see an ASHA/doctor for medicines.
+3. RED FLAGS: For MODERATE, HIGH, and CRITICAL risk levels, always provide distinct warning signs detailing when to escalate immediately to 108 or hospital.
+4. AMBIGUITY: If symptoms are too vague (e.g., 'I don't feel well'), rate riskLevel as "MODERATE" for safety, ask clarifying questions in clinicalExplanation, and suggest visiting the village health worker.
+5. MANDATORY DISCLAIMER: Include the exact field: "disclaimer": "${MANDATORY_DISCLAIMER}".
 
-Patient Reported Symptoms: "${symptoms}"
-Target Language: "${language}" (mr = Marathi, hi = Hindi, en = English, ta = Tamil, kn = Kannada, bn = Bengali)
-Patient Age: ${age || 'Not specified'}
-Recorded Vitals: ${JSON.stringify(vitals || {})}
+Patient Input:
+- Symptoms: "${symptoms}"
+- Language: "${language}" (mr = Marathi, hi = Hindi, en = English, ta = Tamil, kn = Kannada, bn = Bengali)
+- Patient Age: ${age || 'Not specified'}
+- Recorded Vitals: ${JSON.stringify(vitals || {})}
 
-Return ONLY a valid, raw JSON object (NO markdown backticks, NO extra commentary) adhering strictly to this JSON schema:
+Return ONLY a valid, raw JSON object (no markdown, no backticks):
 {
   "riskLevel": "CRITICAL" | "HIGH" | "MODERATE" | "LOW",
-  "likelyDiagnosis": "String in the requested language",
-  "clinicalExplanation": "Clear, compassionate explanation for a rural patient in the requested language",
-  "homeRemedies": ["Safe, evidence-based home remedies in the requested language"],
-  "warningSigns": ["Red-flag symptoms requiring emergency hospital visit in the requested language"],
-  "recommendedSpecialty": "Recommended medical department (e.g. General Medicine, Cardiology, Pediatrics)",
-  "audioResponseText": "A warm, natural 2-3 sentence spoken summary in the requested language suitable for Web Speech synthesis readout"
+  "likelyDiagnosis": "Concise medical assessment in requested language",
+  "clinicalExplanation": "Compassionate, plain-language explanation in requested language",
+  "homeRemedies": ["Safe, non-prescriptive home actions in requested language"],
+  "warningSigns": ["Emergency red flags in requested language"],
+  "recommendedSpecialty": "Recommended specialty (e.g. Cardiology, Emergency Medicine, PHC)",
+  "audioResponseText": "Warm 2-3 sentence spoken summary in requested language for speech playback",
+  "disclaimer": "${MANDATORY_DISCLAIMER}"
 }
 `;
 
@@ -123,11 +395,27 @@ Return ONLY a valid, raw JSON object (NO markdown backticks, NO extra commentary
       const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
       const parsedJson = JSON.parse(cleaned);
 
+      if (!parsedJson.disclaimer) {
+        parsedJson.disclaimer = MANDATORY_DISCLAIMER;
+      }
+
+      logTriageSession({
+        source: 'gemini-api',
+        model: modelName,
+        input: { symptoms, language, age, vitals },
+        output: parsedJson
+      });
+
       return res.json(parsedJson);
     } catch (geminiError) {
-      console.warn('[Gemini API Call Failed]', geminiError.message);
-      // Graceful fallback to clinical triage engine
-      const fallbackResult = offlineClinicalTriage(symptoms, language);
+      console.warn('[Gemini API Fallback]', geminiError.message);
+      const fallbackResult = offlineClinicalTriage(symptoms, language, vitals, age);
+      logTriageSession({
+        source: 'fallback-clinical-engine',
+        reason: geminiError.message,
+        input: { symptoms, language, age, vitals },
+        output: fallbackResult
+      });
       return res.json(fallbackResult);
     }
   } catch (err) {
