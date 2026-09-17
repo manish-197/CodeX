@@ -60,6 +60,8 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
   const isListeningRef = useRef(false);
   const latestTranscriptRef = useRef('');
   const handleSendToAIRef = useRef(null);
+  const retryCountRef = useRef(0);
+  const textareaRef = useRef(null);
 
   // Mic recognition language is independent of static UI language
   const activeRecognitionLang = spokenLangMode === 'auto'
@@ -91,6 +93,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       console.log('[Voice AI Stage 1: Mic Capture] Speech recognition started. Listening on language:', activeRecognitionLang, 'Mode:', spokenLangMode);
       setPipelineStage('listening');
       setPipelineErrorMessage('');
+      retryCountRef.current = 0;
     };
 
     recognition.onresult = (event) => {
@@ -134,10 +137,57 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
 
     recognition.onerror = (err) => {
       console.warn('[Voice AI Stage 1: Mic Capture Notice]', err.error);
+
+      // Log full diagnostic error object to console to confirm underlying cause (sandbox vs connectivity vs permissions)
+      console.error('[Voice AI SpeechRecognition Error Details]', {
+        error: err.error,
+        message: err.message,
+        event: err,
+        online: typeof navigator !== 'undefined' ? navigator.onLine : 'unknown',
+        secureContext: typeof window !== 'undefined' ? window.isSecureContext : 'unknown',
+        origin: typeof window !== 'undefined' ? window.location.origin : 'unknown',
+        inIframe: typeof window !== 'undefined' ? (window.self !== window.top) : false,
+        retryCount: retryCountRef.current
+      });
+
       // In Chrome/Edge, 'no-speech' is expected during conversational pauses or before user speaks.
       if (err.error === 'no-speech') {
         if (isListeningRef.current) {
           setPipelineStage('listening');
+        }
+        return;
+      }
+
+      // Handle 'network' error with automatic 1-time retry before falling back
+      if (err.error === 'network') {
+        if (retryCountRef.current < 1) {
+          retryCountRef.current += 1;
+          console.log('[Voice AI Stage 1] SpeechRecognition network error encountered. Attempting 1-time automatic restart in ~1s...');
+          setPipelineStage('listening');
+          setPipelineErrorMessage('Voice service reconnecting...');
+          setTimeout(() => {
+            if (isListeningRef.current && recognitionRef.current) {
+              try { recognitionRef.current.abort(); } catch (e) {}
+              try {
+                recognitionRef.current.lang = activeRecognitionLang;
+                recognitionRef.current.start();
+                console.log('[Voice AI Stage 1] Automatic retry session started.');
+              } catch (retryErr) {
+                console.warn('[Voice AI Stage 1] Retry restart exception:', retryErr.message);
+              }
+            }
+          }, 1000);
+          return;
+        }
+
+        // Persistent network error after retry: clearly advise user and auto-focus text input
+        console.warn('[Voice AI Stage 1] Network error persisted after retry. Falling back to text input.');
+        isListeningRef.current = false;
+        setIsListening(false);
+        setPipelineStage('error');
+        setPipelineErrorMessage('Voice service unavailable right now — check your connection, or type your symptoms below.');
+        if (textareaRef.current) {
+          textareaRef.current.focus();
         }
         return;
       }
@@ -155,6 +205,9 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         setPipelineErrorMessage('No microphone detected. Please connect an audio input device.');
       } else {
         setPipelineErrorMessage(`Voice recognition notice: ${err.error}. You can also type symptoms directly.`);
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
       }
     };
 
@@ -218,6 +271,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       setTranscript('');
       latestTranscriptRef.current = '';
       setPipelineErrorMessage('');
+      retryCountRef.current = 0;
       isListeningRef.current = true;
       setIsListening(true);
       setPipelineStage('listening');
@@ -623,6 +677,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         {/* Interactive Speech-to-Text Transcript Box */}
         <div className="relative">
           <textarea
+            ref={textareaRef}
             id="symptom-input-textarea"
             value={transcript}
             onChange={(e) => {
