@@ -75,6 +75,20 @@ export default function VitalsCard({
               {bp.sys === 0 ? t('vitals_idle') : isHypertensive ? t('vitals_hypertensive') : t('vitals_normal')}
             </span>
           </div>
+
+          {bp.sys === 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenBleModal) onOpenBleModal();
+              }}
+              className="mt-3 w-full py-1.5 px-3 rounded-xl bg-medical-blue/10 hover:bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+            >
+              <Bluetooth className="w-3.5 h-3.5 shrink-0" />
+              <span>{t('vitals_btn_connect_device')}</span>
+            </button>
+          )}
         </div>
 
         {/* Heart Rate Meter */}
@@ -109,6 +123,20 @@ export default function VitalsCard({
               {heartRate === 0 ? t('vitals_idle') : heartRate > 100 ? t('vitals_tachycardia') : t('vitals_resting')}
             </span>
           </div>
+
+          {heartRate === 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenBleModal) onOpenBleModal();
+              }}
+              className="mt-3 w-full py-1.5 px-3 rounded-xl bg-medical-blue/10 hover:bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+            >
+              <Bluetooth className="w-3.5 h-3.5 shrink-0" />
+              <span>{t('vitals_btn_connect_device')}</span>
+            </button>
+          )}
         </div>
 
         {/* SpO2 Blood Oxygen Meter */}
