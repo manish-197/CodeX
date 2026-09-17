@@ -92,18 +92,22 @@ export default function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-md glass-card p-6 sm:p-8 relative shadow-2xl bg-white/95 dark:bg-dark-card/95"
+        className="w-full max-w-md max-h-[90vh] flex flex-col glass-card rounded-3xl relative shadow-2xl bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 dark:border-white/10 overflow-hidden"
         data-lenis-prevent="true"
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist"
+          className="absolute top-4 right-4 z-20 p-2 rounded-full hover:bg-deep-teal/10 dark:hover:bg-white/10 text-deep-teal dark:text-sky-mist transition-colors"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
+
+        {/* Scrollable Inner Container */}
+        <div className="overflow-y-auto p-6 sm:p-8 overscroll-contain">
 
         {/* Header */}
         <div className="text-center space-y-2 mb-6">
@@ -374,5 +378,6 @@ export default function AuthModal({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
