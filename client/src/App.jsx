@@ -1,122 +1,53 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import Layout from './components/layout/Layout';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [currentTab, setCurrentTab] = useState('home');
+  const [userRole, setUserRole] = useState('citizen');
+  const [darkMode, setDarkMode] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
+
+  // Sync dark class on document element
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <Layout
+      currentTab={currentTab}
+      setCurrentTab={setCurrentTab}
+      userRole={userRole}
+      setUserRole={setUserRole}
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+      currentLang={currentLang}
+      onSelectLang={setCurrentLang}
+    >
+      <div className="py-12 text-center">
+        <div className="neo-glass-card p-10 max-w-2xl mx-auto space-y-4">
+          <span className="inline-block px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-terracotta/15 text-terracotta">
+            Soft Neo-Glass • Earth & Sky Design System
+          </span>
+          <h1 className="font-display font-bold text-3xl sm:text-4xl text-deep-teal dark:text-sky-mist">
+            ArogyaRakshak AI
+          </h1>
+          <p className="text-deep-teal/80 dark:text-dark-muted text-sm sm:text-base leading-relaxed">
+            Global layout shell loaded with humanist typography, custom Tailwind tokens, and Lenis smooth scrolling.
           </p>
+          <div className="pt-4 flex justify-center gap-3">
+            <button className="btn-terracotta">
+              Explore Platform
+            </button>
+            <button className="btn-glass">
+              Learn More
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </div>
+    </Layout>
+  );
 }
-
-export default App
