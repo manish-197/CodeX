@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
+import FamilyHub from './components/family/FamilyHub';
 import AuthModal from './components/auth/AuthModal';
 
 export default function App() {
@@ -8,6 +9,8 @@ export default function App() {
   const [userRole, setUserRole] = useState('citizen');
   const [darkMode, setDarkMode] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
+  
+  // Latest recorded heart rate (strictly 0 BPM initial per zero dummy data rule)
   const [latestHeartRate, setLatestHeartRate] = useState(0);
 
   // Authentication State
@@ -50,6 +53,10 @@ export default function App() {
     }
   };
 
+  const handleVitalsChange = (bpm) => {
+    setLatestHeartRate(bpm || 0);
+  };
+
   return (
     <Layout
       currentTab={currentTab}
@@ -71,10 +78,21 @@ export default function App() {
         />
       )}
 
-      {currentTab !== 'home' && (
+      {currentTab === 'hub' && (
+        <FamilyHub 
+          currentUser={currentUser}
+          onVitalsChange={handleVitalsChange}
+          onNavigateToPrescription={() => alert('Prescription OCR will activate in Slice 11')}
+          onDownloadHealthCard={() => alert('ABDM Health Card PDF download activates in Slice 9')}
+          onOpenBleModal={() => alert('Web Bluetooth BLE sync activates in Slice 12')}
+          onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
+        />
+      )}
+
+      {currentTab !== 'home' && currentTab !== 'hub' && (
         <div className="py-12 neo-glass-card p-8 text-center space-y-3 max-w-xl mx-auto">
           <h2 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist capitalize">
-            {currentTab === 'hub' ? 'Family Health Hub' : currentTab === 'triage' ? 'Voice AI Clinical Triage' : 'Hospital Navigation'}
+            {currentTab === 'triage' ? 'Voice AI Clinical Triage' : 'Hospital Navigation'}
           </h2>
           <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
             Section ready for incremental activation in upcoming build slice.

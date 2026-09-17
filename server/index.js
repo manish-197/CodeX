@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import familyRoutes from './routes/familyRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ connectDB();
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/family', familyRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
