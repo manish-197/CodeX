@@ -120,7 +120,7 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
               onClick={() => onNavigate('triage')}
               className="btn-medical-blue text-sm sm:text-base py-3.5 px-8"
             >
-              <PhoneCall className="w-5 h-5" />
+              <Stethoscope className="w-5 h-5" />
               <span>{t('hero_cta_triage')}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
