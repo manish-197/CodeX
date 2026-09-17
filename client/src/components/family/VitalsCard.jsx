@@ -44,33 +44,33 @@ export default function VitalsCard({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         {/* Blood Pressure Meter */}
-        <div className="glass-card p-5 relative overflow-hidden group hover:border-medical-blue/50">
+        <div className="glass-card vitals-meter-card p-5 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-deep-navy/70 dark:text-dark-muted">
+            <span className="text-xs font-bold uppercase tracking-wider vitals-label">
               {t('vitals_bp')}
             </span>
-            <div className={`p-2.5 rounded-2xl ${isHypertensive ? 'bg-alert-red/15 text-alert-red' : 'bg-deep-navy/10 text-deep-navy dark:text-clinical-white'}`}>
+            <div className={`p-2.5 rounded-2xl ${isHypertensive ? 'vitals-badge-alert' : 'vitals-icon-idle'}`}>
               <Activity className="w-4 h-4" />
             </div>
           </div>
 
           <div className="flex items-baseline gap-1.5 my-1">
-            <span className={`font-display font-black text-3xl sm:text-4xl ${bp.sys === 0 ? 'text-deep-navy/30 dark:text-dark-muted/40' : isHypertensive ? 'text-alert-red' : 'text-deep-navy dark:text-clinical-white'}`}>
+            <span className={`font-display font-black text-3xl sm:text-4xl ${bp.sys === 0 ? 'vitals-zero' : isHypertensive ? 'text-alert-red' : 'vitals-val'}`}>
               {bp.sys}/{bp.dia}
             </span>
-            <span className="text-xs text-slate-500 font-bold">
+            <span className="text-xs vitals-unit">
               mmHg
             </span>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-deep-navy/10 dark:border-white/10 flex items-center justify-between text-[11px]">
-            <span className="text-deep-navy/70 dark:text-dark-muted">{t('vitals_status')}</span>
-            <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+          <div className="mt-3 pt-3 vitals-divider flex items-center justify-between text-[11px]">
+            <span className="vitals-label font-normal text-[11px] opacity-80">{t('vitals_status')}</span>
+            <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
               bp.sys === 0 
-                ? 'bg-deep-navy/10 text-deep-navy/60 dark:text-dark-muted' 
+                ? 'vitals-badge-idle' 
                 : isHypertensive 
-                ? 'bg-alert-red/15 text-alert-red' 
-                : 'bg-health-green/20 text-health-green'
+                ? 'vitals-badge-alert' 
+                : 'vitals-badge-normal'
             }`}>
               {bp.sys === 0 ? t('vitals_idle') : isHypertensive ? t('vitals_hypertensive') : t('vitals_normal')}
             </span>
@@ -78,33 +78,33 @@ export default function VitalsCard({
         </div>
 
         {/* Heart Rate Meter */}
-        <div className="glass-card p-5 relative overflow-hidden group hover:border-medical-blue/50">
+        <div className="glass-card vitals-meter-card p-5 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-deep-navy/70 dark:text-dark-muted">
+            <span className="text-xs font-bold uppercase tracking-wider vitals-label">
               {t('vitals_heart')}
             </span>
-            <div className={`p-2.5 rounded-2xl ${heartRate > 100 ? 'bg-alert-red/15 text-alert-red' : 'bg-medical-blue/15 text-medical-blue'}`}>
+            <div className={`p-2.5 rounded-2xl ${heartRate > 100 ? 'vitals-badge-alert' : 'vitals-icon-idle'}`}>
               <Heart className={`w-4 h-4 ${heartRate > 0 ? 'animate-pulse' : ''}`} />
             </div>
           </div>
 
           <div className="flex items-baseline gap-1.5 my-1">
-            <span className={`font-display font-black text-3xl sm:text-4xl ${heartRate === 0 ? 'text-deep-navy/30 dark:text-dark-muted/40' : 'text-medical-blue'}`}>
+            <span className={`font-display font-black text-3xl sm:text-4xl ${heartRate === 0 ? 'vitals-zero' : heartRate > 100 ? 'text-alert-red' : 'vitals-val'}`}>
               {heartRate}
             </span>
-            <span className="text-xs text-slate-500 font-bold">
+            <span className="text-xs vitals-unit">
               BPM
             </span>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-deep-navy/10 dark:border-white/10 flex items-center justify-between text-[11px]">
-            <span className="text-deep-navy/70 dark:text-dark-muted">{t('vitals_status')}</span>
-            <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+          <div className="mt-3 pt-3 vitals-divider flex items-center justify-between text-[11px]">
+            <span className="vitals-label font-normal text-[11px] opacity-80">{t('vitals_status')}</span>
+            <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
               heartRate === 0 
-                ? 'bg-deep-navy/10 text-deep-navy/60 dark:text-dark-muted' 
+                ? 'vitals-badge-idle' 
                 : heartRate > 100 
-                ? 'bg-alert-red/15 text-alert-red' 
-                : 'bg-health-green/20 text-health-green'
+                ? 'vitals-badge-alert' 
+                : 'vitals-badge-normal'
             }`}>
               {heartRate === 0 ? t('vitals_idle') : heartRate > 100 ? t('vitals_tachycardia') : t('vitals_resting')}
             </span>
@@ -112,33 +112,33 @@ export default function VitalsCard({
         </div>
 
         {/* SpO2 Blood Oxygen Meter */}
-        <div className="glass-card p-5 relative overflow-hidden group hover:border-medical-blue/50">
+        <div className="glass-card vitals-meter-card p-5 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-deep-navy/70 dark:text-dark-muted">
+            <span className="text-xs font-bold uppercase tracking-wider vitals-label">
               {t('vitals_spo2')}
             </span>
-            <div className={`p-2.5 rounded-2xl ${spo2 > 0 && spo2 < 94 ? 'bg-alert-red/15 text-alert-red' : 'bg-caution-amber/25 text-deep-navy dark:text-caution-amber'}`}>
+            <div className={`p-2.5 rounded-2xl ${spo2 > 0 && spo2 < 94 ? 'vitals-badge-alert' : 'vitals-badge-caution'}`}>
               <Droplets className="w-4 h-4" />
             </div>
           </div>
 
           <div className="flex items-baseline gap-1.5 my-1">
-            <span className={`font-display font-black text-3xl sm:text-4xl ${spo2 === 0 ? 'text-deep-navy/30 dark:text-dark-muted/40' : spo2 < 94 ? 'text-alert-red' : 'text-deep-navy dark:text-clinical-white'}`}>
+            <span className={`font-display font-black text-3xl sm:text-4xl ${spo2 === 0 ? 'vitals-zero' : spo2 < 94 ? 'text-alert-red' : 'vitals-val'}`}>
               {spo2}
             </span>
-            <span className="text-xs text-slate-500 font-bold">
+            <span className="text-xs vitals-unit">
               % SpO2
             </span>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-deep-navy/10 dark:border-white/10 flex items-center justify-between text-[11px]">
-            <span className="text-deep-navy/70 dark:text-dark-muted">{t('vitals_status')}</span>
-            <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+          <div className="mt-3 pt-3 vitals-divider flex items-center justify-between text-[11px]">
+            <span className="vitals-label font-normal text-[11px] opacity-80">{t('vitals_status')}</span>
+            <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
               spo2 === 0 
-                ? 'bg-deep-navy/10 text-deep-navy/60 dark:text-dark-muted' 
+                ? 'vitals-badge-idle' 
                 : spo2 < 94 
-                ? 'bg-alert-red/15 text-alert-red' 
-                : 'bg-health-green/20 text-health-green'
+                ? 'vitals-badge-alert' 
+                : 'vitals-badge-normal'
             }`}>
               {spo2 === 0 ? t('vitals_idle') : spo2 < 94 ? t('vitals_hypoxemia') : t('vitals_optimal')}
             </span>
@@ -148,9 +148,9 @@ export default function VitalsCard({
       </div>
 
       {/* Control bar & Recorded At status */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-deep-navy/80 dark:text-dark-muted">
-          <Clock className="w-4 h-4 text-medical-blue" />
+      <div className="glass-card vitals-meter-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 vitals-label font-medium text-xs normal-case opacity-90">
+          <Clock className="w-4 h-4 text-medical-blue shrink-0" />
           <span>
             {recordedAt ? t('vitals_last_logged', { time: new Date(recordedAt).toLocaleString() }) : t('vitals_no_tests')}
           </span>

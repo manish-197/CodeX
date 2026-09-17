@@ -71,6 +71,38 @@
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.8);
   --glass-shadow: 0 10px 32px -4px rgba(11, 42, 74, 0.08), 0 4px 16px -2px rgba(37, 99, 166, 0.05);
+
+  /* Explicit Vitals Tokens - Light Mode */
+  --vitals-card-bg: rgba(255, 255, 255, 0.88);
+  --vitals-card-border: rgba(37, 99, 166, 0.18);
+  --vitals-card-border-hover: rgba(37, 99, 166, 0.50);
+  --vitals-card-shadow: 0 10px 30px -4px rgba(11, 42, 74, 0.08), 0 4px 14px -2px rgba(37, 99, 166, 0.05);
+  
+  --vitals-label: #0B2A4A;
+  --vitals-val: #0B2A4A;
+  --vitals-unit: #475569;
+  --vitals-zero: #94A3B8;
+  
+  --vitals-badge-idle-bg: rgba(11, 42, 74, 0.08);
+  --vitals-badge-idle-text: #0B2A4A;
+  --vitals-badge-idle-border: rgba(11, 42, 74, 0.15);
+  
+  --vitals-icon-bg: rgba(37, 99, 166, 0.12);
+  --vitals-icon-color: #2563A6;
+  
+  --vitals-divider: rgba(11, 42, 74, 0.10);
+  
+  --vitals-badge-normal-bg: rgba(46, 158, 91, 0.15);
+  --vitals-badge-normal-text: #1E7E45;
+  --vitals-badge-normal-border: rgba(46, 158, 91, 0.30);
+  
+  --vitals-badge-alert-bg: rgba(214, 69, 69, 0.15);
+  --vitals-badge-alert-text: #D64545;
+  --vitals-badge-alert-border: rgba(214, 69, 69, 0.30);
+
+  --vitals-badge-caution-bg: rgba(232, 169, 58, 0.20);
+  --vitals-badge-caution-text: #9A6700;
+  --vitals-badge-caution-border: rgba(232, 169, 58, 0.35);
 }
 
 html.dark, [data-theme="dark"] {
@@ -84,6 +116,38 @@ html.dark, [data-theme="dark"] {
   --glass-bg: rgba(13, 32, 54, 0.85);
   --glass-border: rgba(244, 249, 251, 0.12);
   --glass-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+
+  /* Explicit Vitals Tokens - Dark Mode (translucent dark-navy glass tone, high contrast text & badges) */
+  --vitals-card-bg: rgba(13, 32, 54, 0.90);
+  --vitals-card-border: rgba(95, 179, 206, 0.25);
+  --vitals-card-border-hover: rgba(95, 179, 206, 0.60);
+  --vitals-card-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 4px 16px rgba(95, 179, 206, 0.08);
+  
+  --vitals-label: #CBE3F5;
+  --vitals-val: #FFFFFF;
+  --vitals-unit: #9BB8D4;
+  --vitals-zero: #7E9BB8;
+  
+  --vitals-badge-idle-bg: rgba(95, 179, 206, 0.18);
+  --vitals-badge-idle-text: #E0F2FE;
+  --vitals-badge-idle-border: rgba(95, 179, 206, 0.35);
+  
+  --vitals-icon-bg: rgba(95, 179, 206, 0.22);
+  --vitals-icon-color: #7ED4EC;
+  
+  --vitals-divider: rgba(244, 249, 251, 0.12);
+  
+  --vitals-badge-normal-bg: rgba(46, 158, 91, 0.25);
+  --vitals-badge-normal-text: #4ADE80;
+  --vitals-badge-normal-border: rgba(74, 222, 128, 0.40);
+  
+  --vitals-badge-alert-bg: rgba(214, 69, 69, 0.25);
+  --vitals-badge-alert-text: #F87171;
+  --vitals-badge-alert-border: rgba(248, 113, 113, 0.45);
+
+  --vitals-badge-caution-bg: rgba(232, 169, 58, 0.25);
+  --vitals-badge-caution-text: #FCD34D;
+  --vitals-badge-caution-border: rgba(252, 211, 77, 0.40);
 }
 
 /* Global Base Typography and Crisp Clinical Gradient Canvas */
@@ -127,6 +191,66 @@ h1, h2, h3, .font-display {
 .dark .glass-card:hover, .dark .neo-glass-card:hover {
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.65);
   border-color: rgba(95, 179, 206, 0.45);
+}
+
+/* Vitals Card Specific Tokens & Utilities (High Contrast Light & Dark) */
+.vitals-meter-card {
+  background: var(--vitals-card-bg) !important;
+  border: 1px solid var(--vitals-card-border) !important;
+  box-shadow: var(--vitals-card-shadow) !important;
+}
+
+.vitals-meter-card:hover {
+  border-color: var(--vitals-card-border-hover) !important;
+}
+
+.vitals-label {
+  color: var(--vitals-label) !important;
+}
+
+.vitals-val {
+  color: var(--vitals-val) !important;
+}
+
+.vitals-zero {
+  color: var(--vitals-zero) !important;
+}
+
+.vitals-unit {
+  color: var(--vitals-unit) !important;
+}
+
+.vitals-divider {
+  border-top: 1px solid var(--vitals-divider) !important;
+}
+
+.vitals-badge-idle {
+  background: var(--vitals-badge-idle-bg) !important;
+  color: var(--vitals-badge-idle-text) !important;
+  border: 1px solid var(--vitals-badge-idle-border) !important;
+}
+
+.vitals-badge-normal {
+  background: var(--vitals-badge-normal-bg) !important;
+  color: var(--vitals-badge-normal-text) !important;
+  border: 1px solid var(--vitals-badge-normal-border) !important;
+}
+
+.vitals-badge-alert {
+  background: var(--vitals-badge-alert-bg) !important;
+  color: var(--vitals-badge-alert-text) !important;
+  border: 1px solid var(--vitals-badge-alert-border) !important;
+}
+
+.vitals-badge-caution {
+  background: var(--vitals-badge-caution-bg) !important;
+  color: var(--vitals-badge-caution-text) !important;
+  border: 1px solid var(--vitals-badge-caution-border) !important;
+}
+
+.vitals-icon-idle {
+  background: var(--vitals-icon-bg) !important;
+  color: var(--vitals-icon-color) !important;
 }
 
 /* Primary Medical Blue CTA Button */
