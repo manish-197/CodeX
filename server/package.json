@@ -1,0 +1,26 @@
+{
+  "name": "arogyarakshak-server",
+  "version": "1.0.0",
+  "description": "Backend services for ArogyaRakshak AI Rural Healthcare Accessibility Platform",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "keywords": [
+    "healthcare",
+    "rural-india",
+    "gemini-ai",
+    "telemedicine",
+    "triage"
+  ],
+  "author": "ArogyaRakshak Team",
+  "license": "ISC"
+}
