@@ -39,15 +39,84 @@ const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
 const MANDATORY_DISCLAIMER = "This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.";
 
+export const languageNameMap = {
+  mr: 'Marathi',
+  hi: 'Hindi',
+  en: 'English',
+  ta: 'Tamil',
+  kn: 'Kannada',
+  bn: 'Bengali'
+};
+
+/**
+ * Detect language of spoken/entered clinical text
+ * Analyzes Indic scripts (Devanagari, Tamil, Kannada, Bengali) & vocabulary
+ */
+export function detectLanguageFromText(text) {
+  if (!text) return 'en';
+  const str = text.toLowerCase();
+
+  // 1. Devanagari script range (\u0900-\u097F)
+  if (/[\u0900-\u097F]/.test(text)) {
+    // Distinct Marathi indicators (character ळ \u0933, verb conjugations, vocabulary, pronouns)
+    const marathiPattern = /[\u0933]|आहे|नाही|दुखत|डोके|ताप|मळमळ|पोटात|औषध|करा|माझे|माझ्या|त्रास|कपाळ|उलट्या|थंडी|लागणे|होते|येत|पाहिजे|दवाखान्यात|रूग्ण|छातीत|हातात|पायात|कंबर/;
+    if (marathiPattern.test(text)) {
+      return 'mr';
+    }
+    // Hindi indicators
+    const hindiPattern = /है|नहीं|दर्द|सिर|पेट|बुखार|उल्टी|दवा|चक्कर|मुझे|मेरा|मेरी|सांस|सीने|कमर|हो|रहा|रही|चाहिए/;
+    if (hindiPattern.test(text)) {
+      return 'hi';
+    }
+    // Default to Marathi in Maharashtra rural clinic context
+    return 'mr';
+  }
+
+  // 2. Tamil script (\u0B80-\u0BFF)
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'ta';
+
+  // 3. Kannada script (\u0C80-\u0CFF)
+  if (/[\u0C80-\u0CFF]/.test(text)) return 'kn';
+
+  // 4. Bengali script (\u0980-\u09FF)
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn';
+
+  // 5. Romanized transliterated Marathi phrases
+  const romanizedMarathi = /\b(majhe|mazhe|doke|dukhata|dukhat|aahe|ahe|aani|ani|taap|aala|traas|potaat|potala|chhaati|haat)\b/i;
+  if (romanizedMarathi.test(str)) return 'mr';
+
+  // 6. Romanized transliterated Hindi phrases
+  const romanizedHindi = /\b(mera|meri|mujhe|sar|dard|bukhar|hai|aur|ulti|pet|seene|saans|dawa)\b/i;
+  if (romanizedHindi.test(str)) return 'hi';
+
+  return 'en';
+}
+
+function formatTriageResult(result, activeLang) {
+  return {
+    ...result,
+    detectedLanguage: activeLang,
+    detectedLanguageName: languageNameMap[activeLang] || 'English'
+  };
+}
+
 /**
  * Verified Rural Clinical Triage Rules Engine
  * Implements strict clinical safety rules:
  * 1. Err toward caution (over-triage when uncertain, never under-triage).
  * 2. Safe, non-prescriptive home remedies only (no drug dosages).
  * 3. Specific emergency red-flag warning signs on every MODERATE/HIGH/CRITICAL case.
- * 4. Multilingual support (Marathi, Hindi, English).
+ * 4. Auto-detects spoken language independent of static UI language.
  */
 export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, age = null) {
+  // Independent of UI language setting: auto-detect from symptoms text
+  const detected = detectLanguageFromText(symptoms);
+  const activeLang = (detected !== 'en') ? detected : (language && language !== 'auto' ? language : 'en');
+  const res = runOfflineClinicalRules(symptoms, activeLang, vitals, age);
+  return formatTriageResult(res, activeLang);
+}
+
+function runOfflineClinicalRules(symptoms, language = 'en', vitals = {}, age = null) {
   const lower = (symptoms || '').toLowerCase();
   
   // 1. Critical Life-Threatening Emergencies (Cardiovascular, Severe Trauma, Airway Compromise)
@@ -400,11 +469,16 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
 
 export async function triageSymptoms(req, res) {
   try {
-    const { symptoms, language = 'en', age, vitals } = req.body;
+    const { symptoms, language = 'auto', age, vitals } = req.body;
+
+    const detectedLang = detectLanguageFromText(symptoms);
+    const effectiveLanguage = (detectedLang !== 'en') ? detectedLang : (language && language !== 'auto' ? language : 'en');
 
     console.log('[Voice AI Stage 4: Backend Endpoint] Incoming triage request:', {
       symptoms,
-      language,
+      requestedLanguage: language,
+      detectedLanguage: detectedLang,
+      effectiveLanguage,
       age,
       vitalsPresent: !!vitals
     });
@@ -421,10 +495,10 @@ export async function triageSymptoms(req, res) {
     // Check if Gemini API Key is configured
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
       console.log('[Voice AI Stage 5: Notice] No Gemini API key provided. Using verified offline clinical rules engine.');
-      const result = offlineClinicalTriage(symptoms, language, vitals, age);
+      const result = offlineClinicalTriage(symptoms, effectiveLanguage, vitals, age);
       logTriageSession({
         source: 'offline-clinical-engine',
-        input: { symptoms, language, age, vitals },
+        input: { symptoms, language: effectiveLanguage, age, vitals },
         output: result
       });
       return res.json(result);
@@ -437,43 +511,53 @@ export async function triageSymptoms(req, res) {
       const prompt = `
 You are ArogyaRakshak AI, an expert clinical triage physician serving rural and underserved communities in India.
 CRITICAL SAFETY & TRIAGE GUIDELINES:
-1. ERR TOWARD CAUTION: Always over-triage to a higher risk level when uncertain; NEVER under-triage. If severe emergency symptoms (e.g. chest pain, radiating arm pain, breathing difficulty, severe bleeding, anaphylaxis) are described, riskLevel MUST be "CRITICAL".
-2. NON-PRESCRIPTIVE HOME REMEDIES: Strictly restrict home remedies to safe, non-drug self-care: oral rehydration fluids (ORS), lukewarm sponging, physical rest, clean wound pressure, position elevation, herbal soothing drinks. Instruct patient to see an ASHA/doctor for medicines.
-3. SAFE MEDICINE SUGGESTIONS (SAFETY-CRITICAL & MANDATORY RULES):
+1. VOICE AI AUTO-LANGUAGE MANDATE: Detect the language the user's message is written in and respond entirely in that same language, regardless of any other language setting.
+   - For example, if the input is in Marathi (e.g., Devanagari Marathi or Marathi symptoms), you MUST generate all response fields (likelyDiagnosis, clinicalExplanation, homeRemedies, suggestedMedicines, warningSigns, audioResponseText, disclaimer) ENTIRELY in Marathi (मराठी).
+   - If the input is in Hindi, respond ENTIRELY in Hindi.
+   - If the input is in Tamil, respond ENTIRELY in Tamil.
+   - If the input is in Kannada, respond ENTIRELY in Kannada.
+   - If the input is in Bengali, respond ENTIRELY in Bengali.
+   - If the input is in English, respond in English.
+   - Never default back to English when regional language input is provided.
+2. ERR TOWARD CAUTION: Always over-triage to a higher risk level when uncertain; NEVER under-triage. If severe emergency symptoms (e.g. chest pain, radiating arm pain, breathing difficulty, severe bleeding, anaphylaxis) are described, riskLevel MUST be "CRITICAL".
+3. NON-PRESCRIPTIVE HOME REMEDIES: Strictly restrict home remedies to safe, non-drug self-care: oral rehydration fluids (ORS), lukewarm sponging, physical rest, clean wound pressure, position elevation, herbal soothing drinks. Instruct patient to see an ASHA/doctor for medicines.
+4. SAFE MEDICINE SUGGESTIONS (SAFETY-CRITICAL & MANDATORY RULES):
    - Only suggest common, generally-safe, over-the-counter (OTC) medicine CATEGORIES appropriate to mild/moderate symptoms (e.g., "Paracetamol-based fever reducer category", "Oral Rehydration Salts (ORS) category").
    - NEVER output specific dosage amounts (e.g., NEVER write '500mg', '650mg', '10ml', etc.).
    - NEVER output specific intake frequencies (e.g., do NOT write 'take 2 tablets 3 times daily').
    - NEVER output commercial brand names.
    - For CRITICAL-risk symptoms: NEVER suggest any medicine under any circumstance. For CRITICAL cases, you MUST set "suggestedMedicines": [] and strictly instruct "seek emergency care immediately."
    - PHRASING MANDATE: You MUST explicitly phrase all medicine entries as a SUGGESTION TO DISCUSS WITH A PHARMACIST OR DOCTOR, NOT a prescription.
-4. RED FLAGS: For MODERATE, HIGH, and CRITICAL risk levels, always provide distinct warning signs detailing when to escalate immediately to 108 or hospital.
-5. AMBIGUITY: If symptoms are too vague (e.g., 'I don't feel well'), rate riskLevel as "MODERATE" for safety, ask clarifying questions in clinicalExplanation, and suggest visiting the village health worker.
-6. MANDATORY DISCLAIMER: Include the exact field: "disclaimer": "${MANDATORY_DISCLAIMER}".
+5. RED FLAGS: For MODERATE, HIGH, and CRITICAL risk levels, always provide distinct warning signs detailing when to escalate immediately to 108 or hospital.
+6. AMBIGUITY: If symptoms are too vague (e.g., 'I don't feel well'), rate riskLevel as "MODERATE" for safety, ask clarifying questions in clinicalExplanation, and suggest visiting the village health worker.
+7. MANDATORY DISCLAIMER: Include safety disclaimer in the same detected language.
 
 Patient Input:
 - Symptoms: "${symptoms}"
-- Language: "${language}" (mr = Marathi, hi = Hindi, en = English, ta = Tamil, kn = Kannada, bn = Bengali)
+- Language Context: Auto-detect language from symptoms text (user input language overrides any UI setting)
 - Patient Age: ${age || 'Not specified'}
 - Recorded Vitals: ${JSON.stringify(vitals || {})}
 
 Return ONLY a valid, raw JSON object (no markdown, no backticks):
 {
+  "detectedLanguage": "mr" | "hi" | "en" | "ta" | "kn" | "bn" | string,
+  "detectedLanguageName": "Marathi" | "Hindi" | "English" | "Tamil" | "Kannada" | "Bengali" | string,
   "riskLevel": "CRITICAL" | "HIGH" | "MODERATE" | "LOW",
-  "likelyDiagnosis": "Concise medical assessment in requested language",
-  "clinicalExplanation": "Compassionate, plain-language explanation in requested language",
-  "homeRemedies": ["Safe, non-prescriptive home actions in requested language"],
+  "likelyDiagnosis": "Concise medical assessment in detected language",
+  "clinicalExplanation": "Compassionate, plain-language explanation in detected language",
+  "homeRemedies": ["Safe, non-prescriptive home actions in detected language"],
   "suggestedMedicines": [
     {
-      "name": "Generic OTC Category Name in requested language (NO specific dosages)",
-      "category": "Pharmacological Category in requested language",
-      "instructions": "Non-prescriptive suggestion to discuss with pharmacist or doctor",
-      "timing": "General non-prescriptive timing advice (e.g., Post-meals as advised by pharmacist)"
+      "name": "Generic OTC Category Name in detected language (NO specific dosages)",
+      "category": "Pharmacological Category in detected language",
+      "instructions": "Non-prescriptive suggestion to discuss with pharmacist or doctor in detected language",
+      "timing": "General non-prescriptive timing advice in detected language (e.g., Post-meals as advised by pharmacist)"
     }
   ],
-  "warningSigns": ["Emergency red flags in requested language"],
-  "recommendedSpecialty": "Recommended specialty (e.g. Cardiology, Emergency Medicine, PHC)",
-  "audioResponseText": "Warm 2-3 sentence spoken summary in requested language for speech playback",
-  "disclaimer": "${MANDATORY_DISCLAIMER}"
+  "warningSigns": ["Emergency red flags in detected language"],
+  "recommendedSpecialty": "Recommended specialty in detected language (e.g. Cardiology, Emergency Medicine, PHC)",
+  "audioResponseText": "Warm 2-3 sentence spoken summary in detected language for speech playback",
+  "disclaimer": "Safety disclaimer in detected language"
 }
 `;
 
@@ -488,6 +572,13 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
 
       if (!parsedJson.disclaimer) {
         parsedJson.disclaimer = MANDATORY_DISCLAIMER;
+      }
+
+      if (!parsedJson.detectedLanguage) {
+        parsedJson.detectedLanguage = effectiveLanguage;
+      }
+      if (!parsedJson.detectedLanguageName) {
+        parsedJson.detectedLanguageName = languageNameMap[parsedJson.detectedLanguage] || 'English';
       }
 
       // Strict clinical safety guardrail on medicine suggestions
@@ -506,19 +597,19 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
       logTriageSession({
         source: 'gemini-api',
         model: modelName,
-        input: { symptoms, language, age, vitals },
+        input: { symptoms, language: effectiveLanguage, age, vitals },
         output: parsedJson
       });
 
-      console.log('[Voice AI Stage 5: Returning Result] Risk:', parsedJson.riskLevel, 'Diagnosis:', parsedJson.likelyDiagnosis);
+      console.log('[Voice AI Stage 5: Returning Result] Risk:', parsedJson.riskLevel, 'Language:', parsedJson.detectedLanguage, 'Diagnosis:', parsedJson.likelyDiagnosis);
       return res.json(parsedJson);
     } catch (geminiError) {
       console.error('[Voice AI Stage 5: Gemini API Failure]', geminiError.message);
-      const fallbackResult = offlineClinicalTriage(symptoms, language, vitals, age);
+      const fallbackResult = offlineClinicalTriage(symptoms, effectiveLanguage, vitals, age);
       logTriageSession({
         source: 'fallback-clinical-engine',
         reason: geminiError.message,
-        input: { symptoms, language, age, vitals },
+        input: { symptoms, language: effectiveLanguage, age, vitals },
         output: fallbackResult
       });
       return res.json(fallbackResult);

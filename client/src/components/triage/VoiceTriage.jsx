@@ -18,13 +18,31 @@ import {
   Radio,
   Pill,
   FileText,
-  Download
+  Download,
+  Globe
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { getSpeechLangCode } from '../../i18n/translations';
+
+function detectSimpleScriptLang(text) {
+  if (!text) return 'en';
+  if (/[\u0900-\u097F]/.test(text)) {
+    if (/[\u0933]|आहे|नाही|दुखत|डोके|ताप|मळमळ|पोटात|औषध|करा|माझे|माझ्या|त्रास|कपाळ|उलट्या|थंडी|लागणे/.test(text)) {
+      return 'mr';
+    }
+    return 'hi';
+  }
+  if (/[\u0B80-\u0BFF]/.test(text)) return 'ta';
+  if (/[\u0C80-\u0CFF]/.test(text)) return 'kn';
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn';
+  return 'en';
+}
 
 export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, activeVitals, currentUser }) {
-  const { lang, speechLang, t } = useLanguage();
+  const { lang, t } = useLanguage();
 
+  // Spoken Language Mode: 'auto' | 'mr' | 'hi' | 'en' | 'ta' (Independent from UI language)
+  const [spokenLangMode, setSpokenLangMode] = useState('auto');
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   // Pipeline status: 'idle' | 'listening' | 'speech-detected' | 'silence-counting' | 'processing-symptoms' | 'getting-ai-response' | 'complete' | 'error'
@@ -42,6 +60,11 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
   const isListeningRef = useRef(false);
   const latestTranscriptRef = useRef('');
   const handleSendToAIRef = useRef(null);
+
+  // Mic recognition language is independent of static UI language
+  const activeRecognitionLang = spokenLangMode === 'auto'
+    ? (navigator.language || 'en-IN')
+    : getSpeechLangCode(spokenLangMode);
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -62,10 +85,10 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = speechLang;
+    recognition.lang = activeRecognitionLang;
 
     recognition.onstart = () => {
-      console.log('[Voice AI Stage 1: Mic Capture] Speech recognition started. Listening on language:', speechLang);
+      console.log('[Voice AI Stage 1: Mic Capture] Speech recognition started. Listening on language:', activeRecognitionLang, 'Mode:', spokenLangMode);
       setPipelineStage('listening');
       setPipelineErrorMessage('');
     };
@@ -169,7 +192,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         window.speechSynthesis.cancel();
       }
     };
-  }, [speechLang]);
+  }, [activeRecognitionLang, spokenLangMode]);
 
   const toggleListening = () => {
     if (!speechSupported) {
@@ -200,7 +223,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       setPipelineStage('listening');
 
       try {
-        recognitionRef.current.lang = speechLang;
+        recognitionRef.current.lang = activeRecognitionLang;
         recognitionRef.current.start();
       } catch (e) {
         console.warn('Recognition start exception, retrying:', e.message);
@@ -242,7 +265,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       setPipelineStage('getting-ai-response');
       console.log('[Voice AI Stage 4: Backend Endpoint Call] Sending symptoms to /api/triage:', {
         symptoms,
-        language: lang,
+        spokenLangMode,
         vitals: activeVitals
       });
 
@@ -251,7 +274,7 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           symptoms,
-          language: lang,
+          language: spokenLangMode === 'auto' ? 'auto' : spokenLangMode,
           vitals: activeVitals,
         }),
       });
@@ -266,9 +289,9 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       setTriageResult(data);
       setPipelineStage('complete');
 
-      // Auto-play spoken audio explainer if available
+      // Auto-play spoken audio explainer in the detected response language
       if (data.audioResponseText) {
-        speakResponse(data.audioResponseText);
+        speakResponse(data.audioResponseText, data.detectedLanguage);
       }
 
       // Smooth scroll into view
@@ -283,29 +306,41 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       console.error('[Voice AI Stage 4/5 Error] Endpoint call failed:', err.message);
       setPipelineErrorMessage(`Backend communication note: ${err.message}. Using offline clinical triage safety guard.`);
       
-      // Clinical Emergency Rules Engine Fallback
+      // Clinical Emergency Rules Engine Fallback with Auto-Detected Spoken Language
+      const fallbackLang = detectSimpleScriptLang(symptoms);
+      const isMr = fallbackLang === 'mr';
+      const isHi = fallbackLang === 'hi';
+
       const mockDiagnosis = {
-        riskLevel: symptoms.toLowerCase().includes('chest') ? 'CRITICAL' : 'MODERATE',
-        likelyDiagnosis: lang === 'mr' ? 'मोसमी विषाणू ताप / प्राथमिक तपासणी' : lang === 'hi' ? 'मौसमी वायरल बुखार / प्राथमिक जांच' : 'Clinical Triage Evaluation',
-        clinicalExplanation: lang === 'mr' 
+        riskLevel: (symptoms.toLowerCase().includes('chest') || symptoms.includes('छातीत') || symptoms.includes('सीने')) ? 'CRITICAL' : 'MODERATE',
+        detectedLanguage: fallbackLang,
+        detectedLanguageName: isMr ? 'Marathi' : isHi ? 'Hindi' : 'English',
+        likelyDiagnosis: isMr ? 'मोसमी विषाणू ताप / प्राथमिक तपासणी' : isHi ? 'मौसमी वायरल बुखार / प्राथमिक जांच' : 'Clinical Triage Evaluation',
+        clinicalExplanation: isMr 
           ? 'आपली लक्षणे नोंदवली गेली आहेत. भरपूर पाणी प्या आणि आराम करा.'
+          : isHi
+          ? 'आपके लक्षण दर्ज कर लिए गए हैं। पर्याप्त पानी पिएं और विश्राम करें।'
           : 'Your symptoms have been evaluated. Maintain hydration and monitor vitals closely.',
         homeRemedies: [
-          lang === 'mr' ? 'ओआरएस (ORS) किंवा कोमट पाणी प्या.' : 'Drink warm water and oral rehydration salts.',
-          lang === 'mr' ? 'कपाळावर कोमट पाण्याच्या पट्ट्या ठेवा.' : 'Cold/lukewarm damp cloth on forehead if feverish.'
+          isMr ? 'ओआरएस (ORS) किंवा कोमट पाणी प्या.' : isHi ? 'ओआरएस या गुनगुना पानी पिएं।' : 'Drink warm water and oral rehydration salts.',
+          isMr ? 'कपाळावर कोमट पाण्याच्या पट्ट्या ठेवा.' : isHi ? 'माथे पर ठंडी/गुनगुनी पट्टी रखें।' : 'Cold/lukewarm damp cloth on forehead if feverish.'
         ],
         warningSigns: [
-          lang === 'mr' ? 'श्वास घेण्यास त्रास झाल्यास' : 'Difficulty breathing, severe chest tightness, or prolonged high fever',
+          isMr ? 'श्वास घेण्यास त्रास झाल्यास किंवा तीव्र छातीत दुखल्यास' : isHi ? 'सांस लेने में दिक्कत या सीने में तेज दर्द होने पर' : 'Difficulty breathing, severe chest tightness, or prolonged high fever',
         ],
-        recommendedSpecialty: 'Primary Health Centre (PHC)',
-        audioResponseText: lang === 'mr'
-          ? 'आपली लक्षणे नोंदवली गेली आहेत. कृपया भरपूर विश्रांती घ्या आणि जवळच्या केंद्राला भेट द्या.'
+        recommendedSpecialty: isMr ? 'प्राथमिक आरोग्य केंद्र (PHC)' : isHi ? 'प्राथमिक स्वास्थ्य केंद्र (PHC)' : 'Primary Health Centre (PHC)',
+        audioResponseText: isMr
+          ? 'आपली लक्षणे नोंदवली गेली आहेत. कृपया भरपूर विश्रांती घ्या आणि जवळच्या आरोग्य केंद्राला भेट द्या.'
+          : isHi
+          ? 'आपके लक्षण दर्ज कर लिए गए हैं। कृपया पर्याप्त विश्राम करें और स्वास्थ्य केंद्र जाएं।'
           : 'Triage assessment complete. Rest well and visit your local health centre if symptoms worsen.',
-        disclaimer: 'This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.'
+        disclaimer: isMr
+          ? 'हा कृत्रिम बुद्धिमत्ता (AI) सहाय्यित प्राथमिक सल्ला आहे, हे अंतिम वैद्यकीय निदान नाही. आणीबाणीत १०८ वर संपर्क साधा.'
+          : 'This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.'
       };
       setTriageResult(mockDiagnosis);
       setPipelineStage('complete');
-      speakResponse(mockDiagnosis.audioResponseText);
+      speakResponse(mockDiagnosis.audioResponseText, fallbackLang);
     } finally {
       setIsAnalyzing(false);
     }
@@ -314,13 +349,24 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
   // Keep ref up to date on every render so timeouts never call stale function
   handleSendToAIRef.current = handleSendToAI;
 
-  const speakResponse = (text) => {
+  const speakResponse = (text, responseLang) => {
     if (!window.speechSynthesis || !text) return;
     window.speechSynthesis.cancel();
 
+    // Dynamically match detected response language, NEVER static UI language!
+    const targetLangCode = getSpeechLangCode(responseLang || triageResult?.detectedLanguage || detectSimpleScriptLang(text));
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = speechLang;
+    utterance.lang = targetLangCode;
     utterance.rate = 0.95; // Slightly slower for clarity in rural dialects
+
+    // Dynamically look up speech synthesis voices matching the target language
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      const match = voices.find(v => v.lang === targetLangCode || v.lang.startsWith(targetLangCode.slice(0, 2)));
+      if (match) {
+        utterance.voice = match;
+      }
+    }
 
     utterance.onstart = () => setIsPlayingAudio(true);
     utterance.onend = () => setIsPlayingAudio(false);
@@ -534,15 +580,43 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
           </button>
         </div>
 
-        {/* Status helper text */}
-        <div className="space-y-1">
+        {/* Status helper text & Alexa-style Independent Voice Language Selector */}
+        <div className="space-y-2.5">
           <p className="text-xs sm:text-sm font-semibold text-deep-navy dark:text-clinical-white">
             {isListening 
-              ? 'Mic is LIVE & continuously listening. Speak naturally across pauses.'
-              : 'Click the mic button to start voice recognition.'}
+              ? 'Mic is LIVE & continuously listening. Speak naturally in any language.'
+              : 'Click the mic button to speak symptoms in your native tongue.'}
           </p>
-          <p className="text-xs text-deep-navy/60 dark:text-dark-muted">
-            Language model set to: <strong>{speechLang}</strong>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+            <span className="text-xs font-bold text-deep-navy/70 dark:text-dark-muted flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 text-medical-blue" />
+              Spoken Dialect:
+            </span>
+            <div className="inline-flex rounded-full p-0.5 glass-card border border-deep-navy/15 dark:border-white/15 shadow-sm">
+              {[
+                { id: 'auto', label: 'Auto-Detect' },
+                { id: 'mr', label: 'मराठी' },
+                { id: 'hi', label: 'हिन्दी' },
+                { id: 'en', label: 'English' },
+                { id: 'ta', label: 'தமிழ்' }
+              ].map(l => (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => setSpokenLangMode(l.id)}
+                  className={`px-3 py-1 text-xs rounded-full font-bold transition-all ${
+                    spokenLangMode === l.id 
+                      ? 'bg-medical-blue text-white shadow-sm' 
+                      : 'text-deep-navy/70 dark:text-dark-muted hover:text-medical-blue'
+                  }`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] text-deep-navy/60 dark:text-dark-muted">
+            Voice AI detects whatever language you speak and responds completely in that language, regardless of UI settings.
           </p>
         </div>
 
@@ -602,12 +676,20 @@ export default function VoiceTriage({ onNavigateToHospital, onNavigateToHub, act
       {triageResult && (
         <div id="triage-result-container" className="glass-card p-6 sm:p-8 space-y-6 animate-fadeIn border-2 border-deep-navy/20">
           
-          {/* Top banner: Risk level + Audio Player */}
+          {/* Top banner: Risk level + Detected Language + Audio Player */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-deep-navy/10 dark:border-white/10">
-            <div className="flex items-center gap-3">
-              <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${getRiskBadgeStyles(triageResult.riskLevel)}`}>
-                {triageResult.riskLevel} Risk
-              </span>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${getRiskBadgeStyles(triageResult.riskLevel)}`}>
+                  {triageResult.riskLevel} Risk
+                </span>
+                {triageResult.detectedLanguage && (
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-medical-blue/15 text-medical-blue border border-medical-blue/30 flex items-center gap-1.5 shadow-sm">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Spoken Language Detected: {triageResult.detectedLanguageName || (triageResult.detectedLanguage === 'mr' ? 'मराठी (Marathi)' : triageResult.detectedLanguage === 'hi' ? 'हिन्दी (Hindi)' : 'English')}</span>
+                  </span>
+                )}
+              </div>
               <h3 className="font-display font-bold text-xl sm:text-2xl text-deep-navy dark:text-clinical-white">
                 {triageResult.likelyDiagnosis}
               </h3>
