@@ -8,6 +8,7 @@ import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
 import EmergencySOSBeacon from './components/common/EmergencySOSBeacon';
 import OfflineSyncIndicator from './components/common/OfflineSyncIndicator';
+import WhatsAppBotModal from './components/common/WhatsAppBotModal';
 import { LanguageProvider } from './i18n/LanguageContext';
 
 function AppContent() {
@@ -26,6 +27,7 @@ function AppContent() {
   // Authentication State
   const [currentUser, setCurrentUser] = useState(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   // Restore existing session from localStorage if present
   useEffect(() => {
@@ -79,6 +81,7 @@ function AppContent() {
       currentUser={currentUser}
       onOpenAuth={() => setAuthModalOpen(true)}
       onLogout={handleLogout}
+      onOpenWhatsApp={() => setWhatsAppModalOpen(true)}
     >
       {currentTab === 'home' && (
         <HomePage 
@@ -119,6 +122,12 @@ function AppContent() {
         onNavigateToHospital={() => setCurrentTab('navigation')}
         activeVitals={activeVitals}
         currentUser={currentUser}
+      />
+
+      {/* WhatsApp Voice Bot Simulator for Elderly Citizens */}
+      <WhatsAppBotModal
+        isOpen={whatsAppModalOpen}
+        onClose={() => setWhatsAppModalOpen(false)}
       />
 
       {/* Offline PWA Status and Background Sync Queue Indicator */}

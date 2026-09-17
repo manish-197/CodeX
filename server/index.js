@@ -9,6 +9,7 @@ import hospitalRoutes from './routes/hospitalRoutes.js';
 import healthCardRoutes from './routes/healthCardRoutes.js';
 import sosRoutes from './routes/sosRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
+import whatsappRoutes from './routes/whatsappRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For Twilio Webhook forms
 
 // Initialize DB connection
 connectDB();
@@ -29,6 +31,7 @@ app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/health-card', healthCardRoutes);
 app.use('/api/sos', sosRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

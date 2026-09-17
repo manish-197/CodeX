@@ -11,11 +11,10 @@ export default function Layout({
   setUserRole, 
   darkMode, 
   setDarkMode,
-  currentLang,
-  onSelectLang,
   currentUser,
   onOpenAuth,
-  onLogout
+  onLogout,
+  onOpenWhatsApp
 }) {
   // Initialize Lenis smooth scroll with support for data-lenis-prevent
   useEffect(() => {
@@ -56,11 +55,10 @@ export default function Layout({
         setUserRole={setUserRole}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        currentLang={currentLang}
-        onSelectLang={onSelectLang}
         currentUser={currentUser}
         onOpenAuth={onOpenAuth}
         onLogout={onLogout}
+        onOpenWhatsApp={onOpenWhatsApp}
       />
 
       {/* Main Page Content */}

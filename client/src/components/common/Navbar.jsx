@@ -12,7 +12,8 @@ import {
   PhoneCall,
   LogOut,
   LogIn,
-  Check
+  Check,
+  MessageCircle
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -25,7 +26,8 @@ export default function Navbar({
   setDarkMode,
   currentUser,
   onOpenAuth,
-  onLogout
+  onLogout,
+  onOpenWhatsApp
 }) {
   const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,9 +98,20 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Control Bar: Role Switch, Language Picker, Auth, Dark Mode */}
+        {/* Control Bar: WhatsApp Bot, Role Switch, Language Picker, Auth, Dark Mode */}
         <div className="flex items-center gap-2">
           
+          {/* WhatsApp Elder Bot Launch Button */}
+          <button
+            onClick={onOpenWhatsApp}
+            title="Launch WhatsApp Voice Bot for Senior Citizens"
+            className="p-2 rounded-full hover:bg-leaf-green/10 text-leaf-green transition-colors border border-leaf-green/20 flex items-center gap-1.5"
+            aria-label="WhatsApp Elder Voice Bot"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="hidden xl:inline text-xs font-bold">WhatsApp Bot</span>
+          </button>
+
           {/* Dual-Role Indicator / Toggle */}
           <button
             onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
@@ -221,6 +234,17 @@ export default function Navbar({
               </button>
             );
           })}
+
+          <button
+            onClick={() => {
+              if (onOpenWhatsApp) onOpenWhatsApp();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/10"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span>Launch WhatsApp Elder Bot</span>
+          </button>
 
           <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between">
             <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Mode</span>
