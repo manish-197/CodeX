@@ -9,29 +9,19 @@ export default {
     extend: {
       colors: {
         'sky-mist': '#EAF4F4',
-        'terracotta': {
-          DEFAULT: '#E4714E',
-          hover: '#cf5a37',
-          light: '#f9ded6'
-        },
-        'deep-teal': {
-          DEFAULT: '#0F5E5E',
-          dark: '#0a4242',
-          light: '#1b8080'
-        },
-        'sun-gold': {
-          DEFAULT: '#F4B942',
-          light: '#fdf1d4'
-        },
-        'alert-crimson': {
-          DEFAULT: '#D64550',
-          hover: '#be343f',
-          light: '#fad9dc'
-        },
-        'leaf-green': {
-          DEFAULT: '#4C9A6A',
-          light: '#dbede2'
-        },
+        'terracotta': '#E4714E',
+        'terracotta-hover': '#cf5a37',
+        'terracotta-light': '#f9ded6',
+        'deep-teal': '#0F5E5E',
+        'deep-teal-dark': '#0a4242',
+        'deep-teal-light': '#1b8080',
+        'sun-gold': '#F4B942',
+        'sun-gold-light': '#fdf1d4',
+        'alert-crimson': '#D64550',
+        'alert-crimson-hover': '#be343f',
+        'alert-crimson-light': '#fad9dc',
+        'leaf-green': '#4C9A6A',
+        'leaf-green-light': '#dbede2',
         dark: {
           base: '#0B1616',
           card: '#132424',

@@ -1,4 +1,34 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Manrope:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-sky-mist: #EAF4F4;
+  --color-terracotta: #E4714E;
+  --color-terracotta-hover: #cf5a37;
+  --color-terracotta-light: #f9ded6;
+  --color-deep-teal: #0F5E5E;
+  --color-deep-teal-dark: #0a4242;
+  --color-deep-teal-light: #1b8080;
+  --color-sun-gold: #F4B942;
+  --color-sun-gold-light: #fdf1d4;
+  --color-alert-crimson: #D64550;
+  --color-alert-crimson-hover: #be343f;
+  --color-alert-crimson-light: #fad9dc;
+  --color-leaf-green: #4C9A6A;
+  --color-leaf-green-light: #dbede2;
+
+  --color-dark-base: #0B1616;
+  --color-dark-card: #132424;
+  --color-dark-border: #1E3838;
+  --color-dark-text: #EAF4F4;
+  --color-dark-muted: #8FA8A8;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Manrope", "Poppins", sans-serif;
+
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+}
 
 :root {
   --sky-mist: #EAF4F4;
@@ -12,22 +42,13 @@
   --glass-shadow: 0 10px 32px -4px rgba(15, 94, 94, 0.08), 0 4px 16px -2px rgba(228, 113, 78, 0.05);
 }
 
-.dark, [data-theme="dark"] {
+html.dark, [data-theme="dark"] {
   --sky-mist: #0B1616;
   --deep-teal: #1A3E3E;
   --terracotta: #E4714E;
   --glass-bg: rgba(19, 36, 36, 0.82);
   --glass-border: rgba(234, 244, 244, 0.12);
   --glass-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --sky-mist: #0B1616;
-    --deep-teal: #1A3E3E;
-    --glass-bg: rgba(19, 36, 36, 0.82);
-    --glass-border: rgba(234, 244, 244, 0.12);
-  }
 }
 
 /* Global Base Typography and Warm Gradient Canvas */
@@ -37,14 +58,14 @@ html, body {
   min-height: 100vh;
   font-family: 'Manrope', 'Poppins', system-ui, -apple-system, sans-serif;
   color: #0F5E5E;
-  background: linear-gradient(135deg, #EAF4F4 0%, #F4F9F9 35%, #FDF9F7 70%, #F5FBFB 100%);
-  background-attachment: fixed;
+  background: linear-gradient(135deg, #EAF4F4 0%, #F4F9F9 35%, #FDF9F7 70%, #F5FBFB 100%) !important;
+  background-attachment: fixed !important;
   overflow-x: hidden;
 }
 
-.dark html, .dark body {
-  background: linear-gradient(135deg, #071010 0%, #0B1616 45%, #0E1B1B 100%);
-  color: #EAF4F4;
+html.dark, html.dark body, [data-theme="dark"], [data-theme="dark"] body {
+  background: linear-gradient(135deg, #071010 0%, #0B1616 45%, #0E1B1B 100%) !important;
+  color: #EAF4F4 !important;
 }
 
 h1, h2, h3, .font-display {

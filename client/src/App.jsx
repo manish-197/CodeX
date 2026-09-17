@@ -14,7 +14,13 @@ import { LanguageProvider } from './i18n/LanguageContext';
 function AppContent() {
   const [currentTab, setCurrentTab] = useState('home');
   const [userRole, setUserRole] = useState('citizen');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem('arogya_theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
   
   // Latest recorded heart rate (strictly 0 BPM initial per zero dummy data rule)
   const [latestHeartRate, setLatestHeartRate] = useState(0);
@@ -43,12 +49,17 @@ function AppContent() {
     }
   }, []);
 
-  // Sync dark class on document element
+  // Sync dark class and data-theme on document element and localStorage
   useEffect(() => {
+    try {
+      localStorage.setItem('arogya_theme', darkMode ? 'dark' : 'light');
+    } catch (e) {}
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, [darkMode]);
 
