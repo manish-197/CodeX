@@ -153,7 +153,17 @@ export default function FamilyHub({
   const handleSaveVitals = (newVitals) => {
     const updated = members.map(m => {
       if (m.id === activeMember.id) {
-        const fullVitals = { ...newVitals, recordedAt: new Date().toISOString() };
+        const fullVitals = { 
+          ...m.vitals,
+          ...newVitals,
+          bp: {
+            sys: typeof newVitals.sys !== 'undefined' ? newVitals.sys : (newVitals.bp?.sys ?? m.vitals?.bp?.sys ?? 0),
+            dia: typeof newVitals.dia !== 'undefined' ? newVitals.dia : (newVitals.bp?.dia ?? m.vitals?.bp?.dia ?? 0)
+          },
+          heartRate: typeof newVitals.heartRate !== 'undefined' ? newVitals.heartRate : (m.vitals?.heartRate ?? 0),
+          spo2: typeof newVitals.spo2 !== 'undefined' ? newVitals.spo2 : (m.vitals?.spo2 ?? 0),
+          recordedAt: new Date().toISOString()
+        };
         return { ...m, vitals: fullVitals };
       }
       return m;
@@ -621,6 +631,8 @@ export default function FamilyHub({
         onSaveVitals={handleSaveVitals}
         memberName={activeMember?.name}
         currentVitals={activeMember?.vitals}
+        isKioskOperator={false}
+        onOpenBleModal={() => setIsBleModalOpen(true)}
       />
 
       {/* Add Member Modal */}

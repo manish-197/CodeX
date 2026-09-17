@@ -105,7 +105,17 @@ export default function KioskDashboard({
   const handleSaveVitals = (newVitals) => {
     const updated = citizens.map(c => {
       if (c.id === selectedCitizen.id) {
-        const full = { ...newVitals, recordedAt: new Date().toISOString() };
+        const full = { 
+          ...c.vitals,
+          ...newVitals,
+          bp: {
+            sys: typeof newVitals.sys !== 'undefined' ? newVitals.sys : (newVitals.bp?.sys ?? c.vitals?.bp?.sys ?? 0),
+            dia: typeof newVitals.dia !== 'undefined' ? newVitals.dia : (newVitals.bp?.dia ?? c.vitals?.bp?.dia ?? 0)
+          },
+          heartRate: typeof newVitals.heartRate !== 'undefined' ? newVitals.heartRate : (c.vitals?.heartRate ?? 0),
+          spo2: typeof newVitals.spo2 !== 'undefined' ? newVitals.spo2 : (c.vitals?.spo2 ?? 0),
+          recordedAt: new Date().toISOString()
+        };
         return { ...c, vitals: full };
       }
       return c;
@@ -322,6 +332,7 @@ export default function KioskDashboard({
                 onOpenLogModal={() => setIsLogModalOpen(true)}
                 onOpenBleModal={() => setIsBleModalOpen(true)}
                 onTriggerDoctorDispatch={onTriggerDoctorDispatch}
+                isKioskOperator={true}
               />
             </div>
 
@@ -350,7 +361,11 @@ export default function KioskDashboard({
         isOpen={isLogModalOpen}
         onClose={() => setIsLogModalOpen(false)}
         onSave={handleSaveVitals}
+        onSaveVitals={handleSaveVitals}
         memberName={selectedCitizen?.name}
+        currentVitals={selectedCitizen?.vitals}
+        isKioskOperator={true}
+        onOpenBleModal={() => setIsBleModalOpen(true)}
       />
 
       <AddMemberModal 

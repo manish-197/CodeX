@@ -6,7 +6,8 @@ export default function VitalsCard({
   vitals = { bp: { sys: 0, dia: 0 }, heartRate: 0, spo2: 0, recordedAt: null },
   onOpenLogModal,
   onOpenBleModal,
-  onTriggerDoctorDispatch
+  onTriggerDoctorDispatch,
+  isKioskOperator = false
 }) {
   const { t } = useLanguage();
   const { bp = { sys: 0, dia: 0 }, heartRate = 0, spo2 = 0, recordedAt } = vitals;
@@ -189,7 +190,7 @@ export default function VitalsCard({
             onClick={onOpenLogModal}
             className="btn-medical-blue text-xs py-2 px-4"
           >
-            {t('vitals_btn_log')}
+            {isKioskOperator ? t('vitals_kiosk_operator_entry') : t('vitals_btn_log')}
           </button>
           <button
             onClick={onOpenBleModal}
