@@ -5,6 +5,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import familyRoutes from './routes/familyRoutes.js';
 import triageRoutes from './routes/triageRoutes.js';
+import hospitalRoutes from './routes/hospitalRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/triage', triageRoutes);
+app.use('/api/hospitals', hospitalRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

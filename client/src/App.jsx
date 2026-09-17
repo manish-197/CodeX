@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 import HomePage from './components/home/HomePage';
 import FamilyHub from './components/family/FamilyHub';
 import VoiceTriage from './components/triage/VoiceTriage';
+import HospitalNavigation from './components/navigation/HospitalNavigation';
 import AuthModal from './components/auth/AuthModal';
 import StateLanguageToast from './components/common/StateLanguageToast';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -88,7 +89,7 @@ function AppContent() {
         <FamilyHub 
           currentUser={currentUser}
           onVitalsChange={handleVitalsChange}
-          onNavigateToPrescription={() => alert('Prescription OCR will activate in Slice 11')}
+          onNavigateToPrescription={() => alert('Prescription OCR activates in Slice 11')}
           onDownloadHealthCard={() => alert('ABDM Health Card PDF download activates in Slice 9')}
           onOpenBleModal={() => alert('Web Bluetooth BLE sync activates in Slice 12')}
           onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
@@ -103,20 +104,7 @@ function AppContent() {
       )}
 
       {currentTab === 'navigation' && (
-        <div className="py-12 neo-glass-card p-8 text-center space-y-3 max-w-xl mx-auto">
-          <h2 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist capitalize">
-            Hospital Road Navigation
-          </h2>
-          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
-            Section ready for incremental activation in Slice 8 (OSRM + Leaflet).
-          </p>
-          <button 
-            onClick={() => setCurrentTab('home')}
-            className="btn-terracotta text-xs mt-2"
-          >
-            Back to Home
-          </button>
-        </div>
+        <HospitalNavigation />
       )}
 
       {/* Dual-Role Authentication Modal */}
