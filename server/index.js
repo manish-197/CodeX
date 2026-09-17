@@ -10,7 +10,14 @@ import healthCardRoutes from './routes/healthCardRoutes.js';
 import sosRoutes from './routes/sosRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import whatsappRoutes from './routes/whatsappRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load root .env first, then local .env if present
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
 const app = express();

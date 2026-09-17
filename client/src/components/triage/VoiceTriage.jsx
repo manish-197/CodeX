@@ -24,8 +24,9 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
 
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [micState, setMicState] = useState('idle'); // 'idle' | 'listening' | 'speech-detected' | 'silence-counting' | 'processing' | 'error'
-  const [micErrorMessage, setMicErrorMessage] = useState('');
+  // Pipeline status: 'idle' | 'listening' | 'speech-detected' | 'silence-counting' | 'processing-symptoms' | 'getting-ai-response' | 'complete' | 'error'
+  const [pipelineStage, setPipelineStage] = useState('idle');
+  const [pipelineErrorMessage, setPipelineErrorMessage] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [triageResult, setTriageResult] = useState(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -34,12 +35,14 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
   const recognitionRef = useRef(null);
   const silenceTimerRef = useRef(null);
   const isListeningRef = useRef(false);
-  const finalTranscriptRef = useRef('');
+  const latestTranscriptRef = useRef('');
+  const handleSendToAIRef = useRef(null);
 
   // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
+      console.warn('[Voice AI Stage 1: Mic Capture] Web Speech API not supported in this browser environment.');
       setSpeechSupported(false);
       return;
     }
@@ -57,11 +60,13 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
     recognition.lang = speechLang;
 
     recognition.onstart = () => {
-      setMicState('listening');
-      setMicErrorMessage('');
+      console.log('[Voice AI Stage 1: Mic Capture] Speech recognition started. Listening on language:', speechLang);
+      setPipelineStage('listening');
+      setPipelineErrorMessage('');
     };
 
     recognition.onresult = (event) => {
+      console.log('[Voice AI Stage 1: Mic Capture] onresult fired with results length:', event.results.length);
       let interim = '';
       let currentFinal = '';
 
@@ -73,65 +78,73 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
         }
       }
 
-      finalTranscriptRef.current = currentFinal;
       const combinedText = (currentFinal + interim).trim();
+      console.log('[Voice AI Stage 2: Transcript Accumulation] Spoken text accumulated:', combinedText);
+      latestTranscriptRef.current = combinedText;
       setTranscript(combinedText);
 
       // Only begin the 1.3s silence countdown AFTER actual speech is detected
-      if (combinedText.length >= 3) {
-        setMicState('speech-detected');
+      if (combinedText.length >= 2) {
+        setPipelineStage('speech-detected');
 
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
         }
 
-        // Set silence counting indicator right after speech pause begins
+        // 1.3s silence timer per clinical triage specification
         silenceTimerRef.current = setTimeout(() => {
-          setMicState('silence-counting');
-          // 1.3s true silence has elapsed after spoken speech
-          if (isListeningRef.current && combinedText.length >= 5) {
-            handleSendToAI(combinedText);
+          console.log('[Voice AI Stage 3: Silence Timer Triggered] 1.3s silence completed after voice input. Text to send:', latestTranscriptRef.current);
+          if (isListeningRef.current && latestTranscriptRef.current.trim().length >= 3) {
+            setPipelineStage('silence-counting');
+            if (handleSendToAIRef.current) {
+              handleSendToAIRef.current(latestTranscriptRef.current);
+            }
           }
-        }, 1300); // 1.3s silence timer per hackathon spec
+        }, 1300);
       }
     };
 
     recognition.onerror = (err) => {
-      console.warn('[Speech Recognition Notice]', err.error);
+      console.warn('[Voice AI Stage 1: Mic Capture Notice]', err.error);
       // In Chrome/Edge, 'no-speech' is expected during conversational pauses or before user speaks.
-      // Do NOT kill the session or stop listening on no-speech!
       if (err.error === 'no-speech') {
         if (isListeningRef.current) {
-          setMicState('listening');
+          setPipelineStage('listening');
         }
         return;
       }
 
+      console.error('[Voice AI Stage 1 Error] Recognition failed:', err.error);
       if (err.error === 'not-allowed' || err.error === 'service-not-allowed') {
         isListeningRef.current = false;
         setIsListening(false);
-        setMicState('error');
-        setMicErrorMessage('Microphone permission blocked or unavailable. Please enable mic access.');
+        setPipelineStage('error');
+        setPipelineErrorMessage('Microphone permission blocked or unavailable. Please click "Allow" in browser settings.');
       } else if (err.error === 'audio-capture') {
         isListeningRef.current = false;
         setIsListening(false);
-        setMicState('error');
-        setMicErrorMessage('No microphone detected. Please connect an audio input device.');
+        setPipelineStage('error');
+        setPipelineErrorMessage('No microphone detected. Please connect an audio input device.');
+      } else {
+        setPipelineErrorMessage(`Voice recognition notice: ${err.error}. You can also type symptoms directly.`);
       }
     };
 
     recognition.onend = () => {
+      console.log('[Voice AI Stage 1: Mic Capture] recognition session ended. Still listening?:', isListeningRef.current);
       // If user still intends to listen and didn't manually stop, auto-restart
       if (isListeningRef.current) {
         try {
           recognition.start();
-          setMicState('listening');
+          setPipelineStage('listening');
         } catch (e) {
-          // If already starting, ignore
+          // If already active or transitioning, ignore
         }
       } else {
         setIsListening(false);
-        setMicState('idle');
+        if (pipelineStage === 'listening') {
+          setPipelineStage('idle');
+        }
       }
     };
 
@@ -154,25 +167,32 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
   }, [speechLang]);
 
   const toggleListening = () => {
+    if (!speechSupported) {
+      setPipelineErrorMessage('Speech recognition is not supported in this browser. Please type symptoms into the box.');
+      return;
+    }
+
     if (!recognitionRef.current) return;
 
     if (isListening) {
       // User manually stopped
+      console.log('[Voice AI] User manually paused microphone listening.');
       isListeningRef.current = false;
       setIsListening(false);
-      setMicState('idle');
+      setPipelineStage('idle');
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       try {
         recognitionRef.current.stop();
       } catch (e) {}
     } else {
       // User explicitly started listening
+      console.log('[Voice AI] User started microphone listening.');
       setTranscript('');
-      finalTranscriptRef.current = '';
-      setMicErrorMessage('');
+      latestTranscriptRef.current = '';
+      setPipelineErrorMessage('');
       isListeningRef.current = true;
       setIsListening(true);
-      setMicState('listening');
+      setPipelineStage('listening');
 
       try {
         recognitionRef.current.lang = speechLang;
@@ -192,13 +212,15 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
   };
 
   const handleSendToAI = async (textToSend) => {
-    const symptoms = textToSend || transcript;
-    if (!symptoms.trim()) return;
+    const symptoms = (textToSend !== undefined ? textToSend : (transcript || latestTranscriptRef.current)).trim();
+    if (!symptoms) {
+      console.warn('[Voice AI Stage 3: Notice] Cannot submit empty symptoms.');
+      return;
+    }
 
     // Gracefully stop recognition and reset timers
     isListeningRef.current = false;
     setIsListening(false);
-    setMicState('processing');
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (recognitionRef.current) {
       try {
@@ -207,9 +229,18 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
     }
 
     setIsAnalyzing(true);
+    setPipelineStage('processing-symptoms');
+    setPipelineErrorMessage('');
     setTriageResult(null);
 
     try {
+      setPipelineStage('getting-ai-response');
+      console.log('[Voice AI Stage 4: Backend Endpoint Call] Sending symptoms to /api/triage:', {
+        symptoms,
+        language: lang,
+        vitals: activeVitals
+      });
+
       const res = await fetch('http://localhost:5000/api/triage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -220,17 +251,33 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
         }),
       });
 
-      if (!res.ok) throw new Error('Triage endpoint unreachable');
+      if (!res.ok) {
+        throw new Error(`Triage endpoint returned HTTP ${res.status}: ${res.statusText}`);
+      }
+
       const data = await res.json();
+      console.log('[Voice AI Stage 6: Response Rendering] Triage response received successfully:', data);
+      
       setTriageResult(data);
-      setMicState('idle');
+      setPipelineStage('complete');
 
       // Auto-play spoken audio explainer if available
       if (data.audioResponseText) {
         speakResponse(data.audioResponseText);
       }
+
+      // Smooth scroll into view
+      setTimeout(() => {
+        const resultElem = document.getElementById('triage-result-container');
+        if (resultElem) {
+          resultElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+
     } catch (err) {
-      console.warn('[Triage Fallback]', err.message);
+      console.error('[Voice AI Stage 4/5 Error] Endpoint call failed:', err.message);
+      setPipelineErrorMessage(`Backend communication note: ${err.message}. Using offline clinical triage safety guard.`);
+      
       // Clinical Emergency Rules Engine Fallback
       const mockDiagnosis = {
         riskLevel: symptoms.toLowerCase().includes('chest') ? 'CRITICAL' : 'MODERATE',
@@ -252,12 +299,15 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
         disclaimer: 'This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.'
       };
       setTriageResult(mockDiagnosis);
-      setMicState('idle');
+      setPipelineStage('complete');
       speakResponse(mockDiagnosis.audioResponseText);
     } finally {
       setIsAnalyzing(false);
     }
   };
+
+  // Keep ref up to date on every render so timeouts never call stale function
+  handleSendToAIRef.current = handleSendToAI;
 
   const speakResponse = (text) => {
     if (!window.speechSynthesis || !text) return;
@@ -296,46 +346,60 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
   };
 
   const renderMicStatusBadge = () => {
-    switch (micState) {
+    switch (pipelineStage) {
       case 'listening':
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green/30 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green/30 text-xs font-semibold animate-pulse">
             <Radio className="w-3.5 h-3.5" />
-            <span>Listening continuously... Speak symptoms</span>
+            <span>Listening continuously... Speak symptoms now</span>
           </div>
         );
       case 'speech-detected':
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-mist/30 dark:bg-dark-base text-deep-teal dark:text-sky-mist border border-deep-teal/20 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-mist/30 dark:bg-dark-base text-deep-teal dark:text-sky-mist border border-deep-teal/20 text-xs font-semibold">
             <Activity className="w-3.5 h-3.5 animate-pulse text-terracotta" />
-            <span>Voice detected & transcribing...</span>
+            <span>Voice detected & transcribing symptoms...</span>
           </div>
         );
       case 'silence-counting':
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold/40 text-xs font-semibold animate-pulse">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sun-gold/25 text-deep-teal dark:text-sun-gold border border-sun-gold/40 text-xs font-semibold animate-pulse">
             <Clock className="w-3.5 h-3.5" />
             <span>Pause detected: Auto-submitting in 1.3s (keep speaking to continue)...</span>
           </div>
         );
-      case 'processing':
+      case 'processing-symptoms':
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold">
+            <Activity className="w-3.5 h-3.5 animate-spin" />
+            <span>Processing your symptoms...</span>
+          </div>
+        );
+      case 'getting-ai-response':
+        return (
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terracotta/20 text-terracotta border border-terracotta/30 text-xs font-semibold animate-pulse">
             <Sparkles className="w-3.5 h-3.5 animate-spin" />
-            <span>Submitting to Gemini 2.5 Flash...</span>
+            <span>Getting AI response from Gemini 3.6 Flash...</span>
+          </div>
+        );
+      case 'complete':
+        return (
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-leaf-green/20 text-leaf-green border border-leaf-green/30 text-xs font-semibold">
+            <CheckCircle className="w-3.5 h-3.5" />
+            <span>Triage evaluation complete</span>
           </div>
         );
       case 'error':
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-alert-crimson/20 text-alert-crimson border border-alert-crimson/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-alert-crimson/20 text-alert-crimson border border-alert-crimson/30 text-xs font-semibold">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{micErrorMessage || 'Microphone issue'}</span>
+            <span>{pipelineErrorMessage || 'Microphone issue'}</span>
           </div>
         );
       case 'idle':
       default:
         return (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-medium text-deep-teal/70 dark:text-dark-muted">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-xs font-medium text-deep-teal/70 dark:text-dark-muted">
             <span className="w-2 h-2 rounded-full bg-leaf-green" />
             <span>Ready for voice or text input</span>
           </div>
@@ -350,7 +414,7 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-xs font-bold text-terracotta uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Gemini 2.5 Flash Clinical Triage</span>
+          <span>Gemini 3.6 Flash Clinical Triage</span>
         </div>
         <h2 className="font-display font-bold text-3xl sm:text-4xl text-deep-teal dark:text-sky-mist">
           {t('feat_triage_title')}
@@ -363,10 +427,26 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
       {/* Voice Capture Hero Interface */}
       <div className="glass-card p-6 sm:p-10 space-y-6 text-center relative overflow-hidden">
         
-        {/* Visible Mic Status Indicator */}
+        {/* Visible Mic / Pipeline Status Indicator */}
         <div className="flex justify-center">
           {renderMicStatusBadge()}
         </div>
+
+        {/* Visible Error Banner if stage failed */}
+        {pipelineErrorMessage && (
+          <div className="p-3.5 rounded-xl bg-alert-crimson/15 border border-alert-crimson/30 flex items-center justify-between text-xs text-alert-crimson text-left max-w-xl mx-auto">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{pipelineErrorMessage}</span>
+            </div>
+            <button 
+              onClick={() => setPipelineErrorMessage('')}
+              className="underline hover:text-white font-bold ml-2 shrink-0"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Pulsing Mic Button */}
         <div className="relative inline-block">
@@ -408,7 +488,10 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
           <textarea
             id="symptom-input-textarea"
             value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
+            onChange={(e) => {
+              setTranscript(e.target.value);
+              latestTranscriptRef.current = e.target.value;
+            }}
             placeholder="Spoken symptoms appear here automatically in real time... You can also edit or type directly (e.g., 'Fever of 101°F with body ache for 2 days')."
             rows={3}
             className="w-full p-4 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-teal/15 dark:border-white/10 text-xs sm:text-sm text-deep-teal dark:text-sky-mist focus:outline-none focus:border-terracotta resize-none"
@@ -418,7 +501,7 @@ export default function VoiceTriage({ onNavigateToHospital, activeVitals }) {
             <button
               onClick={() => {
                 setTranscript('');
-                finalTranscriptRef.current = '';
+                latestTranscriptRef.current = '';
               }}
               className="absolute right-3 top-3 p-1 rounded-full text-deep-teal/40 hover:text-deep-teal dark:text-dark-muted dark:hover:text-white"
               title="Clear text"

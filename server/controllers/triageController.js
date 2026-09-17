@@ -35,7 +35,7 @@ function logTriageSession(entry) {
  * GEMINI_MODEL to gemini-3.1-flash-lite or the then-current stable model if needed. 
  * Never pin a deprecated model at submission time.
  */
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
 const MANDATORY_DISCLAIMER = "This is an AI-assisted preliminary triage, not a medical diagnosis. For any emergency or worsening symptoms, contact a doctor or call 108 immediately.";
 
@@ -338,6 +338,13 @@ export async function triageSymptoms(req, res) {
   try {
     const { symptoms, language = 'en', age, vitals } = req.body;
 
+    console.log('[Voice AI Stage 4: Backend Endpoint] Incoming triage request:', {
+      symptoms,
+      language,
+      age,
+      vitalsPresent: !!vitals
+    });
+
     if (!symptoms || !symptoms.trim()) {
       return res.status(400).json({ error: 'Symptoms description is required.' });
     }
@@ -345,8 +352,11 @@ export async function triageSymptoms(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const modelName = process.env.GEMINI_MODEL || DEFAULT_MODEL;
 
+    console.log('[Voice AI Stage 5: Gemini API Pre-check] apiKey configured:', !!apiKey, 'modelName:', modelName);
+
     // Check if Gemini API Key is configured
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+      console.log('[Voice AI Stage 5: Notice] No Gemini API key provided. Using verified offline clinical rules engine.');
       const result = offlineClinicalTriage(symptoms, language, vitals, age);
       logTriageSession({
         source: 'offline-clinical-engine',
@@ -388,8 +398,10 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
 }
 `;
 
+      console.log(`[Voice AI Stage 5: Calling Gemini] Model: ${modelName}`);
       const response = await model.generateContent(prompt);
       const text = response.response.text();
+      console.log('[Voice AI Stage 5: Gemini Success] Raw response received');
 
       // Clean any potential markdown wrapping
       const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -406,9 +418,10 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
         output: parsedJson
       });
 
+      console.log('[Voice AI Stage 5: Returning Result] Risk:', parsedJson.riskLevel, 'Diagnosis:', parsedJson.likelyDiagnosis);
       return res.json(parsedJson);
     } catch (geminiError) {
-      console.warn('[Gemini API Fallback]', geminiError.message);
+      console.error('[Voice AI Stage 5: Gemini API Failure]', geminiError.message);
       const fallbackResult = offlineClinicalTriage(symptoms, language, vitals, age);
       logTriageSession({
         source: 'fallback-clinical-engine',
