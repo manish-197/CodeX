@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './components/layout/Layout';
+import HomePage from './components/home/HomePage';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState('home');
   const [userRole, setUserRole] = useState('citizen');
   const [darkMode, setDarkMode] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
+  // Latest recorded heart rate (0 BPM default per zero dummy data discipline)
+  const [latestHeartRate, setLatestHeartRate] = useState(0);
 
   // Sync dark class on document element
   useEffect(() => {
@@ -27,27 +30,29 @@ export default function App() {
       currentLang={currentLang}
       onSelectLang={setCurrentLang}
     >
-      <div className="py-12 text-center">
-        <div className="neo-glass-card p-10 max-w-2xl mx-auto space-y-4">
-          <span className="inline-block px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase bg-terracotta/15 text-terracotta">
-            Soft Neo-Glass • Earth & Sky Design System
-          </span>
-          <h1 className="font-display font-bold text-3xl sm:text-4xl text-deep-teal dark:text-sky-mist">
-            ArogyaRakshak AI
-          </h1>
-          <p className="text-deep-teal/80 dark:text-dark-muted text-sm sm:text-base leading-relaxed">
-            Global layout shell loaded with humanist typography, custom Tailwind tokens, and Lenis smooth scrolling.
+      {currentTab === 'home' && (
+        <HomePage 
+          onNavigate={(tab) => setCurrentTab(tab)} 
+          heartRate={latestHeartRate}
+        />
+      )}
+
+      {currentTab !== 'home' && (
+        <div className="py-12 neo-glass-card p-8 text-center space-y-3 max-w-xl mx-auto">
+          <h2 className="font-display font-bold text-2xl text-deep-teal dark:text-sky-mist capitalize">
+            {currentTab === 'hub' ? 'Family Health Hub' : currentTab === 'triage' ? 'Voice AI Clinical Triage' : 'Hospital Navigation'}
+          </h2>
+          <p className="text-xs text-deep-teal/70 dark:text-dark-muted">
+            Section ready for incremental activation in upcoming build slice.
           </p>
-          <div className="pt-4 flex justify-center gap-3">
-            <button className="btn-terracotta">
-              Explore Platform
-            </button>
-            <button className="btn-glass">
-              Learn More
-            </button>
-          </div>
+          <button 
+            onClick={() => setCurrentTab('home')}
+            className="btn-terracotta text-xs mt-2"
+          >
+            Back to Home
+          </button>
         </div>
-      </div>
+      )}
     </Layout>
   );
 }
