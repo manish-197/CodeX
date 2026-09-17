@@ -10,7 +10,9 @@ import {
   Activity, 
   Navigation, 
   PhoneCall,
-  ShieldAlert
+  LogOut,
+  LogIn,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -21,7 +23,10 @@ export default function Navbar({
   darkMode, 
   setDarkMode,
   currentLang = 'en',
-  onSelectLang
+  onSelectLang,
+  currentUser,
+  onOpenAuth,
+  onLogout
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -91,14 +96,14 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Control Bar: Role Switch, Language Picker, Dark Mode Toggle */}
+        {/* Control Bar: Role Switch, Language Picker, Auth, Dark Mode */}
         <div className="flex items-center gap-2">
           
           {/* Dual-Role Indicator / Toggle */}
           <button
             onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
             title="Toggle between Citizen and Gram Panchayat Kiosk mode"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-deep-teal/15 dark:border-white/10 hover:border-terracotta transition-colors"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-deep-teal/15 dark:border-white/10 hover:border-terracotta transition-colors"
           >
             <span className={`w-2 h-2 rounded-full ${userRole === 'kiosk' ? 'bg-sun-gold animate-pulse' : 'bg-leaf-green'}`} />
             <span className="text-deep-teal dark:text-sky-mist">
@@ -153,6 +158,31 @@ export default function Navbar({
             {darkMode ? <Sun className="w-4 h-4 text-sun-gold" /> : <Moon className="w-4 h-4" />}
           </button>
 
+          {/* User Auth status & Single Clean Logout */}
+          {currentUser ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline-block text-xs font-bold text-deep-teal dark:text-sky-mist px-2.5 py-1 rounded-full bg-deep-teal/5 dark:bg-white/10">
+                {currentUser.name.split(' ')[0]}
+              </span>
+              <button
+                onClick={onLogout}
+                title="Log out"
+                className="p-2 rounded-full text-alert-crimson hover:bg-alert-crimson/10 transition-colors"
+                aria-label="Log out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="btn-terracotta text-xs py-1.5 px-3 sm:px-4"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign In</span>
+            </button>
+          )}
+
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -190,12 +220,12 @@ export default function Navbar({
           })}
 
           <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between">
-            <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Mode</span>
+            <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Role</span>
             <button
               onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
               className="px-3 py-1 rounded-full text-xs font-medium bg-terracotta/10 text-terracotta"
             >
-              {userRole === 'kiosk' ? 'Switch to Citizen' : 'Switch to Kiosk Operator'}
+              {userRole === 'kiosk' ? 'Switch to Citizen' : 'Switch to Kiosk'}
             </button>
           </div>
         </div>

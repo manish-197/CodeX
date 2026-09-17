@@ -12,7 +12,10 @@ export default function Layout({
   darkMode, 
   setDarkMode,
   currentLang,
-  onSelectLang
+  onSelectLang,
+  currentUser,
+  onOpenAuth,
+  onLogout
 }) {
   // Initialize Lenis smooth scroll with support for data-lenis-prevent
   useEffect(() => {
@@ -55,6 +58,9 @@ export default function Layout({
         setDarkMode={setDarkMode}
         currentLang={currentLang}
         onSelectLang={onSelectLang}
+        currentUser={currentUser}
+        onOpenAuth={onOpenAuth}
+        onLogout={onLogout}
       />
 
       {/* Main Page Content */}
