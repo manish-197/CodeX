@@ -13,23 +13,25 @@ import {
   LogOut,
   LogIn,
   Check,
-  MessageCircle
+  MessageCircle,
+  ShieldCheck,
+  User
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../auth/AuthContext';
 
 export default function Navbar({ 
   currentTab, 
   setCurrentTab, 
-  userRole = 'citizen', 
-  setUserRole, 
   darkMode, 
   setDarkMode,
-  currentUser,
   onOpenAuth,
   onLogout,
   onOpenWhatsApp
 }) {
   const { lang, setLang, t } = useLanguage();
+  const { currentUser, isAuthenticated, logout, openLogin } = useAuth();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -43,12 +45,38 @@ export default function Navbar({
     { code: 'bn', name: 'বাংলা', label: 'Bengali' },
   ];
 
-  const navItems = [
-    { id: 'home', label: t('nav_home'), icon: Activity },
-    { id: 'hub', label: t('nav_hub'), icon: UserCheck },
-    { id: 'triage', label: t('nav_triage'), icon: PhoneCall },
-    { id: 'navigation', label: t('nav_navigation'), icon: Navigation },
+  // Feature navigation items
+  const allNavItems = [
+    { id: 'home', label: t('nav_home'), icon: Activity, public: true },
+    { id: 'hub', label: t('nav_hub'), icon: UserCheck, public: false },
+    { id: 'triage', label: t('nav_triage'), icon: PhoneCall, public: false },
+    { id: 'navigation', label: t('nav_navigation'), icon: Navigation, public: false },
   ];
+
+  // Pre-login: ONLY Home is visible. Post-login: All feature links appear.
+  const visibleNavItems = isAuthenticated 
+    ? allNavItems 
+    : allNavItems.filter((item) => item.public);
+
+  const handleLogoutAction = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+      setCurrentTab('home');
+    }
+    setProfileMenuOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleOpenLogin = () => {
+    if (onOpenAuth) {
+      onOpenAuth();
+    } else {
+      openLogin('Please log in to continue.');
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full px-4 sm:px-8 py-3 transition-all duration-200">
@@ -77,9 +105,9 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Desktop Nav Items */}
+        {/* Desktop Nav Items (Gated strictly behind authentication) */}
         <nav className="hidden md:flex items-center gap-1.5">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
             return (
@@ -99,31 +127,21 @@ export default function Navbar({
           })}
         </nav>
 
-        {/* Control Bar: WhatsApp Bot, Role Switch, Language Picker, Auth, Dark Mode */}
+        {/* Control Bar: WhatsApp Bot (Logged-In only), Language Picker, Auth, Dark Mode */}
         <div className="flex items-center gap-2">
           
-          {/* WhatsApp Elder Bot Launch Button */}
-          <button
-            onClick={onOpenWhatsApp}
-            title="Launch WhatsApp Voice Bot for Senior Citizens"
-            className="px-3 py-1.5 rounded-full hover:bg-leaf-green/15 text-leaf-green transition-colors border border-leaf-green/30 flex items-center gap-1.5 bg-leaf-green/10"
-            aria-label="WhatsApp Elder Voice Bot"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span className="hidden xl:inline text-xs font-bold">WhatsApp Bot</span>
-          </button>
-
-          {/* Dual-Role Indicator / Toggle */}
-          <button
-            onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
-            title="Toggle between Citizen and Gram Panchayat Kiosk mode"
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border border-deep-teal/20 dark:border-white/10 hover:border-terracotta transition-colors glass-card"
-          >
-            <span className={`w-2 h-2 rounded-full ${userRole === 'kiosk' ? 'bg-sun-gold animate-pulse' : 'bg-leaf-green'}`} />
-            <span className="text-deep-teal dark:text-sky-mist">
-              {userRole === 'kiosk' ? t('nav_kiosk_mode') : t('nav_citizen_mode')}
-            </span>
-          </button>
+          {/* WhatsApp Elder Bot Launch Button - Visible ONLY when logged in */}
+          {isAuthenticated && (
+            <button
+              onClick={onOpenWhatsApp}
+              title="Launch WhatsApp Voice Bot for Senior Citizens"
+              className="px-3 py-1.5 rounded-full hover:bg-leaf-green/15 text-leaf-green transition-colors border border-leaf-green/30 flex items-center gap-1.5 bg-leaf-green/10"
+              aria-label="WhatsApp Elder Voice Bot"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden xl:inline text-xs font-bold">WhatsApp Bot</span>
+            </button>
+          )}
 
           {/* Regional Script Language Selector Dropdown */}
           <div className="relative">
@@ -175,8 +193,8 @@ export default function Navbar({
             {darkMode ? <Sun className="w-4 h-4 text-sun-gold" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* User Auth status & Profile Dropdown */}
-          {currentUser ? (
+          {/* User Auth Status & Profile Dropdown */}
+          {isAuthenticated && currentUser ? (
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
@@ -206,7 +224,7 @@ export default function Navbar({
                   className="absolute right-0 mt-2 w-72 glass-card shadow-2xl p-4 z-50 animate-fadeIn bg-white/95 dark:bg-dark-card/95 border border-deep-teal/15 rounded-3xl space-y-3"
                   data-lenis-prevent="true"
                 >
-                  {/* User Profile Header */}
+                  {/* User Profile Header with Role Tag */}
                   <div className="flex items-start gap-3 pb-3 border-b border-deep-teal/10 dark:border-white/10">
                     <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-base flex items-center justify-center shadow-md shrink-0">
                       {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
@@ -218,8 +236,8 @@ export default function Navbar({
                       <div className="text-xs text-slate-500 font-mono">
                         {currentUser.phone}
                       </div>
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
-                        {currentUser.role === 'kiosk_operator' ? 'GP Kiosk Operator' : 'Citizen Account'}
+                      <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist border border-deep-teal/15 dark:border-white/15">
+                        {currentUser.role === 'kiosk_operator' ? 'Gram Panchayat Kiosk Operator' : 'Citizen Account'}
                       </span>
                     </div>
                   </div>
@@ -254,10 +272,7 @@ export default function Navbar({
                     </button>
 
                     <button
-                      onClick={() => {
-                        onLogout();
-                        setProfileMenuOpen(false);
-                      }}
+                      onClick={handleLogoutAction}
                       className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-alert-crimson hover:bg-alert-crimson/10 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -269,8 +284,8 @@ export default function Navbar({
             </div>
           ) : (
             <button
-              onClick={onOpenAuth}
-              className="btn-terracotta text-xs py-2 px-4 shadow-md"
+              onClick={handleOpenLogin}
+              className="btn-terracotta text-xs py-2 px-4 shadow-md flex items-center gap-1.5"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>{t('nav_sign_in')}</span>
@@ -290,48 +305,81 @@ export default function Navbar({
 
       {/* Mobile Nav Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-2 glass-card p-4 mx-auto max-w-7xl animate-fadeIn space-y-2 border border-white/80">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setCurrentTab(item.id);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors ${
-                  isActive 
-                    ? 'btn-teal text-white w-full' 
-                    : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/5'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        <div className="md:hidden mt-2 glass-card p-4 mx-auto max-w-7xl animate-fadeIn space-y-3 border border-white/80 bg-white/95 dark:bg-dark-card/95">
+          
+          {/* Navigation Links: ONLY Home when logged out; Full list when logged in */}
+          <div className="space-y-1">
+            {visibleNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCurrentTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors ${
+                    isActive 
+                      ? 'btn-teal text-white w-full' 
+                      : 'text-deep-teal dark:text-sky-mist hover:bg-deep-teal/5'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
-          <button
-            onClick={() => {
-              if (onOpenWhatsApp) onOpenWhatsApp();
-              setMobileMenuOpen(false);
-            }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/15"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>Launch WhatsApp Elder Bot</span>
-          </button>
-
-          <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10 flex items-center justify-between">
-            <span className="text-xs font-semibold text-deep-teal/70 dark:text-dark-muted">Mode</span>
+          {/* WhatsApp Elder Bot: Only visible when logged in */}
+          {isAuthenticated && (
             <button
-              onClick={() => setUserRole(userRole === 'citizen' ? 'kiosk' : 'citizen')}
-              className="px-3 py-1 rounded-full text-xs font-medium bg-terracotta/15 text-terracotta"
+              onClick={() => {
+                if (onOpenWhatsApp) onOpenWhatsApp();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-leaf-green bg-leaf-green/15"
             >
-              {userRole === 'kiosk' ? t('nav_citizen_mode') : t('nav_kiosk_mode')}
+              <MessageCircle className="w-4 h-4" />
+              <span>Launch WhatsApp Elder Bot</span>
             </button>
+          )}
+
+          {/* Mobile Auth Bar: Sign In button if logged out; Profile & Sign Out if logged in */}
+          <div className="pt-2 border-t border-deep-teal/10 dark:border-white/10">
+            {isAuthenticated && currentUser ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-terracotta to-sun-gold text-white font-bold text-xs flex items-center justify-center">
+                      {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="text-xs font-bold text-deep-teal dark:text-sky-mist truncate max-w-[150px]">
+                      {currentUser.name}
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist">
+                    {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogoutAction}
+                  className="w-full py-2 px-4 rounded-xl text-xs font-bold text-alert-crimson bg-alert-crimson/10 flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out / लॉग आउट</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleOpenLogin}
+                className="w-full btn-terracotta py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>{t('nav_sign_in')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}

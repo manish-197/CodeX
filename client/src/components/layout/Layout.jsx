@@ -51,8 +51,6 @@ export default function Layout({
       <Navbar 
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        userRole={userRole}
-        setUserRole={setUserRole}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
         currentUser={currentUser}

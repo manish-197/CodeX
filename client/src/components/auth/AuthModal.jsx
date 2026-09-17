@@ -146,7 +146,7 @@ export default function AuthModal({
                 : 'text-deep-teal dark:text-sky-mist opacity-70'
             }`}
           >
-            Citizen Mode
+            Citizen Account
           </button>
           <button
             type="button"
