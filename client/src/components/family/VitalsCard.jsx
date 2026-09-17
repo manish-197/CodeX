@@ -7,7 +7,9 @@ export default function VitalsCard({
   onOpenLogModal,
   onOpenBleModal,
   onTriggerDoctorDispatch,
-  isKioskOperator = false
+  isKioskOperator = false,
+  isBleConnected = false,
+  isStreaming = false
 }) {
   const { t } = useLanguage();
   const { bp = { sys: 0, dia: 0 }, heartRate = 0, spo2 = 0, recordedAt } = vitals;
@@ -69,27 +71,15 @@ export default function VitalsCard({
             <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
               bp.sys === 0 
                 ? 'vitals-badge-idle' 
+                : (isBleConnected || isStreaming)
+                ? 'vitals-badge-normal'
                 : isHypertensive 
                 ? 'vitals-badge-alert' 
                 : 'vitals-badge-normal'
             }`}>
-              {bp.sys === 0 ? t('vitals_idle') : isHypertensive ? t('vitals_hypertensive') : t('vitals_normal')}
+              {bp.sys === 0 ? t('vitals_idle') : (isBleConnected || isStreaming) ? 'Connected — Live' : isHypertensive ? t('vitals_hypertensive') : t('vitals_normal')}
             </span>
           </div>
-
-          {bp.sys === 0 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onOpenBleModal) onOpenBleModal();
-              }}
-              className="mt-3 w-full py-1.5 px-3 rounded-xl bg-medical-blue/10 hover:bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
-            >
-              <Bluetooth className="w-3.5 h-3.5 shrink-0" />
-              <span>{t('vitals_btn_connect_device')}</span>
-            </button>
-          )}
         </div>
 
         {/* Heart Rate Meter */}
@@ -117,27 +107,15 @@ export default function VitalsCard({
             <span className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
               heartRate === 0 
                 ? 'vitals-badge-idle' 
+                : (isBleConnected || isStreaming)
+                ? 'vitals-badge-normal'
                 : heartRate > 100 
                 ? 'vitals-badge-alert' 
                 : 'vitals-badge-normal'
             }`}>
-              {heartRate === 0 ? t('vitals_idle') : heartRate > 100 ? t('vitals_tachycardia') : t('vitals_resting')}
+              {heartRate === 0 ? t('vitals_idle') : (isBleConnected || isStreaming) ? 'Connected — Live' : heartRate > 100 ? t('vitals_tachycardia') : t('vitals_resting')}
             </span>
           </div>
-
-          {heartRate === 0 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onOpenBleModal) onOpenBleModal();
-              }}
-              className="mt-3 w-full py-1.5 px-3 rounded-xl bg-medical-blue/10 hover:bg-medical-blue/20 text-medical-blue border border-medical-blue/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
-            >
-              <Bluetooth className="w-3.5 h-3.5 shrink-0" />
-              <span>{t('vitals_btn_connect_device')}</span>
-            </button>
-          )}
         </div>
 
         {/* SpO2 Blood Oxygen Meter */}
