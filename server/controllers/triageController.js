@@ -789,12 +789,12 @@ function generateFallbackCustomTriage(symptoms, lang = 'mr') {
 export async function triageCustomSymptom(req, res) {
   try {
     const {
-      symptoms,
       language = 'mr',
       familyMemberId = 'self_1',
       patientDetails = {},
       userId
     } = req.body;
+    const symptoms = req.body.symptoms || req.body.symptomText;
 
     if (!symptoms || !symptoms.trim()) {
       return res.status(400).json({ error: 'Symptoms description is required.' });
@@ -855,7 +855,9 @@ Return ONLY a raw JSON object (no markdown, no backticks):
   "warningSigns": ["Red flags when to visit doctor immediately"]
 }
 `;
-        const response = await model.generateContent(prompt);
+        const generatePromise = model.generateContent(prompt);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Gemini API timeout (8s limit)')), 8000));
+        const response = await Promise.race([generatePromise, timeoutPromise]);
         const text = response.response.text();
         const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
         triageResult = JSON.parse(cleaned);

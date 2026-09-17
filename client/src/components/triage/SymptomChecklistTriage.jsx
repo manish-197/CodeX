@@ -299,6 +299,171 @@ export const SYMPTOM_CATALOG = {
           kn: 'ಬೆಚ್ಚಗಿನ ಉಪ್ಪು ನೀರಿನಲ್ಲಿ ಅರಿಶಿನ ಹಾಕಿ ಬಾಯಿ ಮುಕ್ಕಳಿಸಿ.',
           bn: 'ঈষদুষ্ণ নুন ও হলুদ জলে দিনে ৩ বার কুলকুচি করুন।',
         }
+      },
+      {
+        id: 'loose_motion_diarrhea',
+        name: {
+          en: 'Mild Loose Motions / Diarrhea',
+          mr: 'सौम्य जुलाब / पोट बिघडणे (Loose Motions)',
+          hi: 'हल्के दस्त / पेट खराब (Mild Diarrhea)',
+          ta: 'லேசான வயிற்றுப்போக்கு',
+          kn: 'ಸೌಮ್ಯ ಅತಿಸಾರ / ಭೇದಿ',
+          bn: 'মৃদু ডায়রিয়া / পাতলা পায়খানা',
+        },
+        desc: {
+          en: 'Watery stools 2-3 times, mild cramps without high fever or blood.',
+          mr: 'दिवसातून २-३ वेळा पातळ संडास होणे, पोटात सौम्य मुरड, अशक्तपणा.',
+          hi: 'दिन में २-৩ बार पतला दस्त, पेट में हल्का मरोड़ व कमजोरी।',
+          ta: 'நீர்த்த மலம் மற்றும் லேசான வயிற்றுப் பிடிப்பு.',
+          kn: 'ದಿನಕ್ಕೆ 2-3 ಬಾರಿ ತೆಳುವಾದ ಮಲ ಮತ್ತು ಸುಸ್ತು.',
+          bn: 'দিনে ২-৩ বার পাতলা পায়খানা ও পেটে মৃদু টান।',
+        },
+        category: {
+          en: 'Gastroenterology (पचनसंस्था)',
+          mr: 'पचनसंस्था (Gastro)',
+          hi: 'पाचन तंत्र (Gastro)',
+          ta: 'செரிமான மண்டலம் (Gastro)',
+          kn: 'ಜೀರ್ಣಾಂಗ (Gastro)',
+          bn: 'পরিপাকতন্ত্র (Gastro)',
+        },
+        rxGenericEn: 'Oral Rehydration Salts (WHO ORS Sachet)',
+        rxNameLocal: {
+          en: 'WHO ORS Electrolyte Sachet',
+          mr: 'ओआरएस इलेक्ट्रोलाइट सॅचेट (ORS)',
+          hi: 'ओआरएस घोल पैकेट (ORS Sachet)',
+          ta: 'ஓஆர்எஸ் எலக்ட்ரோலைட் பாக்கெட்',
+          kn: 'ಒಆರ್‌ಎಸ್ ಎಲೆಕ್ಟ್ರೋಲೈಟ್ ಸ್ಯಾಚೆಟ್',
+          bn: 'ওআরএস স্যাচেট',
+        },
+        dosage: '1 Sachet in 1 Litre Water',
+        instructionsEn: 'Mix 1 sachet in clean drinking water and sip through the day for 2 days.',
+        instructionsLocal: {
+          en: 'Mix 1 sachet in clean drinking water and sip through the day for 2 days.',
+          mr: '१ लिटर स्वच्छ पाण्यात मिसळून दिवसभर थोडे थोडे प्यावे [२ दिवस].',
+          hi: '१ लीटर पानी में घोलकर दिनभर थोड़ा-थोड़ा पिएं [२ दिन]।',
+          ta: '1 லிட்டர் தண்ணீரில் கலந்து நாள் முழுவதும் குடிக்கவும் [2 நாட்கள்].',
+          kn: '1 ಲೀಟರ್ ನೀರಿನಲ್ಲಿ ಬೆರೆಸಿ ದಿನವಿಡೀ ಕುಡಿಯಿರಿ [2 ದಿನಗಳು].',
+          bn: '১ লিটার জলে গুলে সারাদিন অল্প অল্প করে পান করুন [২ দিন]।',
+        },
+        timing: { morning: true, afternoon: true, night: true },
+        remedy: {
+          en: 'Drink fresh buttermilk with roasted cumin and eat plain khichdi.',
+          mr: 'भाजलेले जिरे टाकून ताजे ताक प्या आणि मुगाच्या डाळीची मऊ खिचडी खा.',
+          hi: 'भुना जीरा डालकर ताजा छाछ पिएं और मूंग दाल की पतली खिचड़ी खाएं।',
+          ta: 'சீரகம் சேர்த்த மோர் அருந்தி மென்மையான கிச்சடி சாப்பிடவும்.',
+          kn: 'ಜೀರಿಗೆ ಹಾಕಿದ ಮಜ್ಜಿಗೆ ಕುಡಿಯಿರಿ ಮತ್ತು ಮೃದುವಾದ ಕಿಚಡಿ ತಿನ್ನಿರಿ.',
+          bn: 'ভাজা জিরে মেশানো ঘোল পান করুন এবং নরম খিচুড়ি খান।',
+        }
+      },
+      {
+        id: 'dry_cough_irritation',
+        name: {
+          en: 'Dry Cough & Throat Tickle',
+          mr: 'कोरडा खोकला / घशात टोचणे (Dry Cough)',
+          hi: 'सूखी खांसी / गले में चुभन (Dry Cough)',
+          ta: 'வறட்டு இருமல்',
+          kn: 'ಒಣ ಕೆಮ್ಮು',
+          bn: 'শুকনো কাশি',
+        },
+        desc: {
+          en: 'Continuous dry barking cough without phlegm, irritation in windpipe.',
+          mr: 'कफ न येता कोरडी ढास लागणे, रात्री खोकल्याची उबळ येणे.',
+          hi: 'बिना बलगम के सूखी खांसी, रात में लगातार धंसका लगना।',
+          ta: 'சளியற்ற வறட்டு இருமல் மற்றும் தொண்டை எரிச்சல்.',
+          kn: 'ಕಫವಿಲ್ಲದ ಒಣ ಕೆಮ್ಮು ಮತ್ತು ಗಂಟಲಿನಲ್ಲಿ ಕೆರೆತ.',
+          bn: 'কফ ছাড়া শুকনো কাশি ও রাতে কাশির দমক।',
+        },
+        category: {
+          en: 'Respiratory (श्वसन)',
+          mr: 'श्वसन (Respiratory)',
+          hi: 'श्वसन (Respiratory)',
+          ta: 'சுவாசம் (Respiratory)',
+          kn: 'ಉಸಿರಾಟ (Respiratory)',
+          bn: 'শ্বাসযন্ত্র (Respiratory)',
+        },
+        rxGenericEn: 'Herbal Throat Lozenges (OTC Antiseptic)',
+        rxNameLocal: {
+          en: 'Herbal Cough Lozenges',
+          mr: 'कफ निवारक हर्बल लोजेंजेस (Lozenges)',
+          hi: 'कफ राहत लोजेंजेस',
+          ta: 'இருமல் நிவாரண மாத்திரை',
+          kn: 'ಕೆಮ್ಮು ನಿವಾರಕ ಮಾತ್ರೆ',
+          bn: 'কাশি উপশমকারী লজেন্স',
+        },
+        dosage: '1 Lozenge',
+        instructionsEn: 'Dissolve 1 lozenge slowly in mouth every 4-6 hours for 2 days.',
+        instructionsLocal: {
+          en: 'Dissolve 1 lozenge slowly in mouth every 4-6 hours for 2 days.',
+          mr: '१ गोळी दर ४-६ तासांनी तोंडात हळूहळू चघळावी [२ दिवस].',
+          hi: '१ गोली हर ४-६ घंटे में मुंह में रखकर चूसें [२ दिन]।',
+          ta: '1 மாத்திரையை 4-6 மணி நேரத்திற்கு ஒருமுறை சப்பவும் [2 நாட்கள்].',
+          kn: 'ಪ್ರತಿ 4-6 ಗಂಟೆಗೊಮ್ಮೆ 1 ಮಾತ್ರೆಯನ್ನು ಚೀಪಬೇಕು [2 ದಿನಗಳು].',
+          bn: 'প্রতি ৪-৬ ঘণ্টা অন্তর ১টি লজেন্স চুষে খান [২ দিন]।',
+        },
+        timing: { morning: true, afternoon: true, night: true },
+        remedy: {
+          en: 'Drink warm water with 1 spoon honey and fresh ginger juice.',
+          mr: '१ चमचा मधात आल्याचा रस मिसळून दिवसातून २ वेळा चाटण घ्या.',
+          hi: '१ चम्मच शहद में अदरक का रस मिलाकर दिन में २ बार चाटें।',
+          ta: 'தேன் மற்றும் இஞ்சி சாறு கலந்து உட்கொள்ளவும்.',
+          kn: 'ಜೇನುತುಪ್ಪ ಮತ್ತು ಶುಂಠಿ ರಸವನ್ನು ಬೆರೆಸಿ ಸೇವಿಸಿ.',
+          bn: '১ চামচ মধুর সাথে আদার রস মিশিয়ে দিনে ২ বার খান।',
+        }
+      },
+      {
+        id: 'toothache_gum_pain',
+        name: {
+          en: 'Mild Toothache & Gum Pain',
+          mr: 'दातदुखी / हिरड्यांची सूज (Mild Toothache)',
+          hi: 'दांत दर्द / मसूड़ों में सूजन',
+          ta: 'பல் வலி / ஈறு வலி',
+          kn: 'ಹಲ್ಲು ನೋವು / ವಸಡು ನೋವು',
+          bn: 'দাঁতের ব্যথা / মাড়ি ফোলা',
+        },
+        desc: {
+          en: 'Throbbing pain in tooth while chewing, mild localized gum sensitivity.',
+          mr: 'चावताना दातात कळ येणे, हिरडी फुगणे, गार किंवा गरम खाताना झिणझिण्या.',
+          hi: 'चबाते समय दांत में दर्द, मसूड़ों में संवेदनशीलता।',
+          ta: 'மெல்லும்போது பல் வலி மற்றும் ஈறு வீக்கம்.',
+          kn: 'ಅಗಿಯುವಾಗ ಹಲ್ಲು ನೋವು ಮತ್ತು ವಸಡಿನ ಊತ.',
+          bn: 'খাবার চিবানোর সময় দাঁতে ব্যথা ও মাড়ির সংবেদনশীলতা।',
+        },
+        category: {
+          en: 'Dental (दंतरोग)',
+          mr: 'दंतरोग (Dental)',
+          hi: 'दंत चिकित्सा (Dental)',
+          ta: 'பல் மருத்துவம் (Dental)',
+          kn: 'ದಂತ ವೈದ್ಯಕೀಯ (Dental)',
+          bn: 'দন্ত চিকিৎসা (Dental)',
+        },
+        rxGenericEn: 'Tab. Paracetamol 500mg (Analgesic)',
+        rxNameLocal: {
+          en: 'Tab. Paracetamol 500mg',
+          mr: 'पॅरासिटामॉल ५०० मि.ग्रॅ. (Paracetamol)',
+          hi: 'पैरासिटामोल ५०० मि.ग्रा.',
+          ta: 'பாராசிட்டமால் 500 மிகி',
+          kn: 'ಪ್ಯಾರಸಿಟಮಾಲ್ 500 ಮಿಲಿಗ್ರಾಂ',
+          bn: 'প্যারাসিটামল ৫০০ মিগ্রা',
+        },
+        dosage: '1 Tablet',
+        instructionsEn: '1 tablet post-meals if toothache is bothersome for 2 days.',
+        instructionsLocal: {
+          en: '1 tablet post-meals if toothache is bothersome for 2 days.',
+          mr: '१ गोळी जेवणानंतर, दातदुखीचा त्रास असल्यास [२ दिवस].',
+          hi: '१ गोली भोजन के बाद, दांत दर्द होने पर [२ दिन]।',
+          ta: 'உணவுக்குப் பின் 1 மாத்திரை, வலி இருந்தால் [2 நாட்கள்].',
+          kn: 'ಊಟದ ನಂತರ 1 ಮಾತ್ರೆ, ನೋವಿದ್ದರೆ [2 ದಿನಗಳು].',
+          bn: 'খাবারের পর ১টি ট্যাবলেট, ব্যথা থাকলে [২ দিন]।',
+        },
+        timing: { morning: true, afternoon: false, night: true },
+        remedy: {
+          en: 'Apply a drop of clove oil on cotton over the painful tooth; rinse with warm salt water.',
+          mr: 'दुखणाऱ्या दातात लवंग किंवा लवंग तेलाचा कापूस धरा आणि कोमट मिठाच्या पाण्याच्या गुळण्या करा.',
+          hi: 'दर्द वाले दांत पर लौंग का तेल लगाएं और गुनगुने नमक के पानी से कुल्ला करें।',
+          ta: 'கிராம்பு எண்ணெய் வைக்கவும், வெதுவெதுப்பான உப்பு நீரில் வாய் கொப்பளிக்கவும்.',
+          kn: 'ಲವಂಗದ ಎಣ್ಣೆಯನ್ನು ಹಚ್ಚಿ, ಉಪ್ಪು ನೀರಿನಲ್ಲಿ ಬಾಯಿ ಮುಕ್ಕಳಿಸಿ.',
+          bn: 'লবঙ্গের তেল লাগান এবং ঈষদুষ্ণ নুন জল দিয়ে কুলকুচি করুন।',
+        }
       }
     ]
   },
@@ -581,6 +746,116 @@ export const SYMPTOM_CATALOG = {
           kn: 'ಅಲೋವೆರಾ ಜೆಲ್ ಅಥವಾ ತೆಂಗಿನ ಎಣ್ಣೆಯನ್ನು ಹಚ್ಚಿ.',
           bn: 'চুলকানির স্থানে খাঁটি অ্যালোভেরা জেল বা নারকেল তেল লাগান।',
         }
+      },
+      {
+        id: 'dehydration_sunstroke',
+        name: {
+          en: 'Heat Exhaustion & Sunstroke Discomfort',
+          mr: 'उन्हाचा त्रास / अशक्तपणा (Heat Exhaustion)',
+          hi: 'लू लगना / अत्यधिक कमजोरी (Sunstroke)',
+          ta: 'வெப்ப சோர்வு மற்றும் நீர்ச்சத்து குறைவு',
+          kn: 'ಬಿಸಿಲಿನ ತಾಪ ಮತ್ತು ಆಯಾಸ',
+          bn: 'হিটস্ট্রোক ও তীব্র পানিশূন্যতা',
+        },
+        desc: {
+          en: 'Extreme dizziness, heavy perspiration, dry parched mouth after working in hot sun.',
+          mr: 'उन्हात शेतात काम केल्यावर चक्कर येणे, खूप घाम सुटणे, घसा कोरडा पडणे व अशक्तपणा.',
+          hi: 'तेज धूप में चक्कर आना, अधिक पसीना आना, मुंह सूखना व कमजोरी।',
+          ta: 'வெயிலில் வேலை செய்த பின் தலைச்சுற்றல் மற்றும் தீவிர சோர்வு.',
+          kn: 'ಬಿಸಿಲಿನಲ್ಲಿ ಕೆಲಸ ಮಾಡಿದ ನಂತರ ತಲೆತಿರುಗುವಿಕೆ ಮತ್ತು ವಿಪರೀತ ಬಾಯಾರಿಕೆ.',
+          bn: 'রোদে কাজ করার পর তীব্র মাথা ঘোরা, দুর্বলতা ও মুখ শুকিয়ে যাওয়া।',
+        },
+        category: {
+          en: 'Emergency Medicine (आपत्कालीन)',
+          mr: 'आपत्कालीन (Emergency)',
+          hi: 'आपातकालीन (Emergency)',
+          ta: 'அவசர சிகிச்சை',
+          kn: 'ತುರ್ತು ಚಿಕಿತ್ಸೆ',
+          bn: 'জরুরি চিকিৎসা',
+        },
+        rxGenericEn: 'Oral Rehydration Salts (WHO ORS Sachet)',
+        rxNameLocal: {
+          en: 'WHO ORS Electrolyte Sachet',
+          mr: 'ओआरएस इलेक्ट्रोलाइट रिहायड्रेशन सॅचेट',
+          hi: 'ओआरएस घोल पैकेट',
+          ta: 'ஓஆர்எஸ் எலக்ட்ரோலைட் பாக்கெட்',
+          kn: 'ಒಆರ್‌ಎಸ್ ಎಲೆಕ್ಟ್ರೋಲೈಟ್ ಸ್ಯಾಚೆಟ್',
+          bn: 'ওআরএস ইলেক্ট্রোলাইট স্যাচেট',
+        },
+        dosage: '1 Sachet in 1 Litre Water',
+        instructionsEn: 'Dissolve in 1 Litre clean drinking water; drink periodically over 2 days.',
+        instructionsLocal: {
+          en: 'Dissolve in 1 Litre clean drinking water; drink periodically over 2 days.',
+          mr: '१ लिटर स्वच्छ पाण्यात मिसळून दिवसभर थोडे थोडे प्यावे [२ दिवस].',
+          hi: '१ लीटर पानी में घोलकर दिनभर थोड़ा-थोड़ा पिएं [२ दिन]।',
+          ta: '1 லிட்டர் தண்ணீரில் கலந்து நாள் முழுவதும் குடிக்கவும் [2 நாட்கள்].',
+          kn: '1 ಲೀಟರ್ ನೀರಿನಲ್ಲಿ ಬೆರೆಸಿ ದಿನವಿಡೀ ಕುಡಿಯಿರಿ [2 ದಿನಗಳು].',
+          bn: '১ লিটার জলে গুলে সারাদিন অল্প অল্প করে পান করুন [২ দিন]।',
+        },
+        timing: { morning: true, afternoon: true, night: true },
+        remedy: {
+          en: 'Move immediately to a cool shaded place; sip tender coconut water or cold milk.',
+          mr: 'तातडीने सावलीत शांत झोपावे; शहाळ्याचे पाणी किंवा थंड दूध प्यावे.',
+          hi: 'तुरंत छायादार ठंडे स्थान पर आराम करें; नारियल पानी या ठंडा दूध पिएं।',
+          ta: 'நிழலான இடத்தில் ஓய்வெடுக்கவும்; இளநீர் அல்லது குளிர்ந்த பால் குடிக்கவும்.',
+          kn: 'ತಂಪಾದ ಸ್ಥಳದಲ್ಲಿ ವಿಶ್ರಾಂತಿ ಪಡೆಯಿರಿ; ಎಳನೀರು ಅಥವಾ ತಣ್ಣನೆಯ ಹಾಲು ಕುಡಿಯಿರಿ.',
+          bn: 'ঠান্ডা ছায়াযুক্ত স্থানে বিশ্রাম নিন; ডাবের জল বা ঠান্ডা দুধ পান করুন।',
+        }
+      },
+      {
+        id: 'red_eyes_conjunctivitis',
+        name: {
+          en: 'Acute Conjunctivitis & Eye Irritation',
+          mr: 'डोळे येणे / लालसरपणा (Conjunctivitis)',
+          hi: 'आंख आना / आंखों में लाली व जलन',
+          ta: 'கண் சிவப்பு மற்றும் எரிச்சல்',
+          kn: 'ಕಣ್ಣು ಕೆಂಪಾಗುವುದು ಮತ್ತು ಉರಿ',
+          bn: 'চোখ ওঠা / চোখে লালচে ভাব ও অস্বস্তি',
+        },
+        desc: {
+          en: 'Severe eye redness, gritty feeling, sticky watery discharge, morning eyelid crusting.',
+          mr: 'डोळे लाल भडक होणे, टोचणे, डोळ्यांतून चिकट पाणी येणे, पापण्या चिकटणे.',
+          hi: 'आंखों में लालिमा, चुभन, पानी आना और चिपचिपापन।',
+          ta: 'கண் சிவத்தல், நீர் வடிதல் மற்றும் கண் இமைகள் ஒட்டுதல்.',
+          kn: 'ಕಣ್ಣುಗಳು ಕೆಂಪಾಗುವುದು, ನೀರು ಸುರಿಯುವುದು ಮತ್ತು ರೆಪ್ಪೆಗಳು ಅಂಟಿಕೊಳ್ಳುವುದು.',
+          bn: 'চোখ লাল হওয়া, খচখচ করা ও সকালে চোখের পাতা জুড়ে যাওয়া।',
+        },
+        category: {
+          en: 'Ophthalmology (नेत्ररोग)',
+          mr: 'नेत्ररोग (Ophthalmology)',
+          hi: 'नेत्र रोग (Ophthalmology)',
+          ta: 'கண் மருத்துவம்',
+          kn: 'ನೇತ್ರಶಾಸ್ತ್ರ',
+          bn: 'চক্ষুরোগ',
+        },
+        rxGenericEn: 'Carboxymethylcellulose 0.5% Lubricant Eye Drops',
+        rxNameLocal: {
+          en: 'Lubricant Eye Drops 0.5%',
+          mr: 'वंगण आय ड्रॉप्स (Lubricant Eye Drops)',
+          hi: 'लुब्रिकेंट आई ड्रॉप्स',
+          ta: 'கண் சொட்டு மருந்து',
+          kn: 'ಕಣ್ಣಿನ ಹನಿಗಳು',
+          bn: 'চোখের ড্রপ',
+        },
+        dosage: '1-2 Drops in each eye',
+        instructionsEn: 'Instill 1-2 drops in affected eye 3 times daily for 2 days. Do not rub eyes.',
+        instructionsLocal: {
+          en: 'Instill 1-2 drops in affected eye 3 times daily for 2 days. Do not rub eyes.',
+          mr: 'दिवसातून ३ वेळा १-२ थेंब डोळ्यात टाकावे [२ दिवस]. डोळे चोळू नयेत.',
+          hi: 'दिन में ३ बार १-२ बूंद आंख में डालें [२ दिन]। आंखें न मलें।',
+          ta: 'நாளைக்கு 3 முறை 1-2 சொட்டு கண்ணில் இடவும் [2 நாட்கள்].',
+          kn: 'ದಿನಕ್ಕೆ 3 ಬಾರಿ 1-2 ಹನಿಗಳನ್ನು ಕಣ್ಣಿಗೆ ಹಾಕಿ [2 ದಿನಗಳು].',
+          bn: 'দিনে ৩ বার ১-২ ফোঁটা চোখে দিন [২ দিন]। চোখ ঘষবেন না।',
+        },
+        timing: { morning: true, afternoon: true, night: true },
+        remedy: {
+          en: 'Wash eyes gently with boiled and cooled clean water; wear dark sunglasses outdoors.',
+          mr: 'उकळून थंड केलेल्या स्वच्छ पाण्याने डोळे धुवा; काळा चष्मा वापरा व इतरांचा रुमाल वापरू नका.',
+          hi: 'उबले हुए ठंडे पानी से आंखें धोएं; धूप का चश्मा पहनें और तौलिया अलग रखें।',
+          ta: 'குளிர்ந்த நீரால் கண்களைக் கழுவவும்; கருப்புக் கண்ணாடி அணியவும்.',
+          kn: 'ಕುದಿಸಿ ತಣಿಸಿದ ನೀರಿನಿಂದ ಕಣ್ಣುಗಳನ್ನು ತೊಳೆಯಿರಿ; ಕಪ್ಪು ಕನ್ನಡಕ ಬಳಸಿ.',
+          bn: 'ফুটানো ঠান্ডা জল দিয়ে চোখ ধুয়ে নিন; কালো চশমা পরুন ও আলাদা তোয়ালে ব্যবহার করুন।',
+        }
       }
     ]
   },
@@ -768,6 +1043,114 @@ export const SYMPTOM_CATALOG = {
           kn: 'ಟ್ರಾಮಾ ಶಸ್ತ್ರಚಿಕಿತ್ಸಕರು',
           bn: 'ট্রমা সার্জন',
         }
+      },
+      {
+        id: 'snake_bite_scorpion_sting',
+        name: {
+          en: 'Snake Bite / Venomous Scorpion Sting',
+          mr: 'सर्पदंश किंवा विंचू दंश (Snake Bite / Scorpion Sting)',
+          hi: 'सांप का काटना / बिच्छू का डंक (Snake Bite)',
+          ta: 'பாம்பு கடி / தேள் கொட்டு',
+          kn: 'ಹಾವು ಕಡಿತ / ಚೇಳು ಕಡಿತ',
+          bn: 'সাপের কামড় / কাঁকড়াবিছার হুল',
+        },
+        desc: {
+          en: 'Two fang puncture marks, burning pain, swelling, ptosis (droopy eyelids), breathing difficulty.',
+          mr: 'दोन दातांचे व्रण, तीव्र जळजळ, सूज, पापण्या जड होणे, बोलताना अडखळणे.',
+          hi: 'दांतों के दो निशान, तेज जलन, सूजन, पलकों का झुकना, सांस लेने में तकलीफ।',
+          ta: 'பல் தடங்கள், தீவிர எரிச்சல், வீக்கம் மற்றும் கண் இமைகள் தொங்குதல்.',
+          kn: 'ಹಲ್ಲಿನ ಗುರುತುಗಳು, ತೀವ್ರ ಉರಿ, ಊತ ಮತ್ತು ಉಸಿರಾಟದ ತೊಂದರೆ.',
+          bn: 'দাঁতের ক্ষত, তীব্র জ্বালা, ফোলাভাব ও চোখের পাতা ভারী হয়ে যাওয়া।',
+        },
+        category: {
+          en: 'Emergency Toxicology (विषबाधा व सर्पदंश)',
+          mr: 'विषबाधा व सर्पदंश (Toxicology)',
+          hi: 'विष विज्ञान एवं आपातकाल',
+          ta: 'நச்சுயியல் அவசர சிகிச்சை',
+          kn: 'ವಿಷಶಾಸ್ತ್ರ ತುರ್ತು ಘಟಕ',
+          bn: 'বিষক্রিয়া জরুরি চিকিৎসা',
+        },
+        critical: true,
+        specialty: {
+          en: 'Emergency Physician (Anti-Snake Venom Unit)',
+          mr: 'आपत्कालीन सर्पदंश विभाग (Anti-Snake Venom Unit)',
+          hi: 'एंटी-वेनम आपातकालीन विशेषज्ञ',
+          ta: 'பாம்பு விஷ முறிவு அவசர மருத்துவர்',
+          kn: 'ಹಾವು ಕಡಿತ ತುರ್ತು ಚಿಕಿತ್ಸಾ ತಜ್ಞರು',
+          bn: 'অ্যান্টি-ভেনম জরুরি বিশেষজ্ঞ',
+        }
+      },
+      {
+        id: 'pesticide_chemical_poisoning',
+        name: {
+          en: 'Agricultural Pesticide / Chemical Ingestion',
+          mr: 'शेती कीटकनाशक पोटात जाणे / विषबाधा (Pesticide Poisoning)',
+          hi: 'कीटनाशक निगलना / विषाक्तता (Pesticide Ingestion)',
+          ta: 'பூச்சிக்கொல்லி விஷம் குடித்தல்',
+          kn: 'ಕೀಟನಾಶಕ ಸೇವನೆ / ವಿಷಪ್ರಾಶನ',
+          bn: 'কীটনাশক পান / বিষক্রিয়া',
+        },
+        desc: {
+          en: 'Accidental ingestion or spray inhalation, excessive salivation, pinpoint pupils, convulsions.',
+          mr: 'कीटकनाशक पोटात जाणे, तोंडून फेस/लाळ गळणे, डोळ्यांची बाहुली बारीक होणे, उलट्या.',
+          hi: 'खेत की दवा निगलना, मुंह से अत्यधिक लार, पुतलियां सिकुड़ना, सांस रुकना।',
+          ta: 'பூச்சிக்கொல்லி மருந்தால் ஏற்படும் அதிக உமிழ்நீர் மற்றும் மூச்சுத் திணறல்.',
+          kn: 'ಬಾಯಲ್ಲಿ ನೊರೆ ಬರುವುದು, ಕಣ್ಣಿನ ಪಾಪೆ ಕಿರಿದಾಗುವುದು ಮತ್ತು ಉಸಿರುಗಟ್ಟುವುದು.',
+          bn: 'মুখ থেকে অতিরিক্ত লালা পড়া, চোখের মণি ছোট হওয়া ও খিঁচুনি।',
+        },
+        category: {
+          en: 'Critical Care Toxicology',
+          mr: 'अतिदक्षता विषबाधा विभाग (ICU Toxicology)',
+          hi: 'क्रिटिकल केयर एवं आईसीयू',
+          ta: 'தீவிர சிகிச்சை நச்சுயியல்',
+          kn: 'ತೀವ್ರ ನಿಗಾ ವಿಷಶಾಸ್ತ್ರ',
+          bn: 'আইসিইউ বিষক্রিয়া ইউনিট',
+        },
+        critical: true,
+        specialty: {
+          en: 'Intensive Care (ICU) & Toxicology Specialist',
+          mr: 'अतिदक्षता विभाग (ICU) प्रमुख व विषशास्त्रज्ञ',
+          hi: 'आईसीयू एवं टॉक्सिकोलॉजी विशेषज्ञ',
+          ta: 'தீவிர சிகிச்சைப் பிரிவு நிபுணர்',
+          kn: 'ಐಸಿಯು ಮತ್ತು ಟಾಕ್ಸಿಕಾಲಜಿ ತಜ್ಞರು',
+          bn: 'আইসিইউ ও টক্সিকোলজি বিশেষজ্ঞ',
+        }
+      },
+      {
+        id: 'severe_head_injury_vomiting',
+        name: {
+          en: 'Severe Head Injury & Projectile Vomiting',
+          mr: 'डोक्याला गंभीर मार, बेशुद्धी व उलटी (Head Trauma)',
+          hi: 'सिर पर गंभीर चोट व लगातार उल्टी',
+          ta: 'தீவிர தலைக்காயம் மற்றும் வாந்தி',
+          kn: 'ತಲೆಗೆ ತೀವ್ರ ಪೆಟ್ಟು ಮತ್ತು ವಾಂತಿ',
+          bn: 'মাথায় গুরুতর আঘাত ও বমি',
+        },
+        desc: {
+          en: 'Fall or vehicular impact to skull, disorientation, fluid or blood from ears/nose, repeated vomiting.',
+          mr: 'डोक्यावर जोराचा आघात, कानातून किंवा नाकातून पाणी/रक्त येणे, सतत उलट्या होणे.',
+          hi: 'सिर पर भारी चोट, कान या नाक से खून/पानी आना, लगातार उल्टियां होना।',
+          ta: 'தலையில் பலத்த காயம், காது/மூக்கிலிருந்து ரத்தம் மற்றும் வாந்தி.',
+          kn: 'ತಲೆಗೆ ಬಲವಾದ ಪೆಟ್ಟು, ಕಿವಿ ಅಥವಾ ಮೂಗಿನಿಂದ ರಕ್ತಸ್ರಾವ.',
+          bn: 'মাথায় প্রচণ্ড আঘাত, কান বা নাক দিয়ে রক্তপাত ও অবিরাম বমি।',
+        },
+        category: {
+          en: 'Neurosurgery & Trauma',
+          mr: 'न्यूरोसर्जरी व हेड ट्रॉमा (Neurosurgery)',
+          hi: 'न्यूरोसर्जरी एवं ट्रॉमा',
+          ta: 'நரம்பியல் அறுவை சிகிச்சை',
+          kn: 'ನ್ಯೂರೋಸರ್ಜರಿ ಮತ್ತು ಟ್ರಾಮಾ',
+          bn: 'নিউরোসার্জারি ও ট্রমা',
+        },
+        critical: true,
+        specialty: {
+          en: 'Neurosurgeon / Emergency Trauma Specialist',
+          mr: 'न्यूरोसर्जन व हेड ट्रॉमा विशेषज्ञ',
+          hi: 'न्यूरोसर्जन एवं ट्रॉमा विशेषज्ञ',
+          ta: 'நரம்பியல் அறுவை சிகிச்சை நிபுணர்',
+          kn: 'ನ್ಯೂರೋಸರ್ಜನ್ ತಜ್ಞರು',
+          bn: 'নিউরোসার্জন ও ট্রমা বিশেষজ্ঞ',
+        }
       }
     ]
   }
@@ -835,6 +1218,9 @@ export default function SymptomChecklistTriage({
   const [generatedPrescription, setGeneratedPrescription] = useState(null);
   const [isGeneratingRx, setIsGeneratingRx] = useState(false);
   const [nearestDoctors, setNearestDoctors] = useState([]);
+  const [customSymptomText, setCustomSymptomText] = useState('');
+  const [isAnalyzingCustom, setIsAnalyzingCustom] = useState(false);
+  const [customError, setCustomError] = useState('');
 
   // Fetch doctors on mount
   useEffect(() => {
@@ -1044,6 +1430,111 @@ export default function SymptomChecklistTriage({
     }
   };
 
+  const handleAnalyzeCustomSymptom = async () => {
+    const trimmed = customSymptomText.trim();
+    if (!trimmed) {
+      setCustomError(lang === 'mr' ? 'कृपया आपला त्रास येथे लिहा.' : lang === 'hi' ? 'कृपया अपनी समस्या यहाँ लिखें।' : 'Please describe your symptoms.');
+      return;
+    }
+    setCustomError('');
+    setIsAnalyzingCustom(true);
+
+    try {
+      const activeMemberId = selectedMember?.id || currentUser?.id || 'self_1';
+      const patientName = selectedMember?.name || currentUser?.name || 'Self (Primary Citizen)';
+      const patientAge = selectedMember?.age || 42;
+      const patientBlood = selectedMember?.bloodGroup || 'B+';
+      const patientAbha = selectedMember?.abhaId || '14-2026-9812-4456';
+
+      const res = await fetch('http://localhost:5000/api/triage/custom-symptom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symptomText: trimmed,
+          language: lang || 'mr',
+          familyMemberId: activeMemberId,
+          patientDetails: {
+            name: patientName,
+            age: patientAge,
+            bloodGroup: patientBlood,
+            abhaId: patientAbha,
+          }
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const prescription = data.prescription;
+
+        // Sync to localStorage
+        try {
+          const savedList = JSON.parse(localStorage.getItem('arogya_prescriptions') || '[]');
+          savedList.unshift(prescription);
+          localStorage.setItem('arogya_prescriptions', JSON.stringify(savedList));
+        } catch (e) {}
+
+        setGeneratedPrescription(prescription);
+        setModalOpen(true);
+        setCustomSymptomText('');
+      } else {
+        throw new Error('API failed');
+      }
+    } catch (err) {
+      console.warn('[Custom Symptom Error, creating fallback prescription]', err);
+      // Create local fallback prescription
+      const isCritical = /छाती|हार्ट|साप|विष|रक्त|बेहोश|heart|chest|snake|poison|unconscious|stroke|breathing/i.test(customSymptomText);
+      const risk = isCritical ? 'CRITICAL' : 'MODERATE';
+      const fallbackRx = {
+        _id: 'rx_custom_' + Date.now(),
+        id: 'rx_custom_' + Date.now(),
+        familyMemberId: selectedMember?.id || 'self_1',
+        patientDetails: {
+          name: selectedMember?.name || 'Self',
+          age: selectedMember?.age || 42,
+          bloodGroup: selectedMember?.bloodGroup || 'B+',
+          abhaId: selectedMember?.abhaId || '14-2026-9812-4456'
+        },
+        createdBy: 'symptom_checklist',
+        durationDays: 2,
+        medicines: isCritical ? [] : [
+          {
+            name: 'Tab. Paracetamol 650mg',
+            nameLocal: 'पॅरासिटामॉल ६५० मि.ग्रॅ.',
+            category: 'Analgesic / Antipyretic',
+            dosage: '1 Tablet',
+            dosageLocal: '१ गोळी',
+            instructions: 'Take after meals with water for 2 days',
+            instructionsLocal: 'जेवणानंतर पाण्यासोबत घ्या (२ दिवस)',
+            timing: 'Morning & Night',
+            timingSchedule: { morning: true, afternoon: false, night: true }
+          }
+        ],
+        homeRemedies: isCritical
+          ? ['रुग्णाला त्वरित जवळच्या ग्रामीण/जिल्हा रुग्णालयात हलवा (१०८ ला कॉल करा).', 'शांत ठेवा, कोणतीही गोळी किंवा पाणी जबरदस्तीने देऊ नका.']
+          : ['कोमट पाणी प्या आणि पुरेसा आराम करा.', 'हलका व ताजा घरगुती आहार घ्या.'],
+        ayurvedicRemedies: isCritical
+          ? []
+          : ['तुळशी व सुंठ काढा (Tulsi & Dry Ginger Kadha) दिवसातून २ वेळा प्यावा.', 'रात्री झोपताना हळदीचे दूध (Golden Turmeric Milk).'],
+        diagnosisSummary: `AI Triage: ${customSymptomText.slice(0, 60)}...`,
+        riskLevel: risk,
+        verificationStatus: 'unverified',
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        const savedList = JSON.parse(localStorage.getItem('arogya_prescriptions') || '[]');
+        savedList.unshift(fallbackRx);
+        localStorage.setItem('arogya_prescriptions', JSON.stringify(savedList));
+      } catch (e) {}
+
+      setGeneratedPrescription(fallbackRx);
+      setModalOpen(true);
+      setCustomSymptomText('');
+    } finally {
+      setIsAnalyzingCustom(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-fadeIn text-deep-navy dark:text-clinical-white">
       
@@ -1246,6 +1737,76 @@ export default function SymptomChecklistTriage({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* SECTION 4: WRITE-IN CUSTOM SYMPTOM (Gemini AI Powered) */}
+      <div className="glass-card p-6 rounded-3xl border border-medical-blue/30 shadow-xl space-y-4 text-left bg-medical-blue/5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-medical-blue/15">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-medical-blue/15 text-medical-blue">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-lg text-deep-navy dark:text-clinical-white">
+                {t('triage_custom_heading')}
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                {t('triage_custom_desc')}
+              </p>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-medical-blue/20 text-medical-blue border border-medical-blue/30 self-start sm:self-auto">
+            AI Triage
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <textarea
+              id="custom-symptom-input"
+              rows={3}
+              value={customSymptomText}
+              onChange={(e) => {
+                setCustomSymptomText(e.target.value);
+                if (customError) setCustomError('');
+              }}
+              placeholder={t('triage_custom_placeholder')}
+              className="w-full p-4 rounded-2xl bg-white/80 dark:bg-dark-base/80 border border-deep-navy/15 dark:border-white/15 focus:border-medical-blue focus:ring-2 focus:ring-medical-blue/20 outline-none text-xs sm:text-sm text-deep-navy dark:text-clinical-white placeholder:text-slate-400 resize-none transition-all"
+            />
+          </div>
+
+          {customError && (
+            <div className="text-xs text-alert-red font-semibold flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>{customError}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+              {t('triage_custom_hint')}
+            </p>
+            <button
+              id="analyze-custom-symptom-btn"
+              onClick={handleAnalyzeCustomSymptom}
+              disabled={isAnalyzingCustom || !customSymptomText.trim()}
+              className="px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm bg-medical-blue hover:bg-blue-600 text-white shadow-lg hover:shadow-medical-blue/30 transition-all flex items-center justify-center gap-2 self-end sm:self-auto shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAnalyzingCustom ? (
+                <>
+                  <Sparkles className="w-4 h-4 animate-spin" />
+                  <span>{t('triage_custom_analyzing')}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>{t('triage_custom_btn')}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
