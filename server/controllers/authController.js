@@ -161,12 +161,12 @@ export async function login(req, res) {
     }
 
     if (!foundUser) {
-      return res.status(401).json({ error: 'Invalid phone number or credentials.' });
+      return res.status(404).json({ error: 'No account found with this number. Please sign up first.' });
     }
 
     const isMatch = await bcrypt.compare(password, foundUser.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid phone number or credentials.' });
+      return res.status(401).json({ error: 'Incorrect password. Please verify your credentials and try again.' });
     }
 
     const token = jwt.sign(

@@ -71,10 +71,11 @@ export default function AuthModal({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        setError(data.error || (isLogin ? 'No account found with this number. Please sign up first.' : 'Registration failed.'));
+        return;
       }
 
-      // Save token and user details to localStorage
+      // Save verified token and user details to localStorage
       localStorage.setItem('arogya_token', data.token);
       localStorage.setItem('arogya_user', JSON.stringify(data.user));
 
@@ -83,26 +84,8 @@ export default function AuthModal({
       }
       onClose();
     } catch (err) {
-      // If server is unreachable in local browser dev without backend running yet, provide seamless local session
-      console.warn('[Auth API]', err.message);
-      
-      // Standalone client fallback for offline/preview
-      const simulatedUser = {
-        id: 'user_' + Date.now(),
-        name: isLogin ? 'Citizen User' : name || 'Registered User',
-        phone,
-        role,
-        abhaId: role === 'citizen' ? (abhaId || '14-2026-9812-4456') : undefined,
-        kioskId: role === 'kiosk_operator' ? (kioskId || 'GP-KIOSK-042') : undefined,
-        village: village || 'Gram Panchayat Center',
-      };
-      localStorage.setItem('arogya_token', 'offline_dev_token');
-      localStorage.setItem('arogya_user', JSON.stringify(simulatedUser));
-
-      if (onAuthSuccess) {
-        onAuthSuccess(simulatedUser, 'offline_dev_token');
-      }
-      onClose();
+      console.error('[Auth API Error]', err.message);
+      setError('Unable to reach server. Please ensure the backend server is running and try again.');
     } finally {
       setLoading(false);
     }
@@ -169,11 +152,25 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Error message */}
+        {/* Error message with direct sign up action */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-alert-crimson/10 border border-alert-crimson/20 flex items-center gap-2 text-xs text-alert-crimson">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="mb-4 p-3 rounded-xl bg-alert-crimson/10 border border-alert-crimson/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-alert-crimson animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-alert-crimson" />
+              <span className="font-semibold">{error}</span>
+            </div>
+            {isLogin && error.toLowerCase().includes('sign up') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(false);
+                  setError('');
+                }}
+                className="font-bold underline text-terracotta hover:text-terracotta-hover shrink-0 self-end sm:self-auto"
+              >
+                Sign Up Now →
+              </button>
+            )}
           </div>
         )}
 
