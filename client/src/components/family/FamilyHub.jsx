@@ -15,7 +15,13 @@ import {
   Heart,
   WifiOff,
   RefreshCw,
-  CheckCircle2
+  CheckCircle2,
+  FileText,
+  Pill,
+  HeartPulse,
+  ShieldAlert,
+  Clock,
+  QrCode
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -46,6 +52,10 @@ export default function FamilyHub({
   ]);
 
   const [activeMemberId, setActiveMemberId] = useState(members[0]?.id || null);
+  const [hubTab, setHubTab] = useState('overview'); // 'overview' | 'prescriptions'
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
+  const [verifyingId, setVerifyingId] = useState(null);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -61,6 +71,56 @@ export default function FamilyHub({
     }
   });
   const [syncToast, setSyncToast] = useState(null);
+
+  const activeMember = members.find(m => m.id === activeMemberId) || members[0];
+
+  const loadPrescriptionsForMember = async (memberId) => {
+    if (!memberId) return;
+    setLoadingPrescriptions(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/prescriptions/member/${memberId}`);
+      if (!res.ok) throw new Error('Failed to fetch member prescriptions');
+      const data = await res.json();
+      setPrescriptions(data.prescriptions || []);
+    } catch (err) {
+      console.warn('[Prescription Load]', err.message);
+      setPrescriptions([]);
+    } finally {
+      setLoadingPrescriptions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeMember?.id) {
+      loadPrescriptionsForMember(activeMember.id);
+    }
+  }, [activeMember?.id, hubTab]);
+
+  const handleVerifyPrescription = async (id) => {
+    setVerifyingId(id);
+    try {
+      const res = await fetch(`http://localhost:5000/api/prescriptions/${id}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verifierName: 'Koregaon Rural Medical Store (Reg #MH-PH-8891)',
+          status: 'pharmacist_verified'
+        })
+      });
+      if (!res.ok) throw new Error('Verification failed');
+      const data = await res.json();
+      setPrescriptions(prev => prev.map(p => (p._id === id || p.id === id) ? { 
+        ...p, 
+        verificationStatus: 'pharmacist_verified', 
+        verifiedBy: 'Koregaon Rural Medical Store (Reg #MH-PH-8891)',
+        verifiedAt: new Date()
+      } : p));
+    } catch (err) {
+      console.error('Verify error:', err);
+    } finally {
+      setVerifyingId(null);
+    }
+  };
 
   useEffect(() => {
     const handleOnline = () => {
@@ -89,8 +149,6 @@ export default function FamilyHub({
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  const activeMember = members.find(m => m.id === activeMemberId) || members[0];
 
   const handleSaveVitals = (newVitals) => {
     const updated = members.map(m => {
@@ -182,6 +240,39 @@ export default function FamilyHub({
         </button>
       </div>
 
+      {/* Sub-Navigation Tabs: Health Profile & Vitals vs Prescription History */}
+      <div className="flex items-center gap-2 border-b border-deep-teal/10 dark:border-white/10 pb-3">
+        <button
+          id="family-tab-overview"
+          onClick={() => setHubTab('overview')}
+          className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all ${
+            hubTab === 'overview'
+              ? 'btn-teal text-white shadow-md'
+              : 'glass-card text-deep-teal dark:text-sky-mist hover:border-terracotta/40'
+          }`}
+        >
+          <HeartPulse className="w-4 h-4" />
+          <span>Health Profile & Vitals</span>
+        </button>
+        <button
+          id="family-tab-prescriptions"
+          onClick={() => setHubTab('prescriptions')}
+          className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all ${
+            hubTab === 'prescriptions'
+              ? 'btn-teal text-white shadow-md'
+              : 'glass-card text-deep-teal dark:text-sky-mist hover:border-terracotta/40'
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span>Prescription History</span>
+          {prescriptions.length > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-terracotta text-white">
+              {prescriptions.length}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Dynamic Profile Switcher: Horizontal Avatar Bar */}
       <div 
         className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none"
@@ -220,7 +311,179 @@ export default function FamilyHub({
         })}
       </div>
 
-      {activeMember ? (
+      {hubTab === 'prescriptions' ? (
+        /* Section 4d: Per-Family-Member Prescription History View */
+        <div className="space-y-6">
+          {/* Prescription History Banner */}
+          <div className="glass-card p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-terracotta/20 text-terracotta">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-lg sm:text-xl text-deep-teal dark:text-sky-mist">
+                  {activeMember.name}'s Prescription Records
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {prescriptions.length} {prescriptions.length === 1 ? 'prescription record' : 'prescription records'} saved for this profile
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsPrescriptionModalOpen(true)}
+              className="btn-terracotta text-xs py-2.5 px-5 flex items-center gap-2 self-start sm:self-auto"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Scan Prescription Image</span>
+            </button>
+          </div>
+
+          {/* Prescriptions List */}
+          {loadingPrescriptions ? (
+            <div className="glass-card p-12 text-center text-xs text-deep-teal dark:text-sky-mist">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto text-terracotta mb-2" />
+              <span>Loading member prescriptions...</span>
+            </div>
+          ) : prescriptions.length === 0 ? (
+            <div className="glass-card p-12 text-center max-w-md mx-auto space-y-4 shadow-lg">
+              <FileText className="w-10 h-10 text-terracotta/60 mx-auto" />
+              <div className="space-y-1">
+                <h4 className="font-display font-bold text-base text-deep-teal dark:text-sky-mist">
+                  No Prescriptions Saved Yet
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  Prescriptions generated from Voice AI Triage or uploaded via the OCR Scanner will be stored under <strong>{activeMember.name}</strong>.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsPrescriptionModalOpen(true)}
+                className="btn-terracotta text-xs py-2 px-5"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload Prescription Slip</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5">
+              {prescriptions.map((presc) => {
+                const isVerified = presc.verificationStatus === 'pharmacist_verified' || presc.verificationStatus === 'doctor_verified';
+                const recordDate = new Date(presc.createdAt || Date.now()).toLocaleDateString('en-IN', {
+                  year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                return (
+                  <div 
+                    key={presc._id || presc.id} 
+                    className="glass-card p-6 space-y-4 border border-deep-teal/15 dark:border-white/10 hover:border-terracotta/40 transition-all shadow-md"
+                  >
+                    {/* Card Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-deep-teal/10 dark:border-white/10">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="text-xs font-bold text-deep-teal/70 dark:text-dark-muted flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{recordDate}</span>
+                        </span>
+
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-deep-teal/10 dark:bg-white/10 text-deep-teal dark:text-sky-mist uppercase">
+                          {presc.createdBy === 'ocr_scan' ? 'Prescription OCR' : 'Voice AI Triage'}
+                        </span>
+
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          presc.riskLevel === 'CRITICAL' ? 'bg-alert-crimson text-white' :
+                          presc.riskLevel === 'HIGH' ? 'bg-alert-crimson/20 text-alert-crimson' :
+                          presc.riskLevel === 'MODERATE' ? 'bg-sun-gold/25 text-deep-teal dark:text-sun-gold' :
+                          'bg-leaf-green/20 text-leaf-green'
+                        }`}>
+                          {presc.riskLevel || 'LOW'} Risk
+                        </span>
+
+                        {/* Verification Status Badge */}
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          isVerified 
+                            ? 'bg-leaf-green/20 text-leaf-green border-leaf-green/30'
+                            : 'bg-sun-gold/25 text-deep-teal dark:text-sun-gold border-sun-gold/40'
+                        }`}>
+                          {isVerified ? '✓ Pharmacist Verified' : 'Awaiting Pharmacist Check'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`http://localhost:5000/api/prescriptions/${presc._id || presc.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-terracotta text-xs py-1.5 px-3.5 flex items-center gap-1.5 whitespace-nowrap"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download PDF</span>
+                        </a>
+
+                        {!isVerified && (
+                          <button
+                            onClick={() => handleVerifyPrescription(presc._id || presc.id)}
+                            disabled={verifyingId === (presc._id || presc.id)}
+                            className="btn-glass text-[11px] py-1.5 px-3 text-leaf-green hover:bg-leaf-green/10 flex items-center gap-1"
+                            title="Simulate Pharmacist Verification check"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{verifyingId === (presc._id || presc.id) ? 'Verifying...' : 'Verify Slip'}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Diagnosis / Summary */}
+                    <div className="space-y-1">
+                      <div className="text-[11px] uppercase tracking-wider font-bold text-deep-teal/60 dark:text-dark-muted">
+                        Diagnosis / Assessment
+                      </div>
+                      <div className="text-sm font-semibold text-deep-teal dark:text-sky-mist">
+                        {presc.diagnosisSummary}
+                      </div>
+                    </div>
+
+                    {/* Medicines Grid */}
+                    {presc.medicines && presc.medicines.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-[11px] uppercase tracking-wider font-bold text-deep-teal/60 dark:text-dark-muted">
+                          Medicines & OTC Guidance
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                          {presc.medicines.map((m, mIdx) => (
+                            <div key={mIdx} className="p-3 rounded-xl bg-white/80 dark:bg-dark-base/60 border border-deep-teal/10 space-y-1 text-xs">
+                              <div className="font-bold text-deep-teal dark:text-sky-mist flex items-center justify-between">
+                                <span>{m.name}</span>
+                                <span className="text-[10px] opacity-70">{m.category}</span>
+                              </div>
+                              <div className="text-deep-teal/70 dark:text-dark-muted text-[11px]">
+                                {m.instructions}
+                              </div>
+                              {m.timing && (
+                                <div className="text-terracotta text-[10px] font-semibold">
+                                  ⏰ {m.timing}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Verified By Note */}
+                    {isVerified && presc.verifiedBy && (
+                      <div className="text-[11px] text-leaf-green font-medium flex items-center gap-1.5 pt-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Verified by <strong>{presc.verifiedBy}</strong> on {new Date(presc.verifiedAt || Date.now()).toLocaleDateString('en-IN')}</span>
+                      </div>
+                    )}
+
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : activeMember ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Left Column: Active Member Demographics & ABHA Card */}

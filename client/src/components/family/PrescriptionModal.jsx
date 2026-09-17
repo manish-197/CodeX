@@ -13,11 +13,12 @@ import {
   Activity, 
   Sparkles,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function PrescriptionModal({ isOpen, onClose, member }) {
+export default function PrescriptionModal({ isOpen, onClose, member, onPrescriptionSaved }) {
   const { lang, speechLang, t } = useLanguage();
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -55,6 +56,10 @@ export default function PrescriptionModal({ isOpen, onClose, member }) {
       if (!res.ok) throw new Error('OCR failed');
       const data = await res.json();
       setOcrResult(data);
+
+      if (onPrescriptionSaved) {
+        onPrescriptionSaved(data.prescription || data);
+      }
 
       if (data.audioExplanationText) {
         speakAudio(data.audioExplanationText);
@@ -258,7 +263,7 @@ export default function PrescriptionModal({ isOpen, onClose, member }) {
               </div>
             </div>
 
-            <div className="pt-2 flex justify-between items-center text-xs">
+            <div className="pt-2 flex flex-wrap justify-between items-center gap-2 text-xs">
               <button
                 onClick={() => setOcrResult(null)}
                 className="text-terracotta hover:underline font-bold"
@@ -266,12 +271,26 @@ export default function PrescriptionModal({ isOpen, onClose, member }) {
                 Scan Another Prescription
               </button>
 
-              <button
-                onClick={onClose}
-                className="btn-glass text-xs py-2 px-4"
-              >
-                Done
-              </button>
+              <div className="flex items-center gap-2">
+                {ocrResult?.prescription && (
+                  <a
+                    href={`http://localhost:5000/api/prescriptions/${ocrResult.prescription._id || ocrResult.prescription.id}/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-terracotta text-xs py-2 px-3.5 flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download PDF Slip</span>
+                  </a>
+                )}
+
+                <button
+                  onClick={onClose}
+                  className="btn-glass text-xs py-2 px-4"
+                >
+                  Done
+                </button>
+              </div>
             </div>
 
           </div>
