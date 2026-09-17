@@ -16,14 +16,14 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function HospitalNavigation() {
+export default function HospitalNavigation({ targetHospital }) {
   const { t } = useLanguage();
 
   // User coordinates: default fallback (Pune rural) while real GPS acquires
   const [userLocation, setUserLocation] = useState({ lat: 18.5204, lng: 73.8567 });
   const [locationSource, setLocationSource] = useState('Acquiring GPS...');
-  const [hospitals, setHospitals] = useState([]);
-  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [hospitals, setHospitals] = useState(targetHospital ? [targetHospital] : []);
+  const [selectedHospital, setSelectedHospital] = useState(targetHospital || null);
   const [routeData, setRouteData] = useState(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [loadingHospitals, setLoadingHospitals] = useState(true);
@@ -34,6 +34,17 @@ export default function HospitalNavigation() {
   const polylineCoreRef = useRef(null);
   const userMarkerRef = useRef(null);
   const hospMarkerRef = useRef(null);
+
+  // Sync targetHospital if prop updates
+  useEffect(() => {
+    if (targetHospital) {
+      setSelectedHospital(targetHospital);
+      setHospitals((prev) => {
+        const exists = prev.some((h) => (h.id && h.id === targetHospital.id) || h.name === targetHospital.name);
+        return exists ? prev : [targetHospital, ...prev];
+      });
+    }
+  }, [targetHospital]);
 
   // 1. Acquire Live Device GPS
   const acquireGPS = () => {
@@ -66,9 +77,16 @@ export default function HospitalNavigation() {
       const res = await fetch(`http://localhost:5000/api/hospitals/nearest?lat=${lat}&lng=${lng}&limit=4`);
       if (!res.ok) throw new Error('Failed to fetch hospitals');
       const data = await res.json();
-      setHospitals(data.hospitals || []);
-      if (data.hospitals && data.hospitals.length > 0) {
-        setSelectedHospital(data.hospitals[0]);
+      const fetched = data.hospitals || [];
+      if (targetHospital) {
+        const merged = [targetHospital, ...fetched.filter(h => h.name !== targetHospital.name)];
+        setHospitals(merged);
+        setSelectedHospital(targetHospital);
+      } else {
+        setHospitals(fetched);
+        if (fetched.length > 0 && !selectedHospital) {
+          setSelectedHospital(fetched[0]);
+        }
       }
     } catch (err) {
       console.warn('[Hospitals fetch error, using local dataset]', err.message);
@@ -94,8 +112,13 @@ export default function HospitalNavigation() {
           specialties: ['Trauma Care', 'Cardiology Stabilisation'],
         }
       ];
-      setHospitals(fallbackList);
-      setSelectedHospital(fallbackList[0]);
+      if (targetHospital) {
+        setHospitals([targetHospital, ...fallbackList]);
+        setSelectedHospital(targetHospital);
+      } else {
+        setHospitals(fallbackList);
+        setSelectedHospital(fallbackList[0]);
+      }
     } finally {
       setLoadingHospitals(false);
     }
