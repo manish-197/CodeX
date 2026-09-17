@@ -88,6 +88,7 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'थंड घाम, चक्कर येणे किंवा शुद्ध हरपणे' : 'Profuse cold clammy sweating, dizziness, or loss of consciousness',
         language === 'mr' ? 'तीव्र धाप लागणे किंवा बोलता न येणे' : 'Severe gasping for air or inability to speak in full sentences'
       ],
+      suggestedMedicines: [],
       recommendedSpecialty: 'Emergency Medicine / Cardiology / Trauma Care',
       audioResponseText: language === 'mr'
         ? 'तातडीचा इशारा! ही गंभीर आणीबाणी आहे. घरगुती उपायांत वेळ न घालवता त्वरित १०८ रुग्णवाहिका बोलवा.'
@@ -118,6 +119,7 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'श्वास घेताना घरघर किंवा घसा आवळल्यासारखे वाटणे' : 'Stridor, throat tightness, or wheezing breath',
         language === 'mr' ? 'चक्कर येणे, रक्तदाब कमी होणे' : 'Lightheadedness, severe itching spreading to neck/face',
       ],
+      suggestedMedicines: [],
       recommendedSpecialty: 'Emergency Medicine / Allergy & Immunology',
       audioResponseText: language === 'mr'
         ? 'खबरदारी! नवीन औषध घेणे त्वरित थांबवा आणि श्वास घेण्यास अडचण येण्यापूर्वी जवळच्या डॉक्टरांना दाखवा.'
@@ -148,6 +150,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'लघवीचे प्रमाण खूप कमी होणे किंवा ६ तास न होणे' : 'No wet diaper or urine output for over 6 hours',
         language === 'mr' ? 'बाळ खूप सुस्त होणे किंवा सतत रडणे' : 'Lethargy, sunken eyes, or persistent irritability / febrile twitching',
       ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'ओआरएस (ORS) इलेक्ट्रोलाइट द्रावण' : language === 'hi' ? 'ओआरएस (ORS) घोल' : 'Oral Rehydration Salts (ORS) Category',
+          category: language === 'mr' ? 'शरीरातील पाणी व क्षार नियंत्रण' : language === 'hi' ? 'इलेक्ट्रोलाइट संतुलन' : 'Electrolyte Replenishment Category',
+          instructions: language === 'mr' ? 'बालरोगतज्ज्ञ किंवा आशा सेविकेच्या सल्ल्यानुसार थोडे थोडे पाजावे.' : language === 'hi' ? 'डॉक्टर या आशा कार्यकर्ता की सलाह से थोड़ा-थोड़ा पिलाएं।' : 'Discuss with a doctor or ASHA worker for age-appropriate administration. Offer in small sips.',
+          timing: language === 'mr' ? 'दिवसभरात थोडे थोडे' : language === 'hi' ? 'दिनभर थोड़े-थोड़े अंतराल पर' : 'Throughout the day as advised by healthcare worker'
+        }
+      ],
       recommendedSpecialty: 'Pediatrics / Maternal & Child Health Unit',
       audioResponseText: language === 'mr'
         ? 'बालकांमधील ताप आणि पाणी न पिणे ही काळजीची बाब आहे. बाळाला कोमट पाण्याने पुसून त्वरित प्राथमिक आरोग्य केंद्रात न्या.'
@@ -176,6 +186,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
       warningSigns: [
         language === 'mr' ? 'साखर दिल्यावरही चक्कर न थांबणे किंवा बेशुद्ध पडणे' : 'Loss of consciousness or inability to swallow safely',
         language === 'mr' ? 'हात थरथरणे किंवा बोलण्यात अडखळणे' : 'Severe tremors, confusion, or speech impairment'
+      ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'ग्लुकोज / साखर पाणी' : language === 'hi' ? 'ग्लूकोज / मीठा पानी' : 'Fast-Acting Glucose / Electrolyte Category',
+          category: language === 'mr' ? 'तात्काळ साखर वाढवणारे' : language === 'hi' ? 'त्वरित शर्करा पूरक' : 'Rapid Carbohydrate / Glucose Supplement',
+          instructions: language === 'mr' ? '१५ मिनिटांत साखर पुन्हा तपासा आणि डॉक्टरांशी संपर्क साधा.' : language === 'hi' ? '१५ मिनट बाद शुगर जांचें और डॉक्टर से संपर्क करें।' : 'Re-check blood glucose after 15 minutes and seek medical evaluation.',
+          timing: language === 'mr' ? 'तात्काळ १ वेळ' : language === 'hi' ? 'तुरंत एक बार' : 'Immediately once, followed by medical evaluation'
+        }
       ],
       recommendedSpecialty: 'General Medicine / Endocrinology',
       audioResponseText: language === 'mr'
@@ -206,6 +224,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'तोंड पूर्ण कोरडे पडणे किंवा लघवी गडद पिवळी व कमी होणे' : 'Extreme thirst, sunken eyes, or dark scanty urine',
         language === 'mr' ? 'उलट्यांमध्ये किंवा शौचात रक्त दिसणे' : 'Blood in vomit or stool, or persistent inability to keep liquids down'
       ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'ओआरएस (ORS) द्रावण' : language === 'hi' ? 'ओआरएस (ORS) घोल' : 'Oral Rehydration Salts (ORS) Category',
+          category: language === 'mr' ? 'निर्जलीकरण प्रतिबंध' : language === 'hi' ? 'निर्जलीकरण निवारक' : 'Electrolyte Balance Category',
+          instructions: language === 'mr' ? 'प्रत्येक जुलाबानंतर उकळून थंड केलेल्या पाण्यात मिसळून प्यावे. योग्य प्रमाण समजून घेण्यासाठी फार्मासिस्टशी बोला.' : language === 'hi' ? 'उबले ठंडे पानी में घोलकर प्रत्येक दस्त के बाद लें।' : 'Mix with boiled and cooled water. Discuss with pharmacist for correct dilution.',
+          timing: language === 'mr' ? 'प्रत्येक जुलाबानंतर' : language === 'hi' ? 'प्रत्येक दस्त के बाद' : 'After every loose stool episode'
+        }
+      ],
       recommendedSpecialty: 'Primary Health Centre (PHC) / Internal Medicine',
       audioResponseText: language === 'mr'
         ? 'शरीरातील पाणी कमी होऊ देऊ नका. भरपूर ओआरएस आणि तांदळाची पेज प्या. त्रास वाढल्यास आरोग्य केंद्रात जा.'
@@ -234,6 +260,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
       warningSigns: [
         language === 'mr' ? 'थुंकीतून रक्त पडणे' : 'Hemoptysis (coughing up blood or rust-colored sputum)',
         language === 'mr' ? 'रात्री अंगाला खूप घाम येणे व बारीक ताप राहणे' : 'Night sweats, prolonged evening low-grade fever, or chest pain'
+      ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'हर्बल / कोमट पाण्याची वाफ' : language === 'hi' ? 'हर्बल भाप / गर्म पानी' : 'Warm Saline Steam & Throat Soothing Category',
+          category: language === 'mr' ? 'घसा व श्वसन आराम' : language === 'hi' ? 'गले की राहत' : 'Supportive Respiratory Soothing Category',
+          instructions: language === 'mr' ? 'स्वतःहून कोणतीही ॲन्टीबायोटिक गोळी घेऊ नका; प्राथमिक आरोग्य केंद्रात तपासणी आवश्यक आहे.' : language === 'hi' ? 'बिना डॉक्टर के कोई एंटीबायोटिक न लें, पीएचसी में जांच कराएं।' : 'Never take unprescribed antibiotics. Consult PHC medical officer for sputum test.',
+          timing: language === 'mr' ? 'दिवसातून २ वेळा' : language === 'hi' ? 'दिन में दो बार' : 'As advised during clinical evaluation'
+        }
       ],
       recommendedSpecialty: 'Pulmonology / National TB Elimination Program (NTEP) Clinic at PHC',
       audioResponseText: language === 'mr'
@@ -267,6 +301,20 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'ताप १०३ अंशांपेक्षा जास्त वाढल्यास' : 'Temperature spiking above 103°F despite cooling compresses',
         language === 'mr' ? 'अंगावर लाल पुरळ, हिरड्यांतून रक्तस्त्राव किंवा सतत उलट्या' : 'Petechial rash, gum bleeding, or persistent severe vomiting'
       ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'पॅरासिटामॉल आधारित ताप प्रतिबंधक औषध गट' : language === 'hi' ? 'पैरासिटामोल आधारित बुखार निवारक वर्ग' : 'Paracetamol-based Fever Reducer Category',
+          category: language === 'mr' ? 'ताप व सौम्य वेदनाशामक' : language === 'hi' ? 'बुखार एवं दर्द निवारक' : 'Antipyretic / Mild Analgesic Category',
+          instructions: language === 'mr' ? 'वजन आणि वयानुसार योग्य स्वरूपासाठी फार्मासिस्ट किंवा डॉक्टरांशी चर्चा करा. रिकाम्या पोटी घेऊ नका.' : language === 'hi' ? 'उचित रूप और खुराक के लिए फार्मासिस्ट या डॉक्टर से परामर्श करें। खाली पेट न लें।' : 'Discuss with a pharmacist or doctor for age- and weight-appropriate formulation. Take after food.',
+          timing: language === 'mr' ? 'जेवणानंतर, फार्मासिस्टच्या सल्ल्यानुसार' : language === 'hi' ? 'भोजन के बाद, फार्मासिस्ट की सलाह पर' : 'Post-meals, as advised by pharmacist or doctor'
+        },
+        {
+          name: language === 'mr' ? 'ओआरएस (ORS) द्रावण' : language === 'hi' ? 'ओआरएस (ORS) घोल' : 'Oral Rehydration Salts (ORS) Category',
+          category: language === 'mr' ? 'इलेक्ट्रोलाइट संतुलन' : language === 'hi' ? 'इलेक्ट्रोलाइट संतुलन' : 'Electrolyte Replenisher Category',
+          instructions: language === 'mr' ? 'तापादरम्यान शरीरातील पाणी टिकवण्यासाठी स्वच्छ पाण्यात मिसळून प्यावे.' : language === 'hi' ? 'बुखार में पानी की कमी रोकने के लिए पिएं।' : 'Consume to maintain hydration during fever episodes.',
+          timing: language === 'mr' ? 'दिवसभरात थोडे थोडे' : language === 'hi' ? 'दिनभर थोड़े-थोड़े अंतराल पर' : 'Throughout the day as needed'
+        }
+      ],
       recommendedSpecialty: 'General Medicine / Primary Health Centre (PHC)',
       audioResponseText: language === 'mr'
         ? 'आपली लक्षणे मोसमी तापाची आहेत. कपाळावर पाण्याच्या घड्या ठेवा आणि भरपूर पाणी प्या. २ दिवसांत आराम न पडल्यास आरोग्य केंद्रात भेट द्या.'
@@ -296,6 +344,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
         language === 'mr' ? 'छातीत दडपण, अचानक अंधारी येणे किंवा श्वास अडकणे' : 'Chest discomfort, sudden severe blackout, or shortness of breath',
         language === 'mr' ? 'अचानक तीव्र पोटदुखी किंवा उलट्या सुरू होणे' : 'Acute onset of severe localized abdominal pain or intractable vomiting'
       ],
+      suggestedMedicines: [
+        {
+          name: language === 'mr' ? 'ओआरएस किंवा इलेक्ट्रोलाइट पेये' : language === 'hi' ? 'ओआरएस या इलेक्ट्रोलाइट पेय' : 'Electrolyte Hydration Category',
+          category: language === 'mr' ? 'सामान्य अशक्तपणा नियंत्रण' : language === 'hi' ? 'कमजोरी निवारण' : 'Mild Supportive Hydration Category',
+          instructions: language === 'mr' ? 'औषध घेण्यापूर्वी आशा सेविकेकडून तपासणी करून घ्यावी.' : language === 'hi' ? 'दवा लेने से पहले आशा कार्यकर्ता से जांच कराएं।' : 'Consult local health worker before taking any oral medication.',
+          timing: language === 'mr' ? 'गरज भासल्यास' : language === 'hi' ? 'आवश्यकतानुसार' : 'As advised by local health worker'
+        }
+      ],
       recommendedSpecialty: 'Village ASHA Worker / Primary Health Centre (PHC)',
       audioResponseText: language === 'mr'
         ? 'कृपया आपल्या त्रासाचे नेमके स्वरूप सांगा, जसे की ताप किंवा दुखणे. सध्या शांत विश्रांती घ्या आणि पाणी प्या.'
@@ -323,6 +379,14 @@ export function offlineClinicalTriage(symptoms, language = 'en', vitals = {}, ag
     warningSigns: [
       language === 'mr' ? 'डोकेदुखी अचानक असह्य तीव्र झाल्यास' : 'Sudden explosive headache unlike anything previously experienced',
       language === 'mr' ? 'उलट्या होणे किंवा मान ताठ होणे' : 'Persistent nausea, neck stiffness, or visual disturbances'
+    ],
+    suggestedMedicines: [
+      {
+        name: language === 'mr' ? 'पॅरासिटामॉल वेदनाशामक गट' : language === 'hi' ? 'पैरासिटामोल दर्द निवारक वर्ग' : 'Paracetamol-based Mild Pain Reliever Category',
+        category: language === 'mr' ? 'सौम्य वेदनाशामक' : language === 'hi' ? 'हल्का दर्द निवारक' : 'Mild Analgesic Category',
+        instructions: language === 'mr' ? 'डोकेदुखी विश्रांतीनंतरही न थांबल्यास फार्मासिस्टचा सल्ला घ्यावा. स्वतःहून जास्त दिवस घेऊ नये.' : language === 'hi' ? 'सिरदर्द आराम करने पर भी न रुके तो फार्मासिस्ट से परामर्श लें।' : 'Consult a pharmacist or doctor if discomfort persists despite rest and hydration.',
+        timing: language === 'mr' ? 'जेवणानंतर, आवश्यकतेनुसार' : language === 'hi' ? 'भोजन के बाद, आवश्यकतानुसार' : 'Post-meals as advised by pharmacist'
+      }
     ],
     recommendedSpecialty: 'Primary Self-Care / Village Health Wellness Centre (HWC)',
     audioResponseText: language === 'mr'
@@ -374,10 +438,17 @@ export async function triageSymptoms(req, res) {
 You are ArogyaRakshak AI, an expert clinical triage physician serving rural and underserved communities in India.
 CRITICAL SAFETY & TRIAGE GUIDELINES:
 1. ERR TOWARD CAUTION: Always over-triage to a higher risk level when uncertain; NEVER under-triage. If severe emergency symptoms (e.g. chest pain, radiating arm pain, breathing difficulty, severe bleeding, anaphylaxis) are described, riskLevel MUST be "CRITICAL".
-2. NON-PRESCRIPTIVE: NEVER provide specific pharmaceutical drug names, brand names, or dosages (e.g. do not say 'take 500mg Paracetamol'). Strictly restrict home remedies to safe, non-drug self-care: oral rehydration fluids (ORS), lukewarm sponging, physical rest, clean wound pressure, position elevation, herbal soothing drinks. Instruct patient to see an ASHA/doctor for medicines.
-3. RED FLAGS: For MODERATE, HIGH, and CRITICAL risk levels, always provide distinct warning signs detailing when to escalate immediately to 108 or hospital.
-4. AMBIGUITY: If symptoms are too vague (e.g., 'I don't feel well'), rate riskLevel as "MODERATE" for safety, ask clarifying questions in clinicalExplanation, and suggest visiting the village health worker.
-5. MANDATORY DISCLAIMER: Include the exact field: "disclaimer": "${MANDATORY_DISCLAIMER}".
+2. NON-PRESCRIPTIVE HOME REMEDIES: Strictly restrict home remedies to safe, non-drug self-care: oral rehydration fluids (ORS), lukewarm sponging, physical rest, clean wound pressure, position elevation, herbal soothing drinks. Instruct patient to see an ASHA/doctor for medicines.
+3. SAFE MEDICINE SUGGESTIONS (SAFETY-CRITICAL & MANDATORY RULES):
+   - Only suggest common, generally-safe, over-the-counter (OTC) medicine CATEGORIES appropriate to mild/moderate symptoms (e.g., "Paracetamol-based fever reducer category", "Oral Rehydration Salts (ORS) category").
+   - NEVER output specific dosage amounts (e.g., NEVER write '500mg', '650mg', '10ml', etc.).
+   - NEVER output specific intake frequencies (e.g., do NOT write 'take 2 tablets 3 times daily').
+   - NEVER output commercial brand names.
+   - For CRITICAL-risk symptoms: NEVER suggest any medicine under any circumstance. For CRITICAL cases, you MUST set "suggestedMedicines": [] and strictly instruct "seek emergency care immediately."
+   - PHRASING MANDATE: You MUST explicitly phrase all medicine entries as a SUGGESTION TO DISCUSS WITH A PHARMACIST OR DOCTOR, NOT a prescription.
+4. RED FLAGS: For MODERATE, HIGH, and CRITICAL risk levels, always provide distinct warning signs detailing when to escalate immediately to 108 or hospital.
+5. AMBIGUITY: If symptoms are too vague (e.g., 'I don't feel well'), rate riskLevel as "MODERATE" for safety, ask clarifying questions in clinicalExplanation, and suggest visiting the village health worker.
+6. MANDATORY DISCLAIMER: Include the exact field: "disclaimer": "${MANDATORY_DISCLAIMER}".
 
 Patient Input:
 - Symptoms: "${symptoms}"
@@ -391,6 +462,14 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
   "likelyDiagnosis": "Concise medical assessment in requested language",
   "clinicalExplanation": "Compassionate, plain-language explanation in requested language",
   "homeRemedies": ["Safe, non-prescriptive home actions in requested language"],
+  "suggestedMedicines": [
+    {
+      "name": "Generic OTC Category Name in requested language (NO specific dosages)",
+      "category": "Pharmacological Category in requested language",
+      "instructions": "Non-prescriptive suggestion to discuss with pharmacist or doctor",
+      "timing": "General non-prescriptive timing advice (e.g., Post-meals as advised by pharmacist)"
+    }
+  ],
   "warningSigns": ["Emergency red flags in requested language"],
   "recommendedSpecialty": "Recommended specialty (e.g. Cardiology, Emergency Medicine, PHC)",
   "audioResponseText": "Warm 2-3 sentence spoken summary in requested language for speech playback",
@@ -409,6 +488,19 @@ Return ONLY a valid, raw JSON object (no markdown, no backticks):
 
       if (!parsedJson.disclaimer) {
         parsedJson.disclaimer = MANDATORY_DISCLAIMER;
+      }
+
+      // Strict clinical safety guardrail on medicine suggestions
+      if (parsedJson.riskLevel === 'CRITICAL' || !Array.isArray(parsedJson.suggestedMedicines)) {
+        parsedJson.suggestedMedicines = [];
+      } else {
+        // Strip any accidental dosages or illegal prescription wording
+        parsedJson.suggestedMedicines = parsedJson.suggestedMedicines.map(med => ({
+          name: med.name || 'General OTC Category',
+          category: med.category || 'General OTC Care',
+          instructions: med.instructions || 'Consult a pharmacist or doctor before taking any medicine.',
+          timing: med.timing || 'As advised by pharmacist or doctor',
+        }));
       }
 
       logTriageSession({

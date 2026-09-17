@@ -125,7 +125,9 @@ function AppContent() {
         <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Voice AI Clinical Triage">
           <VoiceTriage 
             onNavigateToHospital={() => setCurrentTab('navigation')}
+            onNavigateToHub={() => setCurrentTab('hub')}
             activeVitals={activeVitals}
+            currentUser={currentUser}
           />
         </AuthGuard>
       )}
