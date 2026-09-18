@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['citizen', 'kiosk_operator'],
+    enum: ['citizen', 'kiosk_operator', 'grampanchayat', 'gram_panchayat'],
     default: 'citizen',
   },
   arogyaId: {

@@ -18,7 +18,15 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import AuthGuard from './auth/AuthGuard';
 
 function AppContent() {
-  const [currentTab, setCurrentTab] = useState('home');
+  const [currentTab, setCurrentTab] = useState(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('arogya_user') || 'null');
+      const role = (savedUser?.role || '').toLowerCase();
+      const isGP = role === 'kiosk_operator' || role === 'grampanchayat' || role === 'gram_panchayat' || role === 'kiosk' || role === 'operator' || Boolean(savedUser?.kioskId);
+      if (isGP) return 'hub';
+    } catch (e) {}
+    return 'home';
+  });
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     try {
@@ -82,14 +90,45 @@ function AppContent() {
     if (fullVitals) setActiveVitals(fullVitals);
   };
 
+  const isGramPanchayat = Boolean(
+    currentUser?.role === 'kiosk_operator' || 
+    currentUser?.role === 'grampanchayat' || 
+    currentUser?.role === 'gram_panchayat' ||
+    currentUser?.role === 'kiosk' ||
+    currentUser?.role === 'operator' ||
+    Boolean(currentUser?.kioskId) ||
+    Boolean(currentUser?.email && (currentUser.email.includes('kiosk') || currentUser.email.includes('grampanchayat')))
+  );
+
   const handleTabNavigation = (targetTab) => {
     if (targetTab === 'home') {
       setCurrentTab('home');
       return;
     }
 
+    // Gram Panchayat / Kiosk Operator restriction:
+    // Cannot access 'triage' (symptoms) without registering a patient first
+    if (isGramPanchayat && targetTab === 'triage') {
+      let activePat = activeMember;
+      if (!activePat) {
+        try {
+          const fromSession = sessionStorage.getItem('activeKioskPatient');
+          if (fromSession) {
+            activePat = JSON.parse(fromSession);
+          } else {
+            activePat = JSON.parse(localStorage.getItem('arogya_active_member') || 'null');
+          }
+        } catch (e) {}
+      }
+      if (!activePat || (activePat.relation !== 'Walk-in Patient' && activePat.registeredVia !== 'kiosk') || !activePat.id) {
+        alert('कृपया आधी रुग्णाची नोंदणी (Registration) करा. नोंदणीशिवाय लक्षणे तपासता येणार नाहीत.');
+        setCurrentTab('hub');
+        return;
+      }
+    }
+
     // Protected features require auth
-    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? 'Family Hub' : targetTab === 'triage' ? 'Symptom Checklist Triage' : targetTab === 'profile' ? 'My Health Profile' : 'Hospital Navigation'}.`)) {
+    if (requireAuth(() => setCurrentTab(targetTab), `Please log in to access ${targetTab === 'hub' ? (isGramPanchayat ? 'Patient Registration' : 'Family Hub') : targetTab === 'triage' ? 'Symptom Checklist Triage' : targetTab === 'profile' ? 'My Health Profile' : 'Hospital Navigation'}.`)) {
       setCurrentTab(targetTab);
     }
   };
@@ -119,13 +158,22 @@ function AppContent() {
       )}
 
       {currentTab === 'hub' && (
-        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Family Hub & Digital Health Records">
-          {currentUser?.role === 'kiosk_operator' ? (
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName={isGramPanchayat ? 'Patient Registration Desk' : 'Family Hub & Digital Health Records'}>
+          {isGramPanchayat ? (
             <KioskDashboard 
               currentUser={currentUser}
               onVitalsChange={handleVitalsChange}
               onTriggerDoctorDispatch={() => setCurrentTab('navigation')}
-              onNavigateToTriage={() => setCurrentTab('triage')}
+              onNavigateToTriage={(walkInPatient) => {
+                if (walkInPatient) {
+                  setActiveMember(walkInPatient);
+                  try {
+                    localStorage.setItem('arogya_active_member', JSON.stringify(walkInPatient));
+                    sessionStorage.setItem('activeKioskPatient', JSON.stringify(walkInPatient));
+                  } catch (e) {}
+                }
+                setCurrentTab('triage');
+              }}
             />
           ) : (
             <FamilyHub 
@@ -147,6 +195,18 @@ function AppContent() {
               setCurrentTab('navigation');
             }}
             onNavigateToHub={() => setCurrentTab('hub')}
+            onKioskModalClose={() => {
+              if (isGramPanchayat) {
+                setActiveMember(null);
+                try {
+                  localStorage.removeItem('arogya_active_member');
+                  localStorage.removeItem('arogya_active_member_id');
+                  localStorage.removeItem('arogya_active_kiosk_patient');
+                  sessionStorage.removeItem('activeKioskPatient');
+                } catch (e) {}
+                setCurrentTab('hub');
+              }
+            }}
             activeVitals={activeVitals}
             currentUser={currentUser}
             activeMember={activeMember}
@@ -174,7 +234,14 @@ function AppContent() {
       <AuthModal 
         isOpen={authModalOpen}
         onClose={closeLogin}
-        onAuthSuccess={(user, token) => login(token, user)}
+        onAuthSuccess={(user, token) => {
+          login(token, user);
+          const role = (user?.role || '').toLowerCase();
+          const isGP = role === 'kiosk_operator' || role === 'grampanchayat' || role === 'gram_panchayat' || role === 'kiosk' || role === 'operator' || Boolean(user?.kioskId);
+          if (isGP) {
+            setCurrentTab('hub');
+          }
+        }}
         defaultRole={userRole === 'kiosk_operator' ? 'kiosk_operator' : 'citizen'}
         promptMessage={authToast}
       />

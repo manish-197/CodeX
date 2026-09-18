@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import multer from 'multer';
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
@@ -6,6 +9,9 @@ import { Prescription } from '../models/Prescription.js';
 import { FamilyMember } from '../models/FamilyMember.js';
 import { isDbConnected } from '../config/db.js';
 import { memoryDb, generateMemoryId } from '../services/inMemoryStore.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
@@ -297,191 +303,242 @@ export async function generatePrescriptionPdf(req, res) {
     const qrImageBase64 = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 120 });
     const qrBuffer = Buffer.from(qrImageBase64.split(',')[1], 'base64');
 
-    // Create PDF document
-    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+    // Create PDF document (Standard A4: 595.28 x 841.89 points)
+    const doc = new PDFDocument({ margin: 0, size: 'A4' });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="Prescription-${id}.pdf"`);
 
     doc.pipe(res);
 
-    // Header Background & Branding
-    doc.rect(40, 40, 515, 65).fill('#0F4C5C'); // Deep teal header
-    doc.fillColor('#FFFFFF').fontSize(18).font('Helvetica-Bold')
-      .text('ArogyaRakshak AI - Health Accessibility Record', 55, 52);
-    doc.fontSize(10).font('Helvetica')
-      .text('Universal Rural Integrated Health Network | ArogyaRakshak Digital Health ID', 55, 75);
+    // 1. CENTER WATERMARK TAG (50% Visibility as explicitly requested by user)
+    let logoPath = path.resolve(__dirname, '../assets/logo.png');
+    if (!fs.existsSync(logoPath)) {
+      logoPath = path.resolve(process.cwd(), 'assets/logo.png');
+    }
+    if (!fs.existsSync(logoPath)) {
+      logoPath = path.resolve(process.cwd(), 'server/assets/logo.png');
+    }
+    if (fs.existsSync(logoPath)) {
+      doc.save();
+      doc.opacity(0.5); // 50% visibility
+      const logoWidth = 260;
+      const logoHeight = 260;
+      const logoX = (595.28 - logoWidth) / 2;
+      const logoY = (841.89 - logoHeight) / 2;
+      doc.image(logoPath, logoX, logoY, { width: logoWidth, height: logoHeight });
+      doc.restore();
+    }
 
-    // Prominent AI-Assisted Notice Header
-    doc.rect(40, 115, 515, 30).fill('#FFF3CD');
-    doc.rect(40, 115, 515, 30).stroke('#FFEBAA');
-    doc.fillColor('#856404').fontSize(10).font('Helvetica-Bold')
-      .text('AI-Assisted Health Suggestion - Requires Pharmacist/Doctor Verification', 50, 124, { align: 'center', width: 495 });
+    // 2. TOP HEADER (Matching Image 2)
+    // Left: Doctor / Facility Name & Qualification
+    doc.fillColor('#0284C7').fontSize(22).font('Helvetica-Bold')
+      .text('Dr. ArogyaRakshak Clinic', 45, 36);
+    doc.fillColor('#64748B').fontSize(8.5).font('Helvetica-Bold')
+      .text('QUALIFICATION: M.B.B.S., D.N.B. (RURAL HEALTHCARE TELE-TRIAGE)', 45, 62);
+    doc.fillColor('#94A3B8').fontSize(7.5).font('Helvetica')
+      .text('Gram Panchayat Telemedicine Network | Reg. No: MMC/2026/048912', 45, 74);
 
-    // Patient Information Card
-    const patientName = cleanAscii(presc.patientDetails?.name, 'Self (Registered Citizen)');
+    // Right: Circular Medical Cross Badge (Exact match to Image 2)
+    const badgeX = 525;
+    const badgeY = 54;
+    doc.circle(badgeX, badgeY, 24).fill('#0284C7');
+    doc.rect(badgeX - 11, badgeY - 4, 22, 8).fill('#FFFFFF');
+    doc.rect(badgeX - 4, badgeY - 11, 8, 22).fill('#FFFFFF');
+
+    // 3. PATIENT INFORMATION ROW WITH UNDERLINES (Exact match to Image 2)
+    const patientName = cleanAscii(presc.patientDetails?.name, 'Registered Citizen');
     const patientAge = presc.patientDetails?.age || 42;
+    const patientGender = presc.patientDetails?.gender || 'Male';
     const patientBlood = presc.patientDetails?.bloodGroup || 'B+';
-    const arogyaId = cleanAscii(presc.patientDetails?.arogyaId || presc.patientDetails?.abhaId, 'AR-2026-00001');
+    const patientArogya = cleanAscii(presc.patientDetails?.arogyaId || presc.patientDetails?.abhaId, 'AR-2026-00001');
     const recordDate = new Date(presc.createdAt || Date.now()).toLocaleDateString('en-IN', {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
-    doc.rect(40, 155, 515, 75).fill('#F8F9FA');
-    doc.rect(40, 155, 515, 75).stroke('#DEE2E6');
+    let py = 95;
+    doc.strokeColor('#CBD5E1').lineWidth(0.8);
 
-    doc.fillColor('#212529').fontSize(9).font('Helvetica-Bold');
-    doc.text('PATIENT NAME:', 55, 168);
-    doc.font('Helvetica').text(patientName, 150, 168);
+    // Row 1: Patient Name: _______________ Date: _______________
+    doc.fillColor('#475569').fontSize(9).font('Helvetica-Bold').text('Patient Name:', 45, py);
+    doc.fillColor('#0F172A').font('Helvetica-Bold').text(patientName, 115, py);
+    doc.moveTo(112, py + 12).lineTo(365, py + 12).stroke();
 
-    doc.font('Helvetica-Bold').text('AGE / BLOOD GROUP:', 320, 168);
-    doc.font('Helvetica').text(`${patientAge} yrs | ${patientBlood}`, 440, 168);
+    doc.fillColor('#475569').font('Helvetica-Bold').text('Date:', 380, py);
+    doc.fillColor('#0F172A').font('Helvetica').text(recordDate, 412, py);
+    doc.moveTo(410, py + 12).lineTo(550, py + 12).stroke();
 
-    doc.font('Helvetica-Bold').text('AROGYARAKSHAK ID:', 55, 188);
-    doc.font('Helvetica').text(arogyaId, 150, 188);
+    // Row 2: Age: _____ Gender: _____ Weight/Blood: _____ ID: _____
+    py += 22;
+    doc.fillColor('#475569').font('Helvetica-Bold').text('Age:', 45, py);
+    doc.fillColor('#0F172A').font('Helvetica').text(`${patientAge} yrs`, 72, py);
+    doc.moveTo(70, py + 12).lineTo(145, py + 12).stroke();
 
-    doc.font('Helvetica-Bold').text('DATE / TIME:', 320, 188);
-    doc.font('Helvetica').text(recordDate, 440, 188);
+    doc.fillColor('#475569').font('Helvetica-Bold').text('Gender:', 155, py);
+    doc.fillColor('#0F172A').font('Helvetica').text(patientGender, 202, py);
+    doc.moveTo(200, py + 12).lineTo(275, py + 12).stroke();
 
-    doc.font('Helvetica-Bold').text('PRESCRIPTION ID:', 55, 208);
-    doc.font('Helvetica').text(String(presc._id || presc.id), 150, 208);
+    doc.fillColor('#475569').font('Helvetica-Bold').text('Blood / ID:', 285, py);
+    doc.fillColor('#0284C7').font('Helvetica-Bold').text(`${patientBlood} | ${patientArogya}`, 342, py);
+    doc.moveTo(340, py + 12).lineTo(550, py + 12).stroke();
 
-    doc.font('Helvetica-Bold').text('SOURCE CHANNEL:', 320, 208);
-    const sourceLabel = presc.createdBy === 'ocr_scan' 
-      ? 'Prescription OCR Scan' 
-      : presc.createdBy === 'symptom_checklist' 
-        ? 'Symptom Checklist Triage (2-Day Rx)' 
-        : 'Clinical Triage';
-    doc.font('Helvetica').text(sourceLabel, 440, 208);
+    // Row 3: Diagnosis: __________________________________________
+    py += 22;
+    const cleanDiag = sanitizeDiagnosis(presc.diagnosisSummary, presc.riskLevel);
+    doc.fillColor('#475569').font('Helvetica-Bold').text('Diagnosis:', 45, py);
+    doc.fillColor(presc.riskLevel === 'CRITICAL' ? '#DC2626' : '#0F172A')
+      .font(presc.riskLevel === 'CRITICAL' ? 'Helvetica-Bold' : 'Helvetica')
+      .text(cleanDiag, 105, py, { width: 440, lineBreak: false });
+    doc.moveTo(102, py + 12).lineTo(550, py + 12).stroke();
 
-    // Clinical Diagnosis Summary & Risk
+    // Thin separator line
+    doc.strokeColor('#E2E8F0').lineWidth(0.5).moveTo(45, 168).lineTo(550, 168).stroke();
+
+    // 4. LEFT BLUE ACCENT BAR WITH "Rx" PILL (Exact match to Image 2)
+    const barX = 45;
+    const barY = 178;
+    const barWidth = 48;
+    const barHeight = 555;
+
+    doc.save();
+    // Blue pill with rounded top arch (corner radius 20)
+    doc.roundedRect(barX, barY, barWidth, barHeight, 20).fill('#0284C7');
+
+    // Bold white "Rx" symbol inside the rounded top of the pill
+    doc.fillColor('#FFFFFF').fontSize(26).font('Helvetica-Bold')
+      .text('R', barX + 9, barY + 14);
+    doc.fillColor('#FFFFFF').fontSize(22).font('Helvetica-Bold')
+      .text('X', barX + 25, barY + 18);
+    doc.restore();
+
+    // 5. MAIN CONTENT (to the right of the vertical Rx pill, x = 106 to 550)
+    const bodyX = 106;
+    let my = 178;
+
     const isCritical = presc.riskLevel === 'CRITICAL';
-    const assessmentBg = isCritical ? '#FEE2E2' : '#E9ECEF';
-    const assessmentBorder = isCritical ? '#EF4444' : '#CED4DA';
-
-    doc.rect(40, 238, 515, 45).fill(assessmentBg);
-    doc.rect(40, 238, 515, 45).stroke(assessmentBorder);
-    doc.fillColor(isCritical ? '#991B1B' : '#212529').fontSize(10).font('Helvetica-Bold')
-      .text(isCritical ? 'CRITICAL EMERGENCY NOTICE / IMMEDIATE MEDICAL ATTENTION REQUIRED:' : 'Clinical Assessment / Diagnosis Summary:', 55, 246);
-    doc.fontSize(9.5).font('Helvetica')
-      .text(`${sanitizeDiagnosis(presc.diagnosisSummary, presc.riskLevel)}  |  Risk Level: ${presc.riskLevel || 'LOW'}`, 55, 262, { width: 485 });
-
-    let currentY = 292;
 
     if (isCritical) {
-      // Emergency Red Alert Banner - Strictly Zero Self-Medication
-      doc.rect(40, currentY, 515, 65).fill('#FEF2F2');
-      doc.rect(40, currentY, 515, 65).stroke('#DC2626');
+      // Emergency Red Alert Banner
+      doc.roundedRect(bodyX, my, 444, 75, 6).fill('#FEF2F2');
+      doc.strokeColor('#F87171').lineWidth(1).roundedRect(bodyX, my, 444, 75, 6).stroke();
 
       doc.fillColor('#DC2626').fontSize(12).font('Helvetica-Bold')
-        .text('EMERGENCY: STRICTLY NO SELF-MEDICATION', 55, currentY + 12);
-      doc.fillColor('#7F1D1D').fontSize(9).font('Helvetica')
-        .text('Extreme risk detected. OTC medicine is NOT safe for this condition. Immediately visit the nearest emergency trauma hospital or call 108 for ambulance dispatch.', 55, currentY + 30, { width: 485 });
+        .text('EMERGENCY SOS: IMMEDIATE HOSPITAL TRANSFER REQUIRED', bodyX + 14, my + 12);
+      doc.fillColor('#7F1D1D').fontSize(8.5).font('Helvetica')
+        .text('Critical condition detected. Self-medication or OTC dispensing is strictly not advised. Dispatch patient immediately to the nearest trauma hospital or dial 108 for emergency ambulance response.', bodyX + 14, my + 30, { width: 415 });
 
-      currentY += 80;
+      my += 88;
     } else {
-      // 2-Day Schedule Duration Banner
-      doc.rect(40, currentY, 515, 20).fill('#FEF3C7');
-      doc.rect(40, currentY, 515, 20).stroke('#F59E0B');
-      doc.fillColor('#92400E').fontSize(9).font('Helvetica-Bold')
-        .text('STRICT 2-DAY OTC RELIEF PROTOCOL - DURATION: 2 DAYS ONLY (TEMPORARY RELIEF)', 55, currentY + 5, { align: 'center', width: 495 });
+      // 2-Day Temporary Protocol Schedule Banner
+      doc.roundedRect(bodyX, my, 444, 22, 5).fill('#EFF6FF');
+      doc.strokeColor('#BFDBFE').lineWidth(0.8).roundedRect(bodyX, my, 444, 22, 5).stroke();
+      doc.fillColor('#1E40AF').fontSize(8.5).font('Helvetica-Bold')
+        .text('2-DAY OTC RELIEF PROTOCOL - TEMPORARY PRIMARY CARE (MAX 48 HOURS)', bodyX + 14, my + 6);
 
-      currentY += 26;
+      my += 30;
 
-      // Medicines Table Header
-      doc.rect(40, currentY, 515, 22).fill('#2A6F97');
-      doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold');
-      doc.text('MEDICINE / OTC CATEGORY', 50, currentY + 7, { width: 160 });
-      doc.text('PHARMACOLOGICAL CLASS', 215, currentY + 7, { width: 110 });
-      doc.text('INSTRUCTIONS / GUIDANCE', 330, currentY + 7, { width: 130 });
-      doc.text('TIMING (2-DAY)', 465, currentY + 7, { width: 85 });
+      // Table Header
+      doc.roundedRect(bodyX, my, 444, 20, 4).fill('#F1F5F9');
+      doc.fillColor('#475569').fontSize(8).font('Helvetica-Bold');
+      doc.text('MEDICINE / OTC FORMULATION', bodyX + 10, my + 6, { width: 160 });
+      doc.text('CLASS / DOSAGE', bodyX + 175, my + 6, { width: 110 });
+      doc.text('INSTRUCTIONS / TIMING (2-DAY)', bodyX + 290, my + 6, { width: 145 });
 
-      currentY += 22;
+      my += 22;
+
       const meds = presc.medicines && presc.medicines.length > 0
         ? presc.medicines
-        : [{ name: 'Tab. Paracetamol 500mg', category: 'Antipyretic / Analgesic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Post-meals [2 Days]' }];
+        : [{ name: 'Tab. Paracetamol 500mg', category: 'Antipyretic / Analgesic', instructions: 'Take with water post-meals as advised by pharmacist', timing: 'Twice daily post-meals [2 Days]' }];
 
-      meds.forEach((med, index) => {
-        const bgColor = index % 2 === 0 ? '#FFFFFF' : '#F8F9FA';
-        doc.rect(40, currentY, 515, 30).fill(bgColor);
-        doc.rect(40, currentY, 515, 30).stroke('#E5E7EB');
+      meds.slice(0, 4).forEach((med, index) => {
+        const bgColor = index % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
+        doc.rect(bodyX, my, 444, 34).fill(bgColor);
+        doc.strokeColor('#E2E8F0').lineWidth(0.5).rect(bodyX, my, 444, 34).stroke();
 
         const mName = sanitizeMedicineName(med.name || med.medicineName);
         const mCat = sanitizeCategory(med.category);
         const mInst = sanitizeInstructions(med.instructions || med.dosage);
         const mTim = sanitizeTiming(med.timing);
 
-        doc.fillColor('#1F2937').fontSize(8.5).font('Helvetica-Bold')
-          .text(mName, 50, currentY + 6, { width: 160 });
+        doc.fillColor('#0F172A').fontSize(8.5).font('Helvetica-Bold')
+          .text(mName, bodyX + 10, my + 6, { width: 160 });
 
-        doc.font('Helvetica').fillColor('#4B5563')
-          .text(mCat, 215, currentY + 6, { width: 110 });
+        doc.font('Helvetica').fillColor('#64748B').fontSize(7.5)
+          .text(mCat, bodyX + 175, my + 6, { width: 110 });
 
-        doc.text(mInst, 330, currentY + 6, { width: 130 });
-        doc.text(mTim, 465, currentY + 6, { width: 85 });
+        doc.fillColor('#334155').fontSize(7.5)
+          .text(`${mInst} | ${mTim}`, bodyX + 290, my + 6, { width: 145 });
 
-        currentY += 32;
+        my += 36;
       });
 
-      // Safe Home & Ayurvedic Supportive Care Box
+      // Safe Supportive Care Box
       const allSupportive = [
         ...(presc.homeRemedies || []),
         ...(presc.ayurvedicRemedies || []).map(a => `[Ayurvedic] ${a}`)
       ];
       if (allSupportive.length > 0) {
-        currentY += 6;
+        my += 6;
         const cleanRemedies = allSupportive.map(r => sanitizeRemedy(r)).filter(Boolean);
         const remediesCount = Math.min(cleanRemedies.length, 3);
-        const boxHeight = Math.min(65, 22 + remediesCount * 14);
-        doc.rect(40, currentY, 515, boxHeight).fill('#F0FDF4');
-        doc.rect(40, currentY, 515, boxHeight).stroke('#86EFAC');
+        const boxHeight = Math.min(65, 20 + remediesCount * 14);
 
-        doc.fillColor('#166534').fontSize(8.5).font('Helvetica-Bold')
-          .text('SAFE HOME & AYURVEDIC SUPPORTIVE CARE (NON-PHARMACOLOGICAL):', 50, currentY + 6);
-        
-        let remY = currentY + 18;
+        doc.roundedRect(bodyX, my, 444, boxHeight, 5).fill('#F0FDF4');
+        doc.strokeColor('#BBF7D0').lineWidth(0.8).roundedRect(bodyX, my, 444, boxHeight, 5).stroke();
+
+        doc.fillColor('#166534').fontSize(8).font('Helvetica-Bold')
+          .text('SAFE HOME & AYURVEDIC SUPPORTIVE CARE (NON-PHARMACOLOGICAL):', bodyX + 12, my + 5);
+
+        let remY = my + 18;
         cleanRemedies.slice(0, 3).forEach(rem => {
-          doc.fillColor('#15803D').fontSize(8).font('Helvetica')
-            .text(`* ${rem}`, 55, remY, { width: 480 });
+          doc.fillColor('#15803D').fontSize(7.5).font('Helvetica')
+            .text(`* ${rem}`, bodyX + 12, remY, { width: 420 });
           remY += 13;
         });
 
-        currentY += boxHeight + 10;
+        my += boxHeight + 10;
       }
     }
 
-    // Verification Section with QR Code Stamp
-    currentY = Math.max(currentY + 10, 560);
-    doc.rect(40, currentY, 515, 110).fill('#F0FDF4');
-    doc.rect(40, currentY, 515, 110).stroke('#86EFAC');
-
-    // Draw QR Code
-    doc.image(qrBuffer, 55, currentY + 10, { width: 85, height: 85 });
-
-    doc.fillColor('#166534').fontSize(10.5).font('Helvetica-Bold')
-      .text('PHARMACIST / DOCTOR VERIFICATION SECTION', 155, currentY + 12);
-
+    // 6. BOTTOM VERIFICATION & SIGNATURE (Matching Image 2)
+    // QR Code for pharmacist verification stamp on bottom left of content area
+    const qrY = 665;
+    doc.image(qrBuffer, bodyX + 5, qrY, { width: 55, height: 55 });
+    doc.fillColor('#0284C7').fontSize(8.5).font('Helvetica-Bold')
+      .text('ArogyaRakshak Digital Verification', bodyX + 68, qrY + 4);
+    
     const isVerified = presc.verificationStatus === 'pharmacist_verified' || presc.verificationStatus === 'doctor_verified';
-
-    doc.fontSize(8.5).font('Helvetica');
     if (isVerified) {
-      const verifierClean = cleanAscii(presc.verifiedBy, 'Registered Pharmacist');
-      doc.fillColor('#15803D').text(`Status: VERIFIED by ${verifierClean}`, 155, currentY + 28);
-      doc.text(`Verified On: ${new Date(presc.verifiedAt || Date.now()).toLocaleString('en-IN')}`, 155, currentY + 41);
+      doc.fillColor('#16A34A').fontSize(7.5).font('Helvetica-Bold')
+        .text('STATUS: VERIFIED BY PHARMACIST', bodyX + 68, qrY + 16);
+      doc.fillColor('#64748B').fontSize(7).font('Helvetica')
+        .text(`Approved by: ${cleanAscii(presc.verifiedBy, 'Registered Chemist')}`, bodyX + 68, qrY + 28);
     } else {
-      doc.fillColor('#B45309').text('Status: UNVERIFIED (Awaiting local medical store verification)', 155, currentY + 28);
-      doc.fillColor('#4B5563').text('Scan QR code to verify validity and approve dispensing.', 155, currentY + 41);
+      doc.fillColor('#D97706').fontSize(7.5).font('Helvetica-Bold')
+        .text('STATUS: AWAITING PHARMACIST VERIFICATION', bodyX + 68, qrY + 16);
+      doc.fillColor('#64748B').fontSize(7).font('Helvetica')
+        .text('Scan QR at registered pharmacy to verify & dispense.', bodyX + 68, qrY + 28);
     }
+    doc.fillColor('#94A3B8').fontSize(6.5).font('Helvetica')
+      .text(`Doc ID: ${String(presc._id || presc.id)}`, bodyX + 68, qrY + 40);
 
-    doc.fillColor('#374151').fontSize(8)
-      .text('Pharmacist Stamp & Registration Sign-off:', 155, currentY + 60);
-    doc.rect(155, currentY + 72, 230, 20).stroke('#9CA3AF');
-    doc.fontSize(7.5).fillColor('#9CA3AF').text('Dispensing Chemist Signature / Reg No.', 165, currentY + 78);
+    // Signature on bottom right (Exact match to Image 2)
+    const sigX = 390;
+    const sigY = 705;
+    doc.strokeColor('#94A3B8').lineWidth(1).moveTo(sigX, sigY).lineTo(sigX + 155, sigY).stroke();
+    doc.fillColor('#475569').fontSize(8).font('Helvetica-Bold')
+      .text('Signature', sigX, sigY + 5, { width: 155, align: 'center' });
+    doc.fillColor('#94A3B8').fontSize(7).font('Helvetica')
+      .text('Authorized Medical Officer / Pharmacist', sigX, sigY + 16, { width: 155, align: 'center' });
 
-    // Footer Disclaimer
-    doc.rect(40, 720, 515, 45).fill('#F3F4F6');
-    doc.fillColor('#6B7280').fontSize(7.5).font('Helvetica')
-      .text('LEGAL & CLINICAL DISCLAIMER: This document is generated by ArogyaRakshak AI rural tele-triage assistant. It is NOT a substitute for formal medical consultation or doctor prescription. In emergencies, call 108 or transfer patient to nearest Primary Health Centre (PHC). Pharmacists must inspect and verify patient suitability before dispensing OTC items.', 50, 728, { width: 495, align: 'center' });
+    // 7. FOOTER DIVIDER & CONTACT (Exact match to Image 2)
+    const footY = 780;
+    doc.strokeColor('#E2E8F0').lineWidth(0.8).moveTo(45, footY).lineTo(550, footY).stroke();
+
+    doc.fillColor('#64748B').fontSize(8).font('Helvetica')
+      .text('📍 24 Gram Panchayat Health Centre, Rural District, Maharashtra', 48, footY + 8);
+    doc.fillColor('#64748B').fontSize(8).font('Helvetica')
+      .text('📞 +91-1800-111-2026 / Emergency: 108', 350, footY + 8, { width: 195, align: 'right' });
 
     doc.end();
   } catch (err) {

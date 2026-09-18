@@ -12,7 +12,7 @@ const prescriptionSchema = new mongoose.Schema({
   },
   createdBy: {
     type: String,
-    enum: ['ai_triage', 'ocr_scan', 'symptom_checklist'],
+    enum: ['ai_triage', 'ocr_scan', 'symptom_checklist', 'kiosk_desk', 'kiosk_operator'],
     default: 'symptom_checklist',
   },
   durationDays: {
@@ -31,6 +31,10 @@ const prescriptionSchema = new mongoose.Schema({
     gender: { type: String, default: 'Unspecified' },
     bloodGroup: { type: String, default: 'Unknown' },
     abhaId: { type: String, default: '14-2026-9812-4456' },
+    arogyaId: { type: String, default: 'AR-2026-00001' },
+    phone: { type: String, default: '' },
+    village: { type: String, default: '' },
+    relation: { type: String, default: 'Self' },
   },
   medicines: [{
     name: { type: String, required: true },

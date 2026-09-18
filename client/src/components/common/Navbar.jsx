@@ -16,7 +16,9 @@ import {
   MessageCircle,
   ShieldCheck,
   User,
-  Edit3
+  Edit3,
+  ClipboardList,
+  UserPlus
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../auth/AuthContext';
@@ -47,10 +49,56 @@ export default function Navbar({
     { code: 'bn', name: 'বাংলা', label: 'Bengali' },
   ];
 
+  const isKiosk = Boolean(
+    currentUser?.role === 'kiosk_operator' ||
+    currentUser?.role === 'grampanchayat' ||
+    currentUser?.role === 'gram_panchayat' ||
+    currentUser?.role === 'kiosk' ||
+    currentUser?.role === 'operator' ||
+    Boolean(currentUser?.kioskId) ||
+    Boolean(currentUser?.email && (currentUser.email.includes('kiosk') || currentUser.email.includes('grampanchayat')))
+  );
+
+  // Navigation click handler with strict Gram Panchayat / Kiosk gating
+  const handleNavClick = (itemId) => {
+    if (isKiosk && itemId === 'triage') {
+      let activePat = null;
+      try {
+        const fromSession = sessionStorage.getItem('activeKioskPatient');
+        if (fromSession) {
+          activePat = JSON.parse(fromSession);
+        } else {
+          activePat = JSON.parse(localStorage.getItem('arogya_active_member') || 'null');
+        }
+      } catch (e) {}
+      if (!activePat || (activePat.relation !== 'Walk-in Patient' && activePat.registeredVia !== 'kiosk') || !activePat.id) {
+        alert(
+          lang === 'mr'
+            ? 'कृपया आधी रुग्णाची नोंदणी (Registration) करा. नोंदणीशिवाय लक्षणे तपासता येणार नाहीत.'
+            : lang === 'hi'
+              ? 'कृपया पहले मरीज़ का पंजीकरण (Registration) करें। पंजीकरण के बिना लक्षण जांच संभव नहीं है।'
+              : 'Please complete patient registration first. You cannot access symptoms without registering a patient.'
+        );
+        setCurrentTab('hub');
+        setMobileMenuOpen(false);
+        return;
+      }
+    }
+    setCurrentTab(itemId);
+    setMobileMenuOpen(false);
+  };
+
   // Feature navigation items
   const allNavItems = [
     { id: 'home', label: t('nav_home'), icon: Activity, public: true },
-    { id: 'hub', label: t('nav_hub'), icon: UserCheck, public: false },
+    { 
+      id: 'hub', 
+      label: isKiosk 
+        ? (lang === 'mr' ? 'नोंदणी (Registration)' : lang === 'hi' ? 'पंजीकरण (Registration)' : 'Registration') 
+        : t('nav_hub'), 
+      icon: isKiosk ? UserPlus : UserCheck, 
+      public: false 
+    },
     { id: 'triage', label: t('nav_triage'), icon: Stethoscope, public: false },
     { id: 'navigation', label: t('nav_navigation'), icon: Navigation, public: false },
   ];
@@ -89,9 +137,11 @@ export default function Navbar({
           onClick={() => setCurrentTab('home')} 
           className="flex items-center gap-3 cursor-pointer select-none group"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-medical-blue to-caution-amber flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-200">
-            <Heart className="w-5 h-5 fill-white" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="ArogyaRakshak Logo" 
+            className="w-11 h-11 object-contain rounded-full shadow-md group-hover:scale-105 transition-transform duration-200 bg-white ring-2 ring-medical-blue/20 shrink-0" 
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-display font-bold text-lg sm:text-xl tracking-tight text-deep-navy dark:text-clinical-white">
@@ -115,7 +165,7 @@ export default function Navbar({
             return (
               <button
                 key={item.id}
-                onClick={() => setCurrentTab(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
                   isActive 
                     ? 'btn-navy shadow-md' 
@@ -213,7 +263,7 @@ export default function Navbar({
                     {currentUser.name ? currentUser.name.split(' ')[0] : 'User'}
                   </div>
                   <div className="text-[10px] text-medical-blue font-semibold uppercase tracking-wider leading-none">
-                    {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
+                    {isKiosk ? (lang === 'mr' ? 'ग्रामपंचायत' : 'Gram Panchayat') : 'Citizen'}
                   </div>
                 </div>
 
@@ -239,7 +289,7 @@ export default function Navbar({
                         {currentUser.phone}
                       </div>
                       <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white border border-deep-navy/15 dark:border-white/15">
-                        {currentUser.role === 'kiosk_operator' ? 'Gram Panchayat Kiosk Operator' : 'Citizen Account'}
+                        {isKiosk ? (lang === 'mr' ? 'ग्रामपंचायत किओस्क ऑपरेटर' : 'Gram Panchayat Kiosk Desk') : 'Citizen Account'}
                       </span>
                     </div>
                   </div>
@@ -262,7 +312,7 @@ export default function Navbar({
 
                   {/* Actions */}
                   <div className="space-y-1 pt-1">
-                    {currentUser.role !== 'kiosk_operator' && (
+                    {!isKiosk && (
                       <button
                         onClick={() => {
                           setCurrentTab('profile');
@@ -285,7 +335,11 @@ export default function Navbar({
                       }}
                       className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-deep-navy/10 transition-colors flex items-center justify-between"
                     >
-                      <span>{currentUser.role === 'kiosk_operator' ? 'Kiosk Operator Desk' : 'Switch Family Member'}</span>
+                      <span>
+                        {isKiosk 
+                          ? (lang === 'mr' ? 'रुग्ण नोंदणी व किओस्क डेस्क' : 'Patient Registration Desk') 
+                          : (lang === 'mr' ? 'कुटुंब सदस्य निवडा' : 'Switch Family Member')}
+                      </span>
                       <span className="text-medical-blue">→</span>
                     </button>
 
@@ -333,10 +387,7 @@ export default function Navbar({
               return (
                 <button
                   key={item.id}
-                  onClick={() => {
-                    setCurrentTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleNavClick(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors ${
                     isActive 
                       ? 'btn-navy text-white w-full' 
@@ -378,10 +429,10 @@ export default function Navbar({
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-deep-navy/10 dark:bg-white/10 text-deep-navy dark:text-clinical-white">
-                    {currentUser.role === 'kiosk_operator' ? 'Kiosk' : 'Citizen'}
+                    {isKiosk ? 'Gram Panchayat' : 'Citizen'}
                   </span>
                 </div>
-                {currentUser.role !== 'kiosk_operator' && (
+                {!isKiosk && (
                   <button
                     onClick={() => {
                       setCurrentTab('profile');

@@ -11,6 +11,7 @@ import healthCardRoutes from './routes/healthCardRoutes.js';
 import sosRoutes from './routes/sosRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import whatsappRoutes from './routes/whatsappRoutes.js';
+import kioskRoutes from './routes/kioskRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -40,6 +41,7 @@ app.use('/api/health-card', healthCardRoutes);
 app.use('/api/sos', sosRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/kiosk', kioskRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

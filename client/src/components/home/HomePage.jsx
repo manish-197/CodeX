@@ -15,15 +15,28 @@ import {
   Heart,
   Bluetooth,
   WifiOff,
-  MessageSquare
+  MessageSquare,
+  UserPlus
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../auth/AuthContext';
 
 export default function HomePage({ onNavigate, heartRate = 0 }) {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
+  const { currentUser } = useAuth();
   const heroRef = useRef(null);
   const cardsRef = useRef(null);
+
+  const isGramPanchayat = Boolean(
+    currentUser?.role === 'kiosk_operator' ||
+    currentUser?.role === 'grampanchayat' ||
+    currentUser?.role === 'gram_panchayat' ||
+    currentUser?.role === 'kiosk' ||
+    currentUser?.role === 'operator' ||
+    currentUser?.kioskId ||
+    (currentUser?.email && (currentUser.email.includes('kiosk') || currentUser.email.includes('grampanchayat')))
+  );
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -50,7 +63,48 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
     return () => ctx.revert();
   }, []);
 
-  const features = [
+  const features = isGramPanchayat ? [
+    {
+      title: lang === 'mr' ? 'रुग्ण नोंदणी डेस्क' : lang === 'hi' ? 'रोगी पंजीकरण डेस्क' : 'Patient Registration Desk',
+      description: lang === 'mr' 
+        ? 'येणाऱ्या रुग्णांचे सर्व तपशील भरा, जीवनचिन्हे नोंदवा व लक्षण तपासणीसाठी पुढे पाठवा.' 
+        : 'Register walk-in citizens, record vitals, and proceed to clinical triage.',
+      icon: UserPlus,
+      actionText: lang === 'mr' ? 'नोंदणी करा →' : 'Register Patient →',
+      tab: 'hub',
+      badge: lang === 'mr' ? 'ग्रामपंचायत किओस्क' : 'Kiosk Terminal',
+      badgeColor: 'bg-medical-blue/15 text-medical-blue',
+    },
+    {
+      title: t('feat_triage_title'),
+      description: t('feat_triage_desc'),
+      icon: Stethoscope,
+      actionText: t('hero_cta_triage'),
+      tab: 'triage',
+      badge: 'Checklist & 2-Day Rx',
+      badgeColor: 'bg-medical-blue/15 text-medical-blue',
+    },
+    {
+      title: t('feat_nav_title'),
+      description: t('feat_nav_desc'),
+      icon: Navigation,
+      actionText: t('hero_cta_hospital'),
+      tab: 'navigation',
+      badge: 'OSRM + Leaflet',
+      badgeColor: 'bg-deep-navy/15 text-deep-navy dark:text-clinical-white',
+    },
+    {
+      title: lang === 'mr' ? 'रुग्ण व प्रिस्क्रिप्शन इतिहास' : 'Patient & Rx History',
+      description: lang === 'mr'
+        ? 'केंद्रात तपासलेल्या सर्व रुग्णांची यादी, औषध पत्रके व आरोग्य कार्ड्स PDF डाउनलोड करा.'
+        : 'View registered walk-in patients and download consultation Rx PDFs.',
+      icon: ShieldCheck,
+      actionText: lang === 'mr' ? 'इतिहास पहा →' : 'View History →',
+      tab: 'hub',
+      badge: 'Kiosk Records',
+      badgeColor: 'bg-caution-amber/20 text-deep-navy dark:text-caution-amber',
+    },
+  ] : [
     {
       title: t('feat_triage_title'),
       description: t('feat_triage_desc'),
@@ -101,33 +155,52 @@ export default function HomePage({ onNavigate, heartRate = 0 }) {
           {/* Top Mission Pill */}
           <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-bold text-deep-navy dark:text-clinical-white shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-medical-blue animate-pulse" />
-            <span>{t('hero_badge')}</span>
+            <span>
+              {isGramPanchayat 
+                ? (lang === 'mr' ? 'ग्रामपंचायत डिजिटल हेल्थ किओस्क ऑपरेटर केंद्र' : 'Gram Panchayat Digital Health Kiosk Operator Center') 
+                : t('hero_badge')}
+            </span>
           </div>
 
-          {/* Hero Headline in Fraunces Serif */}
+          {/* Hero Headline */}
           <h1 className="hero-fade-in font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-deep-navy dark:text-clinical-white leading-[1.14] tracking-tight">
-            {t('hero_headline')}
+            {isGramPanchayat 
+              ? (lang === 'mr' ? 'ग्रामपंचायत रुग्ण नोंदणी व डिजिटल आरोग्य डेस्क' : 'Gram Panchayat Patient Registration & Digital Health Desk')
+              : t('hero_headline')}
           </h1>
 
           {/* Subheadline */}
           <p className="hero-fade-in text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-sans max-w-2xl">
-            {t('hero_subheadline')}
+            {isGramPanchayat 
+              ? (lang === 'mr' ? 'गावातील नागरिकांची आरोग्य नोंदणी करा, लक्षणे तपासून तात्पुरते औषध पत्रक द्या व आवश्यकतेनुसार रुग्णालय मार्गदर्शन करा.' : 'Register village citizens, evaluate symptoms for safe 2-day OTC prescriptions, and provide instant emergency hospital routing.')
+              : t('hero_subheadline')}
           </p>
 
           {/* Action CTAs */}
           <div className="hero-fade-in flex flex-wrap items-center gap-4 pt-2">
-            <button 
-              onClick={() => onNavigate('triage')}
-              className="btn-medical-blue text-sm sm:text-base py-3.5 px-8"
-            >
-              <Stethoscope className="w-5 h-5" />
-              <span>{t('hero_cta_triage')}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            {isGramPanchayat ? (
+              <button 
+                onClick={() => onNavigate('hub')}
+                className="btn-medical-blue text-sm sm:text-base py-3.5 px-8 flex items-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                <span>{lang === 'mr' ? 'रुग्ण नोंदणी डेस्क (Registration)' : 'Patient Registration Desk'}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button 
+                onClick={() => onNavigate('triage')}
+                className="btn-medical-blue text-sm sm:text-base py-3.5 px-8 flex items-center gap-2"
+              >
+                <Stethoscope className="w-5 h-5" />
+                <span>{t('hero_cta_triage')}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
 
             <button 
               onClick={() => onNavigate('navigation')}
-              className="btn-navy text-sm sm:text-base py-3.5 px-7"
+              className="btn-navy text-sm sm:text-base py-3.5 px-7 flex items-center gap-2"
             >
               <Navigation className="w-5 h-5" />
               <span>{t('hero_cta_hospital')}</span>

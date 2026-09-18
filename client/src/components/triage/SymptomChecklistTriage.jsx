@@ -1783,9 +1783,11 @@ export default function SymptomChecklistTriage({
   onNavigateToHub,
   currentUser,
   activeMember,
-  onSelectMember
+  onSelectMember,
+  onKioskModalClose
 }) {
   const { lang, t } = useLanguage();
+  const isKioskOperator = currentUser?.role === 'kiosk_operator' || currentUser?.role === 'grampanchayat' || currentUser?.role === 'gram_panchayat';
 
   // Family Member Context
   const [allMembers, setAllMembers] = useState(() => {
@@ -1810,6 +1812,20 @@ export default function SymptomChecklistTriage({
 
   const [selectedMember, setSelectedMember] = useState(() => {
     if (activeMember) return activeMember;
+    if (isKioskOperator) {
+      try {
+        const savedKiosk = sessionStorage.getItem('activeKioskPatient');
+        if (savedKiosk) return JSON.parse(savedKiosk);
+        const saved = localStorage.getItem('arogya_active_member');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.relation === 'Walk-in Patient' || parsed?.registeredVia === 'kiosk') {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
     try {
       const saved = localStorage.getItem('arogya_active_member');
       if (saved) return JSON.parse(saved);
@@ -1822,6 +1838,46 @@ export default function SymptomChecklistTriage({
       setSelectedMember(activeMember);
     }
   }, [activeMember]);
+
+  // Strict guard for Gram Panchayat / Kiosk operator: cannot use triage without active registered patient
+  useEffect(() => {
+    if (isKioskOperator) {
+      let activePat = activeMember;
+      if (!activePat) {
+        try {
+          const savedKiosk = sessionStorage.getItem('activeKioskPatient');
+          if (savedKiosk) {
+            activePat = JSON.parse(savedKiosk);
+          } else {
+            const saved = localStorage.getItem('arogya_active_member');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed?.relation === 'Walk-in Patient' || parsed?.registeredVia === 'kiosk') {
+                activePat = parsed;
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!activePat || !activePat.id) {
+        alert(
+          lang === 'mr'
+            ? 'कृपया आधी रुग्णाची नोंदणी करा. नोंदणीशिवाय लक्षणे तपासणी करता येत नाही.'
+            : lang === 'hi'
+            ? 'कृपया पहले मरीज का पंजीकरण करें। बिना पंजीकरण लक्षण जांच संभव नहीं है।'
+            : 'Please register the walk-in patient first before accessing symptoms triage.'
+        );
+        if (onKioskModalClose) {
+          onKioskModalClose();
+        } else if (onNavigateToHub) {
+          onNavigateToHub();
+        }
+      } else {
+        setSelectedMember(activePat);
+      }
+    }
+  }, [isKioskOperator, activeMember]);
 
   const handleSelectPatient = (member) => {
     setSelectedMember(member);
@@ -1941,6 +1997,11 @@ export default function SymptomChecklistTriage({
       const patientAge = selectedMember?.age || 42;
       const patientBlood = selectedMember?.bloodGroup || 'B+';
       const patientAbha = selectedMember?.abhaId || '14-2026-9812-4456';
+      const patientPhone = selectedMember?.phone || currentUser?.phone || '';
+      const patientGender = selectedMember?.gender || 'Other';
+      const patientVillage = selectedMember?.village || currentUser?.village || '';
+      const patientRelation = selectedMember?.relation || (isKioskOperator ? 'Walk-in Patient' : 'Self');
+      const patientArogya = selectedMember?.arogyaId || patientAbha;
 
       // Build 2-day OTC medicines list with clean generic Latin pharmacological names
       // AND localized versions for the UI!
@@ -1982,10 +2043,15 @@ export default function SymptomChecklistTriage({
           patientDetails: {
             name: patientName,
             age: patientAge,
+            gender: patientGender,
             bloodGroup: patientBlood,
+            phone: patientPhone,
+            village: patientVillage,
+            relation: patientRelation,
+            arogyaId: patientArogya,
             abhaId: patientAbha,
           },
-          createdBy: 'symptom_checklist',
+          createdBy: isKioskOperator ? 'kiosk_desk' : 'symptom_checklist',
           durationDays: 2,
           medicines: medicinesList,
           homeRemedies: remediesListLocal,
@@ -2022,10 +2088,15 @@ export default function SymptomChecklistTriage({
         patientDetails: {
           name: selectedMember?.name || 'Self',
           age: selectedMember?.age || 42,
+          gender: selectedMember?.gender || 'Other',
           bloodGroup: selectedMember?.bloodGroup || 'B+',
+          phone: selectedMember?.phone || '',
+          village: selectedMember?.village || '',
+          relation: selectedMember?.relation || (isKioskOperator ? 'Walk-in Patient' : 'Self'),
+          arogyaId: selectedMember?.arogyaId || 'AR-2026-00001',
           abhaId: selectedMember?.abhaId || '14-2026-9812-4456'
         },
-        createdBy: 'symptom_checklist',
+        createdBy: isKioskOperator ? 'kiosk_desk' : 'symptom_checklist',
         durationDays: 2,
         medicines: hasLevel3 ? [] : selectedItems.map(item => ({
           name: item.rxGenericEn || item.name.en,
@@ -2113,10 +2184,15 @@ export default function SymptomChecklistTriage({
         patientDetails: {
           name: selectedMember?.name || 'Self',
           age: selectedMember?.age || 42,
+          gender: selectedMember?.gender || 'Other',
           bloodGroup: selectedMember?.bloodGroup || 'B+',
+          phone: selectedMember?.phone || '',
+          village: selectedMember?.village || '',
+          relation: selectedMember?.relation || (isKioskOperator ? 'Walk-in Patient' : 'Self'),
+          arogyaId: selectedMember?.arogyaId || 'AR-2026-00001',
           abhaId: selectedMember?.abhaId || '14-2026-9812-4456'
         },
-        createdBy: 'symptom_checklist',
+        createdBy: isKioskOperator ? 'kiosk_desk' : 'symptom_checklist',
         durationDays: 2,
         medicines: isCritical ? [] : [
           {
@@ -2175,32 +2251,60 @@ export default function SymptomChecklistTriage({
           </p>
         </div>
 
-        {/* Dynamic Family Member Selector */}
-        <div className="space-y-2 self-start md:self-auto bg-white/50 dark:bg-dark-base/50 p-3.5 rounded-2xl border border-deep-navy/10 dark:border-white/10 shrink-0">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400">
-            <Users className="w-3.5 h-3.5 text-medical-blue" />
-            <span>{t('triage_patient_select')}</span>
+        {/* Dynamic Family Member / Kiosk Walk-in Patient Selector */}
+        {isKioskOperator ? (
+          <div className="space-y-2 self-start md:self-auto bg-gradient-to-r from-medical-blue/15 to-health-green/15 p-4 rounded-2xl border border-medical-blue/30 shrink-0 min-w-[260px]">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-black text-medical-blue">
+                <Users className="w-3.5 h-3.5" />
+                <span>{lang === 'mr' ? 'नोंदणीकृत रुग्ण (Registered Patient)' : 'Registered Patient'}</span>
+              </div>
+              <button
+                onClick={() => {
+                  if (onKioskModalClose) onKioskModalClose();
+                  else if (onNavigateToHub) onNavigateToHub();
+                }}
+                className="text-[11px] font-bold text-medical-blue hover:underline flex items-center gap-0.5"
+                title="Return to Registration Desk"
+              >
+                <span>{lang === 'mr' ? 'नवीन नोंदणी' : 'New Registration'}</span>
+                <span>→</span>
+              </button>
+            </div>
+            <div className="font-display font-extrabold text-base text-deep-navy dark:text-clinical-white">
+              {selectedMember?.name || 'Walk-in Patient'}
+            </div>
+            <div className="text-xs text-slate-600 dark:text-slate-300 font-semibold">
+              {selectedMember?.age ? `${selectedMember.age} yrs` : 'Age N/A'} • {selectedMember?.gender || 'Other'} • Blood: <strong className="text-alert-red">{selectedMember?.bloodGroup || 'Unknown'}</strong>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {allMembers.map((member) => {
-              const isSelected = (selectedMember?.id === member.id) || (selectedMember?.name === member.name);
-              return (
-                <button
-                  key={member.id}
-                  onClick={() => handleSelectPatient(member)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-medical-blue text-white shadow-md scale-[1.03]'
-                      : 'bg-white/80 dark:bg-dark-muted/20 text-deep-navy dark:text-clinical-white hover:bg-medical-blue/10'
-                  }`}
-                >
-                  <span>{member.name}</span>
-                  <span className="text-[10px] opacity-80">({member.relation})</span>
-                </button>
-              );
-            })}
+        ) : (
+          <div className="space-y-2 self-start md:self-auto bg-white/50 dark:bg-dark-base/50 p-3.5 rounded-2xl border border-deep-navy/10 dark:border-white/10 shrink-0">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400">
+              <Users className="w-3.5 h-3.5 text-medical-blue" />
+              <span>{t('triage_patient_select')}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {allMembers.map((member) => {
+                const isSelected = (selectedMember?.id === member.id) || (selectedMember?.name === member.name);
+                return (
+                  <button
+                    key={member.id}
+                    onClick={() => handleSelectPatient(member)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-medical-blue text-white shadow-md scale-[1.03]'
+                        : 'bg-white/80 dark:bg-dark-muted/20 text-deep-navy dark:text-clinical-white hover:bg-medical-blue/10'
+                    }`}
+                  >
+                    <span>{member.name}</span>
+                    <span className="text-[10px] opacity-80">({member.relation})</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Active Patient Card Indicator */}
@@ -2488,7 +2592,18 @@ export default function SymptomChecklistTriage({
       {/* Prescription Result Modal */}
       <PrescriptionResultModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          if (isKioskOperator) {
+            setSelectedSymptomIds([]);
+            setCustomSymptomText('');
+            if (onKioskModalClose) {
+              onKioskModalClose();
+            } else if (onNavigateToHub) {
+              onNavigateToHub();
+            }
+          }
+        }}
         prescription={generatedPrescription}
         selectedMember={selectedMember}
         nearestDoctors={nearestDoctors}

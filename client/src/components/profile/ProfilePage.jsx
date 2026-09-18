@@ -420,21 +420,23 @@ export default function ProfilePage({ onNavigateHome, onNavigate }) {
               {lang === 'mr' ? 'आरोग्य जोडणी' : 'Connected Health Records'}
             </h4>
             <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => onNavigate && onNavigate('hub')}
-                className="p-3.5 rounded-2xl bg-medical-blue/10 hover:bg-medical-blue/20 transition-all text-left border border-medical-blue/20 group"
-              >
-                <div className="flex items-center justify-between text-medical-blue mb-1">
-                  <Users className="w-4 h-4" />
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-                <span className="text-xs font-bold text-deep-navy dark:text-clinical-white block">
-                  {lang === 'mr' ? 'कुटुंब सदस्य' : 'Family Hub'}
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  {lang === 'mr' ? 'सदस्य व्यवस्थापित करा' : 'Manage family profiles'}
-                </span>
-              </button>
+              {!(currentUser?.role === 'kiosk_operator' || currentUser?.role === 'grampanchayat' || currentUser?.role === 'gram_panchayat' || currentUser?.kioskId) && (
+                <button
+                  onClick={() => onNavigate && onNavigate('hub')}
+                  className="p-3.5 rounded-2xl bg-medical-blue/10 hover:bg-medical-blue/20 transition-all text-left border border-medical-blue/20 group"
+                >
+                  <div className="flex items-center justify-between text-medical-blue mb-1">
+                    <Users className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <span className="text-xs font-bold text-deep-navy dark:text-clinical-white block">
+                    {lang === 'mr' ? 'कुटुंब सदस्य' : 'Family Hub'}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {lang === 'mr' ? 'सदस्य व्यवस्थापित करा' : 'Manage family profiles'}
+                  </span>
+                </button>
+              )}
 
               <button
                 onClick={() => onNavigate && onNavigate('triage')}

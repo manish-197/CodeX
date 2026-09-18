@@ -3,6 +3,7 @@ import AddMemberModal from './AddMemberModal';
 import EditMemberModal from './EditMemberModal';
 import HealthCardModal from './HealthCardModal';
 import PrescriptionModal from './PrescriptionModal';
+import KioskDashboard from '../kiosk/KioskDashboard';
 import { 
   UserPlus, 
   CreditCard, 
@@ -41,6 +42,27 @@ export default function FamilyHub({
   const { lang, t } = useLanguage();
   const { token } = useAuth();
   const [copiedId, setCopiedId] = useState(false);
+
+  const isGramPanchayat = Boolean(
+    currentUser?.role === 'kiosk_operator' ||
+    currentUser?.role === 'grampanchayat' ||
+    currentUser?.role === 'gram_panchayat' ||
+    currentUser?.role === 'kiosk' ||
+    currentUser?.role === 'operator' ||
+    currentUser?.kioskId ||
+    (currentUser?.email && (currentUser.email.includes('kiosk') || currentUser.email.includes('grampanchayat')))
+  );
+
+  if (isGramPanchayat) {
+    return (
+      <KioskDashboard 
+        currentUser={currentUser}
+        onVitalsChange={onVitalsChange}
+        onTriggerDoctorDispatch={onTriggerDoctorDispatch}
+        onNavigateToTriage={onNavigateToTriage}
+      />
+    );
+  }
 
   const [members, setMembers] = useState(() => {
     try {

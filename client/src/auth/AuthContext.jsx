@@ -145,7 +145,7 @@ export function AuthProvider({ children }) {
     token,
     isAuthenticated: Boolean(currentUser && token),
     userRole: currentUser?.role || 'citizen',
-    isKioskOperator: currentUser?.role === 'kiosk_operator',
+    isKioskOperator: currentUser?.role === 'kiosk_operator' || currentUser?.role === 'grampanchayat' || currentUser?.role === 'gram_panchayat',
     isLoading,
     authModalOpen,
     authToast,

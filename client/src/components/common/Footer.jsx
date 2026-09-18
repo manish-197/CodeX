@@ -10,9 +10,11 @@ export default function Footer() {
           {/* Col 1: Platform identity */}
           <div className="space-y-3 md:col-span-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-medical-blue to-caution-amber flex items-center justify-center text-white">
-                <Heart className="w-4 h-4 fill-white" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="ArogyaRakshak Logo" 
+                className="w-8 h-8 object-contain rounded-full shadow-sm bg-white ring-1 ring-medical-blue/20" 
+              />
               <span className="font-display font-bold text-xl text-deep-navy dark:text-clinical-white">
                 ArogyaRakshak AI
               </span>
