@@ -2607,7 +2607,13 @@ export default function SymptomChecklistTriage({
         prescription={generatedPrescription}
         selectedMember={selectedMember}
         nearestDoctors={nearestDoctors}
-        onNavigateToHospital={onNavigateToHospital}
+        onNavigateToHospital={(hosp) => {
+          setModalOpen(false);
+          if (onNavigateToHospital) {
+            onNavigateToHospital(hosp);
+          }
+        }}
+        currentUser={currentUser}
       />
 
     </div>

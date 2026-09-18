@@ -78,7 +78,16 @@ export default function KioskDashboard({
     return [];
   });
 
-  // Fetch both patients and prescriptions from backend API on mount
+  // Emergency Doctor Appointments List
+  const [appointments, setAppointments] = useState(() => {
+    try {
+      const saved = localStorage.getItem('arogya_appointments');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  // Fetch patients, prescriptions, and appointments from backend API on mount
   useEffect(() => {
     const fetchBackendData = async () => {
       // 1. Fetch Prescriptions
@@ -133,6 +142,31 @@ export default function KioskDashboard({
         }
       } catch (patErr) {
         console.warn('[Kiosk fetch patients notice]', patErr.message);
+      }
+
+      // 3. Fetch Emergency Doctor Appointments from DB
+      try {
+        const resApp = await fetch('http://localhost:5000/api/appointments');
+        if (resApp.ok) {
+          const appData = await resApp.json();
+          if (appData.appointments && Array.isArray(appData.appointments)) {
+            const localSavedApp = JSON.parse(localStorage.getItem('arogya_appointments') || '[]');
+            const appIds = new Set(appData.appointments.map(a => a._id || a.id || a.tokenNo));
+            const mergedApp = [...appData.appointments];
+            for (const item of localSavedApp) {
+              const id = item._id || item.id || item.tokenNo;
+              if (id && !appIds.has(id)) {
+                mergedApp.push(item);
+                appIds.add(id);
+              }
+            }
+            mergedApp.sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()));
+            setAppointments(mergedApp);
+            localStorage.setItem('arogya_appointments', JSON.stringify(mergedApp));
+          }
+        }
+      } catch (appErr) {
+        console.warn('[Kiosk fetch appointments notice]', appErr.message);
       }
     };
     fetchBackendData();
@@ -881,6 +915,21 @@ export default function KioskDashboard({
                 {prescriptions.length}
               </span>
             </button>
+
+            <button
+              onClick={() => setHistorySubTab('appointments')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                historySubTab === 'appointments'
+                  ? 'btn-medical-blue text-white shadow-md'
+                  : 'text-deep-navy dark:text-clinical-white hover:bg-medical-blue/10'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>{lang === 'mr' ? 'आपत्कालीन अपॉइंटमेंट्स' : 'Doctor Appointments'}</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20">
+                {appointments.length}
+              </span>
+            </button>
           </div>
 
           {/* Search and Filters Bar */}
@@ -947,6 +996,13 @@ export default function KioskDashboard({
                     rx.userId === patId ||
                     rx.patientDetails?.arogyaId === patArogya ||
                     (rx.patientDetails?.name && rx.patientDetails.name.toLowerCase() === (patient.name || '').toLowerCase())
+                  );
+
+                  // Find all emergency appointments for this patient
+                  const patientAppointments = appointments.filter(app =>
+                    app.patientId === patId ||
+                    app.arogyaId === patArogya ||
+                    (app.patientName && app.patientName.toLowerCase() === (patient.name || '').toLowerCase())
                   );
 
                   return (
@@ -1095,6 +1151,53 @@ export default function KioskDashboard({
                           </div>
                         )}
                       </div>
+
+                      {/* Emergency Doctor Appointments for this patient */}
+                      {patientAppointments.length > 0 && (
+                        <div className="space-y-2 pt-3 border-t border-deep-navy/10 dark:border-white/10">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-alert-red flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>{lang === 'mr' ? 'बुक केलेल्या आपत्कालीन डॉक्टर अपॉइंटमेंट्स:' : 'Emergency Doctor Appointments:'}</span>
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              {patientAppointments.length} {lang === 'mr' ? 'अपॉइंटमेंट' : 'Appointments'}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            {patientAppointments.map((app) => (
+                              <div
+                                key={app._id || app.id || app.tokenNo}
+                                className="p-3 rounded-2xl bg-alert-red/5 border border-alert-red/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                              >
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-alert-red text-white">
+                                      {app.tokenNo}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-health-green/20 text-health-green">
+                                      {app.status?.toUpperCase() || 'REQUESTED'}
+                                    </span>
+                                    <span className="text-slate-400">
+                                      • {new Date(app.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  </div>
+                                  <div className="font-bold text-deep-navy dark:text-clinical-white">
+                                    {app.doctorName} <span className="text-medical-blue font-semibold">({app.specialty})</span>
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 flex items-center gap-1.5 flex-wrap">
+                                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{app.hospitalName}</span>
+                                    <span>•</span>
+                                    <span className="text-alert-red font-semibold">{app.requestedTime}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -1276,6 +1379,97 @@ export default function KioskDashboard({
                 })}
               </div>
             )
+          )}
+
+          {/* SUB-VIEW 3: EMERGENCY DOCTOR APPOINTMENTS LEDGER */}
+          {historySubTab === 'appointments' && (
+            (() => {
+              const filteredAppointments = appointments.filter(a => {
+                if (!searchQuery.trim()) return true;
+                const q = searchQuery.toLowerCase();
+                return (
+                  (a.patientName && a.patientName.toLowerCase().includes(q)) ||
+                  (a.doctorName && a.doctorName.toLowerCase().includes(q)) ||
+                  (a.hospitalName && a.hospitalName.toLowerCase().includes(q)) ||
+                  (a.tokenNo && a.tokenNo.toLowerCase().includes(q)) ||
+                  (a.arogyaId && a.arogyaId.toLowerCase().includes(q)) ||
+                  (a.phone && a.phone.includes(q))
+                );
+              });
+
+              if (filteredAppointments.length === 0) {
+                return (
+                  <div className="glass-card p-12 text-center rounded-3xl space-y-3">
+                    <Calendar className="w-12 h-12 text-slate-300 mx-auto" />
+                    <h3 className="font-display font-bold text-lg text-deep-navy dark:text-clinical-white">
+                      {lang === 'mr' ? 'कोणतीही अपॉइंटमेंट सापडली नाही' : 'No Appointments Found'}
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      {lang === 'mr'
+                        ? 'आणीबाणी किंवा गंभीर लक्षणे असलेल्या रुग्णांसाठी बुक केलेल्या अपॉइंटमेंट्स येथे दिसतील.'
+                        : 'Doctor appointment requests generated from critical triage results will appear here.'}
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-3">
+                  {filteredAppointments.map((app) => (
+                    <div
+                      key={app._id || app.id || app.tokenNo}
+                      className="glass-card p-5 rounded-2xl border border-alert-red/25 bg-white/70 dark:bg-dark-base/70 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-left"
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-alert-red text-white">
+                            {app.tokenNo}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-health-green/20 text-health-green">
+                            {app.status?.toUpperCase() || 'REQUESTED'}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {new Date(app.createdAt || Date.now()).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-500">{lang === 'mr' ? 'रुग्ण:' : 'Patient:'}</span>
+                          <strong className="text-sm text-deep-navy dark:text-clinical-white">{app.patientName}</strong>
+                          {app.age ? <span className="text-xs text-slate-500">({app.age} yrs • {app.gender})</span> : null}
+                          {app.arogyaId ? (
+                            <span className="font-mono text-[11px] text-medical-blue font-bold">
+                              {app.arogyaId}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="text-xs text-deep-navy dark:text-clinical-white font-medium flex items-center gap-1.5 flex-wrap">
+                          <span className="text-slate-500">{lang === 'mr' ? 'डॉक्टर:' : 'Doctor:'}</span>
+                          <strong className="text-medical-blue">{app.doctorName}</strong>
+                          <span>({app.specialty})</span>
+                          <span>•</span>
+                          <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{app.hospitalName}</span>
+                        </div>
+
+                        {app.triageSummary && (
+                          <div className="text-[11px] text-slate-500 italic">
+                            {app.triageSummary}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
+                        <div className="px-3 py-1.5 rounded-xl bg-alert-red/10 text-alert-red font-bold text-xs">
+                          {app.requestedTime}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()
           )}
 
         </div>

@@ -8,6 +8,7 @@ export const memoryDb = {
   sosEvents: new Map(),
   hospitals: new Map(),
   patients: new Map(),
+  appointments: new Map(),
 };
 
 let nextIdCounter = 1001;
