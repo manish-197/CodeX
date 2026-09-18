@@ -217,7 +217,11 @@ function AppContent() {
 
       {currentTab === 'navigation' && (
         <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="Hospital Road Navigation">
-          <HospitalNavigation targetHospital={targetHospital} />
+          <HospitalNavigation 
+            targetHospital={targetHospital} 
+            activePatient={activeMember}
+            onNavigateBackToTriage={() => setCurrentTab('triage')}
+          />
         </AuthGuard>
       )}
 

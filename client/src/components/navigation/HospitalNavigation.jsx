@@ -16,8 +16,21 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function HospitalNavigation({ targetHospital }) {
-  const { t } = useLanguage();
+export default function HospitalNavigation({ targetHospital, activePatient, onNavigateBackToTriage }) {
+  const { lang, t } = useLanguage();
+
+  const currentPatient = activePatient || (() => {
+    try {
+      const fromSession = sessionStorage.getItem('activeKioskPatient');
+      if (fromSession) return JSON.parse(fromSession);
+      const fromLocal = localStorage.getItem('arogya_active_member');
+      if (fromLocal) {
+        const parsed = JSON.parse(fromLocal);
+        if (parsed.relation === 'Walk-in Patient' || parsed.registeredVia === 'kiosk') return parsed;
+      }
+    } catch (e) {}
+    return null;
+  })();
 
   // User coordinates: default fallback (Pune rural) while real GPS acquires
   const [userLocation, setUserLocation] = useState({ lat: 18.5204, lng: 73.8567 });
@@ -98,18 +111,28 @@ export default function HospitalNavigation({ targetHospital }) {
           location: { type: 'Point', coordinates: [73.6132, 18.5276] },
           address: 'Mulshi Taluka, Paud Road',
           phone: '020-22922301',
-          distanceKm: 8.4,
-          specialties: ['General Medicine', 'Emergency First Aid'],
+          distanceKm: 2.1,
+          specialties: ['General Medicine', 'Maternity', 'Emergency First Aid']
         },
         {
-          id: 'chc_shirur',
-          name: 'Sub-District Hospital Shirur',
-          type: 'Sub-District Hospital',
-          location: { type: 'Point', coordinates: [74.3789, 18.8274] },
-          address: 'Shirur, Pune Rural District',
-          phone: '02138-222108',
-          distanceKm: 14.2,
-          specialties: ['Trauma Care', 'Cardiology Stabilisation'],
+          id: 'sdh_manchar',
+          name: 'Sub-District Hospital Manchar',
+          type: 'Sub-District Hospital (SDH)',
+          location: { type: 'Point', coordinates: [73.9400, 18.9900] },
+          address: 'Pune-Nashik Highway, Manchar',
+          phone: '02133-223344',
+          distanceKm: 14.5,
+          specialties: ['Emergency Care', 'Surgery', 'Pediatrics']
+        },
+        {
+          id: 'dh_aundh',
+          name: 'District Civil Hospital Aundh',
+          type: 'District Hospital (DH)',
+          location: { type: 'Point', coordinates: [73.8052, 18.5584] },
+          address: 'Aundh Camp, Pune 411027',
+          phone: '020-27158900',
+          distanceKm: 22.0,
+          specialties: ['Trauma Center', 'ICU', 'Cardiology', 'Dialysis']
         }
       ];
       if (targetHospital) {
@@ -117,7 +140,7 @@ export default function HospitalNavigation({ targetHospital }) {
         setSelectedHospital(targetHospital);
       } else {
         setHospitals(fallbackList);
-        setSelectedHospital(fallbackList[0]);
+        if (!selectedHospital) setSelectedHospital(fallbackList[0]);
       }
     } finally {
       setLoadingHospitals(false);
@@ -191,30 +214,30 @@ export default function HospitalNavigation({ targetHospital }) {
           polylineGlowRef.current = L.polyline(coords, {
             color: '#60a5fa',
             weight: 9,
-            opacity: 0.5,
+            opacity: 0.45,
             lineCap: 'round',
             lineJoin: 'round',
           }).addTo(map);
 
-          // 2. Core layer
+          // 2. Core crisp route layer
           polylineCoreRef.current = L.polyline(coords, {
-            color: '#2563eb',
-            weight: 4.5,
+            color: '#0F5E5E',
+            weight: 5,
             opacity: 0.95,
             lineCap: 'round',
             lineJoin: 'round',
           }).addTo(map);
 
-          // User live location marker
+          // User live position marker
           if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
           const userIcon = L.divIcon({
             className: 'custom-user-marker',
-            html: `<div style="background-color:#E4714E; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(228,113,78,0.8);"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
+            html: `<div style="background-color:#0F5E5E; width:18px; height:18px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(15,94,94,0.6);"></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
           });
           userMarkerRef.current = L.marker([userLat, userLng], { icon: userIcon })
-            .bindPopup('<strong>Your Location (Live GPS)</strong>')
+            .bindPopup(`<strong>Your Location</strong><br/>${locationSource}`)
             .addTo(map);
 
           // Hospital marker
@@ -249,6 +272,43 @@ export default function HospitalNavigation({ targetHospital }) {
 
   return (
     <div className="space-y-6 py-4">
+
+      {/* Active Kiosk Patient Emergency Route Context Banner */}
+      {currentPatient && (
+        <div className="glass-card p-4 rounded-2xl border border-alert-red/30 bg-alert-red/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-alert-red text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+              <Activity className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-alert-red">
+                  {lang === 'mr' ? 'सक्रिय रुग्ण आपत्कालीन नेव्हिगेशन' : 'Active Patient Emergency Route'}
+                </span>
+                <span className="font-mono text-[11px] font-bold text-medical-blue bg-medical-blue/10 px-2 py-0.5 rounded-md">
+                  {currentPatient.arogyaId || currentPatient.abhaId || 'AR-2026-PAT'}
+                </span>
+              </div>
+              <div className="font-bold text-sm text-deep-navy dark:text-clinical-white">
+                {currentPatient.name} ({currentPatient.age} yrs • {currentPatient.gender} • Blood: {currentPatient.bloodGroup || 'Unknown'})
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {currentPatient.village ? `गाव: ${currentPatient.village}` : ''} {currentPatient.phone ? `• Ph: ${currentPatient.phone}` : ''}
+              </div>
+            </div>
+          </div>
+
+          {onNavigateBackToTriage && (
+            <button
+              onClick={onNavigateBackToTriage}
+              className="btn-navy text-xs py-2 px-3.5 flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-md"
+            >
+              <span>←</span>
+              <span>{lang === 'mr' ? 'लक्षण तपासणीकडे परत' : 'Back to Symptoms Triage'}</span>
+            </button>
+          )}
+        </div>
+      )}
       
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
