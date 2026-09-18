@@ -312,21 +312,23 @@ export default function Navbar({
 
                   {/* Actions */}
                   <div className="space-y-1 pt-1">
-                    {!isKiosk && (
-                      <button
-                        onClick={() => {
-                          setCurrentTab('profile');
-                          setProfileMenuOpen(false);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-deep-navy/10 transition-colors flex items-center justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <User className="w-3.5 h-3.5 text-medical-blue" />
-                          <span>{lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile'}</span>
+                    <button
+                      onClick={() => {
+                        setCurrentTab('profile');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-deep-navy dark:text-clinical-white hover:bg-medical-blue/10 transition-colors flex items-center justify-between"
+                    >
+                      <span className="flex items-center gap-2">
+                        <User className="w-3.5 h-3.5 text-medical-blue" />
+                        <span>
+                          {isKiosk 
+                            ? (lang === 'mr' ? 'ऑपरेटर प्रोफाइल' : lang === 'hi' ? 'ऑपरेटर प्रोफ़ाइल' : 'Operator Profile')
+                            : (lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile')}
                         </span>
-                        <span className="text-medical-blue">→</span>
-                      </button>
-                    )}
+                      </span>
+                      <span className="text-medical-blue">→</span>
+                    </button>
 
                     <button
                       onClick={() => {
@@ -432,18 +434,20 @@ export default function Navbar({
                     {isKiosk ? 'Gram Panchayat' : 'Citizen'}
                   </span>
                 </div>
-                {!isKiosk && (
-                  <button
-                    onClick={() => {
-                      setCurrentTab('profile');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-medical-blue bg-medical-blue/10 flex items-center justify-center gap-2"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>{lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile'}</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setCurrentTab('profile');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-medical-blue bg-medical-blue/10 flex items-center justify-center gap-2"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>
+                    {isKiosk 
+                      ? (lang === 'mr' ? 'ऑपरेटर प्रोफाइल' : lang === 'hi' ? 'ऑपरेटर प्रोफ़ाइल' : 'Operator Profile')
+                      : (lang === 'mr' ? 'माझे आरोग्य प्रोफाइल' : lang === 'hi' ? 'मेरी स्वास्थ्य प्रोफ़ाइल' : 'My Health Profile')}
+                  </span>
+                </button>
                 <button
                   onClick={handleLogoutAction}
                   className="w-full py-2 px-4 rounded-xl text-xs font-bold text-alert-red bg-alert-red/10 flex items-center justify-center gap-2"

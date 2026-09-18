@@ -13,6 +13,7 @@ import WhatsAppBotModal from './components/common/WhatsAppBotModal';
 import ProfileCompletionModal from './components/profile/ProfileCompletionModal';
 import EditProfileModal from './components/profile/EditProfileModal';
 import ProfilePage from './components/profile/ProfilePage';
+import KioskOperatorProfile from './components/profile/KioskOperatorProfile';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import AuthGuard from './auth/AuthGuard';
@@ -226,11 +227,21 @@ function AppContent() {
       )}
 
       {currentTab === 'profile' && (
-        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName="My Health Profile">
-          <ProfilePage 
-            onNavigateHome={() => setCurrentTab('home')}
-            onNavigate={handleTabNavigation}
-          />
+        <AuthGuard onNavigateHome={() => setCurrentTab('home')} featureName={isGramPanchayat ? 'Kiosk Operator Profile' : 'My Health Profile'}>
+          {isGramPanchayat ? (
+            <KioskOperatorProfile 
+              onNavigate={handleTabNavigation}
+              onLogout={() => {
+                logout();
+                setCurrentTab('home');
+              }}
+            />
+          ) : (
+            <ProfilePage 
+              onNavigateHome={() => setCurrentTab('home')}
+              onNavigate={handleTabNavigation}
+            />
+          )}
         </AuthGuard>
       )}
 
